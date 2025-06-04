@@ -929,6 +929,22 @@ describe(OlmMachine.name, () => {
             expect(keyInfoList.length).toEqual(1);
             expect(keyInfoList[0].roomId.toString()).toStrictEqual(room.toString());
         });
+
+        test("importing room keys calls RoomKeyUpdatedCallbacks", async () => {
+            const success = jest.fn();
+            success.mockImplementation(() => Promise.resolve(undefined));
+            const error = jest.fn();
+            error.mockImplementation(() => Promise.resolve(undefined));
+            let m = await machine();
+            m.registerRoomKeyUpdatedCallbacks(success, error);
+            await m.importExportedRoomKeys(exportedRoomKeys, () => undefined);
+            expect(success).toHaveBeenCalledTimes(1);
+            let keyInfoList = success.mock.calls[0][0];
+            expect(keyInfoList.length).toEqual(1);
+            expect(keyInfoList[0].roomId.toString()).toStrictEqual(room.toString());
+
+            expect(error).toHaveBeenCalledTimes(0);
+        });
     });
 
     describe("can do in-room verification", () => {
