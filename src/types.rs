@@ -390,6 +390,8 @@ pub struct DecryptedToDeviceEvent {
     /// A JSON-encoded object containing the processed event.
     /// The decrypted message as if it was sent in clear (For room keys or
     /// secrets some part of the content might have been zeroize'd).
+    /// Represents a Matrix to-device message with `type`, `sender` and
+    /// `content` fields.
     #[wasm_bindgen(readonly, js_name = "rawDecryptedEvent")]
     pub decrypted_raw_event: JsString,
 
@@ -422,7 +424,8 @@ impl DecryptedToDeviceEvent {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone)]
 pub struct PlainTextToDeviceEvent {
-    /// A JSON-encoded object containing the message.
+    /// A JSON-encoded object containing the Matrix to-device message with
+    /// `type`, `sender` and `content` fields.
     #[wasm_bindgen(readonly, js_name = "rawEvent")]
     pub raw_event: JsString,
 }
@@ -448,8 +451,8 @@ impl PlainTextToDeviceEvent {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone)]
 pub struct UTDToDeviceEvent {
-    /// A JSON-encoded string containing the original message of type
-    /// `m.room.encrypted`
+    /// A JSON-encoded object containing the original message of type
+    /// `m.room.encrypted` that failed to be decrypted.
     #[wasm_bindgen(readonly, js_name = "wireEvent")]
     pub wire_event: JsString,
     // TODO: Add some OlmError in the future
@@ -476,8 +479,8 @@ impl UTDToDeviceEvent {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone)]
 pub struct InvalidToDeviceEvent {
-    /// A JSON-encoded string containing the original message that was not
-    /// processed.
+    /// A JSON-encoded object containing the original message as received from
+    /// sync.
     #[wasm_bindgen(readonly, js_name = "wireEvent")]
     pub wire_event: JsString,
     // TODO: Add some error information here?
