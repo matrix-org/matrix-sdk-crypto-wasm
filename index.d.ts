@@ -61,6 +61,13 @@ declare module "./pkg/matrix_sdk_crypto_wasm.js" {
         | RoomMessageRequest
         | KeysBackupRequest;
 
+    /** The types returned by {@link OlmMachine.receiveSyncChanges}. */
+    type ProcessedToDeviceEvent =
+        | DecryptedToDeviceEvent
+        | PlainTextToDeviceEvent
+        | InvalidToDeviceEvent
+        | UTDToDeviceEvent;
+
     interface OlmMachine {
         trackedUsers(): Promise<Set<UserId>>;
         updateTrackedUsers(users: UserId[]): Promise<void>;

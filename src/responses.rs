@@ -19,6 +19,7 @@ use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
 use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
+use crate::encryption::EncryptionAlgorithm;
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -223,7 +224,7 @@ impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decrypte
 
 /// Struct containing information on how an event was decrypted.
 #[wasm_bindgen()]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EncryptionInfo {
     inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
 }
@@ -295,5 +296,14 @@ impl EncryptionInfo {
             verification_state.to_shield_state_lax()
         }
         .into()
+    }
+
+    /// Get the algorithm used for encryption.
+    #[wasm_bindgen(getter, js_name = "algorithm")]
+    pub fn algorithm(&self) -> EncryptionAlgorithm {
+        match self.inner.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => EncryptionAlgorithm::MegolmV1AesSha2,
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => EncryptionAlgorithm::OlmV1Curve25519AesSha2
+        }
     }
 }

@@ -43,7 +43,8 @@ use crate::{
     store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
     types::{
-        self, ProcessedToDeviceEvent, RoomKeyImportResult, RoomSettings, SignatureVerification,
+        self, processed_to_device_event_to_js_value, RoomKeyImportResult, RoomSettings,
+        SignatureVerification,
     },
     verification, vodozemac,
 };
@@ -300,9 +301,11 @@ impl OlmMachine {
     ///
     /// # Returns
     ///
-    /// A list of {@link ProcessedToDeviceEvent} object, containing the
-    /// serialized processed event and if it was successfully decrypted, sent in
-    /// clear, unable to decrypt or invalid.
+    /// This returns a list of values, each of which can be any of:
+    ///   * {@link DecryptedToDeviceEvent},
+    ///   * {@link PlainTextToDeviceEvent},
+    ///   * {@link UTDToDeviceEvent},
+    ///   * {@link InvalidToDeviceEvent},
     #[wasm_bindgen(js_name = "receiveSyncChanges")]
     pub fn receive_sync_changes(
         &self,
@@ -357,8 +360,10 @@ impl OlmMachine {
                 })
                 .await?;
 
-            let processed_to_device_events: Vec<ProcessedToDeviceEvent> =
-                processed_to_device_events.into_iter().map(ProcessedToDeviceEvent::from).collect();
+            let processed_to_device_events: Vec<JsValue> = processed_to_device_events
+                .into_iter()
+                .map(|e| processed_to_device_event_to_js_value(e))
+                .collect();
             Ok(processed_to_device_events)
         }))
     }

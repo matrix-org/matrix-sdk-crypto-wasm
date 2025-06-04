@@ -7,11 +7,13 @@ import {
     DeviceId,
     DeviceKeyId,
     DeviceLists,
+    DecryptedToDeviceEvent,
     EncryptionAlgorithm,
     EncryptionSettings,
     EventId,
     getVersions,
     InboundGroupSession,
+    InvalidToDeviceEvent,
     KeysBackupRequest,
     KeysClaimRequest,
     KeysQueryRequest,
@@ -20,6 +22,7 @@ import {
     MegolmDecryptionError,
     OlmMachine,
     OwnUserIdentity,
+    PlainTextToDeviceEvent,
     ProcessedToDeviceEventType,
     RequestType,
     RoomId,
@@ -34,6 +37,7 @@ import {
     ToDeviceRequest,
     TrustRequirement,
     UserId,
+    UTDToDeviceEvent,
     OtherUserIdentity,
     VerificationRequest,
     Versions,
@@ -1642,6 +1646,7 @@ describe(OlmMachine.name, () => {
             expect(received.length).toBe(1);
             const processed = received[0];
             expect(processed.type).toEqual(ProcessedToDeviceEventType.PlainText);
+            expect(processed).toBeInstanceOf(PlainTextToDeviceEvent);
 
             let toDeviceEvent = JSON.parse(processed.wireEvent);
 
@@ -1683,6 +1688,7 @@ describe(OlmMachine.name, () => {
 
             expect(received.length).toBe(1);
             const processed = received[0];
+            expect(processed).toBeInstanceOf(UTDToDeviceEvent);
             expect(processed.type).toEqual(ProcessedToDeviceEventType.UnableToDecrypt);
 
             let toDeviceEvent = JSON.parse(processed.wireEvent);
@@ -1736,6 +1742,7 @@ describe(OlmMachine.name, () => {
             expect(received.length).toBe(2);
             const processed0 = received[0];
             expect(processed0.type).toEqual(ProcessedToDeviceEventType.Invalid);
+            expect(processed0).toBeInstanceOf(InvalidToDeviceEvent);
             const processed1 = received[1];
             expect(processed1.type).toEqual(ProcessedToDeviceEventType.Invalid);
 
@@ -1844,13 +1851,21 @@ describe(OlmMachine.name, () => {
             );
 
             expect(received.length).toBe(1);
-            const processed = received[0];
+            expect(received[0]).toBeInstanceOf(DecryptedToDeviceEvent);
+            const processed = received[0] as DecryptedToDeviceEvent;
             expect(processed.type).toEqual(ProcessedToDeviceEventType.Decrypted);
 
             let toDeviceEvent = JSON.parse(processed.wireEvent);
             expect(toDeviceEvent.sender).toEqual("@alice:example.org");
             expect(toDeviceEvent.type).toEqual("custom.type");
             expect(toDeviceEvent.content.foo).toEqual("bar");
+
+            let encryptionInfo = processed.encryptionInfo;
+            expect(encryptionInfo.algorithm).toEqual(EncryptionAlgorithm.OlmV1Curve25519AesSha2);
+            expect(encryptionInfo.senderCurve25519Key).toEqual(alice.identityKeys.curve25519.toBase64());
+
+            let verificationState = processed.encryptionInfo.shieldState(false);
+            expect(verificationState.code).toBe(ShieldStateCode.UnsignedDevice);
         });
     });
 });
