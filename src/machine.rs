@@ -360,11 +360,10 @@ impl OlmMachine {
                 })
                 .await?;
 
-            let processed_to_device_events: Vec<JsValue> = processed_to_device_events
+            Ok(processed_to_device_events
                 .into_iter()
                 .map(|e| processed_to_device_event_to_js_value(e))
-                .collect();
-            Ok(processed_to_device_events)
+                .collect::<Vec<JsValue>>())
         }))
     }
 
