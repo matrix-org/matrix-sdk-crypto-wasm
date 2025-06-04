@@ -302,10 +302,10 @@ impl OlmMachine {
     /// # Returns
     ///
     /// This returns a list of values, each of which can be any of:
-    ///   * {@link DecryptedToDeviceEvent},
-    ///   * {@link PlainTextToDeviceEvent},
-    ///   * {@link UTDToDeviceEvent},
-    ///   * {@link InvalidToDeviceEvent},
+    ///   * {@link DecryptedToDeviceEvent}
+    ///   * {@link PlainTextToDeviceEvent}
+    ///   * {@link UTDToDeviceEvent}
+    ///   * {@link InvalidToDeviceEvent}
     #[wasm_bindgen(js_name = "receiveSyncChanges")]
     pub fn receive_sync_changes(
         &self,
@@ -371,13 +371,13 @@ impl OlmMachine {
     /// Get the outgoing requests that need to be sent out.
     ///
     /// This returns a list of values, each of which can be any of:
-    ///   * {@link KeysUploadRequest},
-    ///   * {@link KeysQueryRequest},
-    ///   * {@link KeysClaimRequest},
-    ///   * {@link ToDeviceRequest},
-    ///   * {@link SignatureUploadRequest},
-    ///   * {@link RoomMessageRequest}, or
-    ///   * {@link KeysBackupRequest}.
+    ///   * {@link KeysUploadRequest}
+    ///   * {@link KeysQueryRequest}
+    ///   * {@link KeysClaimRequest}
+    ///   * {@link ToDeviceRequest}
+    ///   * {@link SignatureUploadRequest}
+    ///   * {@link RoomMessageRequest} or
+    ///   * {@link KeysBackupRequest}
     ///
     /// Those requests need to be sent out to the server and the
     /// responses need to be passed back to the state machine
