@@ -511,18 +511,18 @@ pub fn processed_to_device_event_to_js_value(
     match processed_to_device_event {
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, encryption_info } => {
             JsValue::from(DecryptedToDeviceEvent::new(
-                raw.json().get().to_owned().into(),
+                raw.json().get().into(),
                 encryption_info.into(),
             ))
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
-            JsValue::from(UTDToDeviceEvent::new(utd.json().get().to_owned().into()))
+            JsValue::from(UTDToDeviceEvent::new(utd.json().get().into()))
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::PlainText(plain) => {
-            JsValue::from(PlainTextToDeviceEvent::new(plain.json().get().to_owned().into()))
+            JsValue::from(PlainTextToDeviceEvent::new(plain.json().get().into()))
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
-            JsValue::from(InvalidToDeviceEvent::new(invalid.json().get().to_owned().into()))
+            JsValue::from(InvalidToDeviceEvent::new(invalid.json().get().into()))
         }
     }
 }
