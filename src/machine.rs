@@ -1088,16 +1088,17 @@ impl OlmMachine {
             for room_room_keys_entry in room_room_keys.entries() {
                 let room_room_keys_entry: Array = room_room_keys_entry?.dyn_into()?;
                 let session_id: JsString = room_room_keys_entry.get(0).dyn_into()?;
-                if let Ok(key) =
-                    serde_wasm_bindgen::from_value::<BackedUpRoomKey>(room_room_keys_entry.get(1))
+                match serde_wasm_bindgen::from_value::<BackedUpRoomKey>(room_room_keys_entry.get(1))
                 {
-                    keys.push(ExportedRoomKey::from_backed_up_room_key(
+                    Ok(key) => keys.push(ExportedRoomKey::from_backed_up_room_key(
                         room_id.clone(),
                         session_id.into(),
                         key,
-                    ));
-                } else {
-                    failures += 1;
+                    )),
+                    Err(e) => {
+                        failures += 1;
+                        warn!("Error parsing backed-up room key (session_id={session_id}): {e}");
+                    }
                 }
             }
         }

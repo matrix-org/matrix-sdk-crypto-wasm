@@ -43,10 +43,10 @@ export * from "./pkg/matrix_sdk_crypto_wasm.js";
  * Load the WebAssembly module in the background, if it has not already been loaded.
  *
  * Returns a promise which will resolve once the other methods are ready.
- *
+ * @param {URL | string} [url] - The URL to fetch the WebAssembly module from. If not provided, a default URL will be used.
  * @returns {Promise<void>}
  */
-export declare function initAsync(): Promise<void>;
+export declare function initAsync(url?: URL | string): Promise<void>;
 
 // The auto-generated typescript definitions are a good start, but could do with tightening up in a lot of areas.
 // The following is a manually-curated set of typescript definitions.

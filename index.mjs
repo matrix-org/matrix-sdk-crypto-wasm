@@ -21,7 +21,7 @@
 
 import * as bindings from "./pkg/matrix_sdk_crypto_wasm_bg.js";
 
-const moduleUrl = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
+const defaultURL = new URL("./pkg/matrix_sdk_crypto_wasm_bg.wasm", import.meta.url);
 
 // Although we could simply instantiate the WASM at import time with a top-level `await`,
 // we avoid that, to make it easier for callers to delay loading the WASM (and instead
@@ -52,10 +52,11 @@ let modPromise = null;
 /**
  * Loads and instantiates the WASM module asynchronously
  *
+ * @param {URL | string} url - The URL to fetch the WebAssembly module from
  * @returns {Promise<void>}
  */
-async function loadModuleAsync() {
-    const { instance } = await WebAssembly.instantiateStreaming(fetch(moduleUrl), {
+async function loadModuleAsync(url) {
+    const { instance } = await WebAssembly.instantiateStreaming(fetch(url), {
         // @ts-expect-error: The bindings don't exactly match the 'ExportValue' type
         "./matrix_sdk_crypto_wasm_bg.js": bindings,
     });
@@ -70,10 +71,11 @@ async function loadModuleAsync() {
  *
  * Returns a promise which will resolve once the other methods are ready.
  *
+ * @param {URL | string} [url] - The URL to fetch the WebAssembly module from. If not provided, a default URL will be used.
  * @returns {Promise<void>}
  */
-export async function initAsync() {
-    if (!modPromise) modPromise = loadModuleAsync();
+export async function initAsync(url = defaultURL) {
+    if (!modPromise) modPromise = loadModuleAsync(url);
     await modPromise;
 }
 

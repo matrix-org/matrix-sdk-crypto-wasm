@@ -9,6 +9,11 @@
     This allows to make the difference between an event that was sent in clear and
     the same event successfully decrypted.
 
+# matrix-sdk-crypto-wasm v14.2.0
+
+-   Log warnings when we fail to parse a backed-up room key
+    ([#228](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/228))
+
 # matrix-sdk-crypto-wasm v14.1.0
 
 -   Update matrix-rusk-sdk to `0.11.0`, which includes:
