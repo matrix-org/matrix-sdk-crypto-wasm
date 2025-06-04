@@ -1,12 +1,13 @@
 # UNRELEASED
 
--   Update matrix-rusk-sdk to `35a2ce9`, which includes:
+-   Update matrix-rusk-sdk to `0f73ffde`, which includes:
 
+    -   feat(crypto): Add EncryptionInfo to Decrypted to-device variant ([#5074](https://github.com/matrix-org/matrix-rust-sdk/pull/5074))
     -   Add variants for plain text and encrypted to-device events ([#4935](https://github.com/matrix-org/matrix-rust-sdk/pull/4935))
 
 -   **BREAKING**: `OlmMachine.receiveSyncChanges` now returns a list of
-    `ProcessedToDeviceEvent` instead of a json encoded list of json encoded events.
-    This allows to make the difference between an event that was sent in clear and
+    `ProcessedToDeviceEvent` instead of a JSON-encoded list of JSON-encoded events.
+    This allows making the difference between an event that was sent in clear and
     the same event successfully decrypted.
 
 # matrix-sdk-crypto-wasm v14.2.0
