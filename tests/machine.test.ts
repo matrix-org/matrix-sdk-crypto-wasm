@@ -1648,7 +1648,8 @@ describe(OlmMachine.name, () => {
             expect(processed.type).toEqual(ProcessedToDeviceEventType.PlainText);
             expect(processed).toBeInstanceOf(PlainTextToDeviceEvent);
 
-            let toDeviceEvent = JSON.parse(processed.wireEvent);
+            let typedEvent = processed as PlainTextToDeviceEvent;
+            let toDeviceEvent = JSON.parse(typedEvent.rawEvent);
 
             expect(toDeviceEvent.sender).toEqual("@alice:example.com");
             expect(toDeviceEvent.type).toEqual("custom.type");
@@ -1691,7 +1692,8 @@ describe(OlmMachine.name, () => {
             expect(processed).toBeInstanceOf(UTDToDeviceEvent);
             expect(processed.type).toEqual(ProcessedToDeviceEventType.UnableToDecrypt);
 
-            let toDeviceEvent = JSON.parse(processed.wireEvent);
+            const typedEvent = processed as UTDToDeviceEvent;
+            let toDeviceEvent = JSON.parse(typedEvent.wireEvent);
 
             expect(toDeviceEvent.sender).toEqual("@bob:example.org");
             expect(toDeviceEvent.type).toEqual("m.room.encrypted");
@@ -1746,12 +1748,12 @@ describe(OlmMachine.name, () => {
             const processed1 = received[1];
             expect(processed1.type).toEqual(ProcessedToDeviceEventType.Invalid);
 
-            let toDeviceEvent0 = JSON.parse(processed0.wireEvent);
+            let toDeviceEvent0 = JSON.parse((processed0 as InvalidToDeviceEvent).wireEvent);
             expect(toDeviceEvent0.sender).toEqual("@alice:example.com");
             expect(toDeviceEvent0.content).toBeDefined();
             expect(toDeviceEvent0.type).toBeUndefined();
 
-            let toDeviceEvent1 = JSON.parse(processed1.wireEvent);
+            let toDeviceEvent1 = JSON.parse((processed1 as InvalidToDeviceEvent).wireEvent);
             expect(toDeviceEvent1.sender).toEqual("@bob:example.org");
             expect(toDeviceEvent1.type).toEqual("m.room.encrypted");
         });
@@ -1855,7 +1857,7 @@ describe(OlmMachine.name, () => {
             const processed = received[0] as DecryptedToDeviceEvent;
             expect(processed.type).toEqual(ProcessedToDeviceEventType.Decrypted);
 
-            let toDeviceEvent = JSON.parse(processed.wireEvent);
+            let toDeviceEvent = JSON.parse(processed.rawDecryptedEvent);
             expect(toDeviceEvent.sender).toEqual("@alice:example.org");
             expect(toDeviceEvent.type).toEqual("custom.type");
             expect(toDeviceEvent.content.foo).toEqual("bar");
