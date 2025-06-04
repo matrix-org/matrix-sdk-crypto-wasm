@@ -111,7 +111,7 @@ matrix-sdk-qrcode = { path = "../matrix-rust-sdk/crates/matrix-sdk-qrcode" }
 ## Documentation
 
 [The documentation can be found
-online](https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/).
+online](https://matrix-org.github.io/matrix-sdk-crypto-wasm/).
 
 To generate the documentation locally, please run the following
 command:
