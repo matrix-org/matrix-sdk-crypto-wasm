@@ -18,8 +18,10 @@ use matrix_sdk_common::{
 use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
-use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
-use crate::encryption::EncryptionAlgorithm;
+use crate::{
+    encryption, encryption::EncryptionAlgorithm, identifiers, impl_from_to_inner,
+    requests::RequestType,
+};
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -303,7 +305,9 @@ impl EncryptionInfo {
     pub fn algorithm(&self) -> EncryptionAlgorithm {
         match self.inner.algorithm_info {
             AlgorithmInfo::MegolmV1AesSha2 { .. } => EncryptionAlgorithm::MegolmV1AesSha2,
-            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => EncryptionAlgorithm::OlmV1Curve25519AesSha2
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => {
+                EncryptionAlgorithm::OlmV1Curve25519AesSha2
+            }
         }
     }
 }

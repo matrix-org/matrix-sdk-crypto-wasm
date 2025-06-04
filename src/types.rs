@@ -397,7 +397,6 @@ pub struct DecryptedToDeviceEvent {
     #[wasm_bindgen(readonly, js_name = "wireEvent")]
     pub wire_event: JsString,
 
-
     #[wasm_bindgen(readonly, js_name = "encryptionInfo")]
     /// The encryption information (olm variant) for the event.
     pub encryption_info: crate::responses::EncryptionInfo,
