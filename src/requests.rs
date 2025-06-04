@@ -513,6 +513,7 @@ pub fn outgoing_request_to_js_value(
         }
 
         AnyOutgoingRequest::RoomMessage(request) => {
+            let request = request.as_ref();
             JsValue::from(RoomMessageRequest::try_from((request_id, request))?)
         }
     })

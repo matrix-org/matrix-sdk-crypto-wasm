@@ -402,10 +402,10 @@ pub struct ProcessedToDeviceEvent {
 impl From<matrix_sdk_crypto::types::ProcessedToDeviceEvent> for ProcessedToDeviceEvent {
     fn from(value: matrix_sdk_crypto::types::ProcessedToDeviceEvent) -> Self {
         match value {
-            matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted(decrypted_event) => {
+            matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, .. } => {
                 ProcessedToDeviceEvent {
                     processed_type: ProcessedToDeviceEventType::Decrypted,
-                    wire_event: decrypted_event.json().get().to_owned().into(),
+                    wire_event: raw.json().get().to_owned().into(),
                 }
             }
             matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {

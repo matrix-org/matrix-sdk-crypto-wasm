@@ -541,7 +541,7 @@ impl OlmMachine {
         Ok(future_to_promise(async move {
             let encryption_info =
                 me.get_room_event_encryption_info(&event, room_id.as_ref()).await?;
-            Ok(responses::EncryptionInfo::from(encryption_info))
+            Ok(responses::EncryptionInfo::from(encryption_info.as_ref().clone()))
         }))
     }
 

@@ -216,7 +216,7 @@ impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decrypte
     fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
         Self {
             event: value.raw().json().get().to_owned().into(),
-            encryption_info: value.encryption_info().map(|e| e.clone().into()),
+            encryption_info: value.encryption_info().map(|e| e.as_ref().clone().into()),
         }
     }
 }
@@ -251,9 +251,14 @@ impl EncryptionInfo {
     /// decryption key originally.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
     pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        Some(match &self.inner.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => curve25519_key.clone().into(),
-        })
+        match &self.inner.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => {
+                Some(curve25519_key.clone().into())
+            }
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { curve25519_public_key_base64 } => {
+                Some(curve25519_public_key_base64.clone().into())
+            }
+        }
     }
 
     /// The signing Ed25519 key that created the megolm key that
@@ -264,6 +269,8 @@ impl EncryptionInfo {
             AlgorithmInfo::MegolmV1AesSha2 { sender_claimed_keys, .. } => {
                 sender_claimed_keys.get(&ruma::DeviceKeyAlgorithm::Ed25519).cloned().map(Into::into)
             }
+            // Not applicable for olm info
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => None,
         }
     }
 
