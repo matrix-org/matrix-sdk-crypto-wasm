@@ -1857,7 +1857,7 @@ describe(OlmMachine.name, () => {
             const processed = received[0] as DecryptedToDeviceEvent;
             expect(processed.type).toEqual(ProcessedToDeviceEventType.Decrypted);
 
-            let toDeviceEvent = JSON.parse(processed.rawDecryptedEvent);
+            let toDeviceEvent = JSON.parse(processed.decryptedRawEvent);
             expect(toDeviceEvent.sender).toEqual("@alice:example.org");
             expect(toDeviceEvent.type).toEqual("custom.type");
             expect(toDeviceEvent.content.foo).toEqual("bar");

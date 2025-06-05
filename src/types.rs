@@ -393,7 +393,7 @@ pub struct DecryptedToDeviceEvent {
     /// secrets some part of the content might have been zeroize'd).
     /// Represents a Matrix to-device message with `type`, `sender` and
     /// `content` fields.
-    #[wasm_bindgen(readonly, js_name = "rawDecryptedEvent")]
+    #[wasm_bindgen(readonly, js_name = "decryptedRawEvent")]
     pub decrypted_raw_event: JsString,
 
     #[wasm_bindgen(readonly, js_name = "encryptionInfo")]
