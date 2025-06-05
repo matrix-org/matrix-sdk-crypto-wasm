@@ -18,7 +18,7 @@ use matrix_sdk_common::{
 use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
-use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
+use crate::{encryption, identifiers, requests::RequestType};
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -216,7 +216,9 @@ impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decrypte
     fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
         Self {
             event: value.raw().json().get().to_owned().into(),
-            encryption_info: value.encryption_info().map(|e| e.as_ref().clone().into()),
+            encryption_info: value.encryption_info().map(|e| {
+                e.as_ref().clone().try_into().expect("Timeline events are megolm encrypted")
+            }),
         }
     }
 }
@@ -228,7 +230,20 @@ pub struct EncryptionInfo {
     inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
 }
 
-impl_from_to_inner!(matrix_sdk_common::deserialized_responses::EncryptionInfo => EncryptionInfo);
+impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for EncryptionInfo {
+    type Error = JsError;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    ) -> Result<Self, Self::Error> {
+        match value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Ok(Self { inner: value }),
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(JsError::new(
+                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for megolm EncryptionInfo",
+            )),
+        }
+    }
+}
 
 #[wasm_bindgen()]
 impl EncryptionInfo {
