@@ -102,7 +102,7 @@ impl EncryptedAttachment {
         self.encrypted_data.clone()
     }
 
-    /// Return the media encryption info as a JSON-encoded string. The
+    /// Return the media encryption info as a JSON-encoded object. The
     /// structure is fully valid.
     ///
     /// If the media encryption info have been consumed already, it

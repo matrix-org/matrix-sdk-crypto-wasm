@@ -61,6 +61,13 @@ declare module "./pkg/matrix_sdk_crypto_wasm.js" {
         | RoomMessageRequest
         | KeysBackupRequest;
 
+    /** The types returned by {@link OlmMachine.receiveSyncChanges}. */
+    type ProcessedToDeviceEvent =
+        | DecryptedToDeviceEvent
+        | PlainTextToDeviceEvent
+        | InvalidToDeviceEvent
+        | UTDToDeviceEvent;
+
     interface OlmMachine {
         trackedUsers(): Promise<Set<UserId>>;
         updateTrackedUsers(users: UserId[]): Promise<void>;
@@ -69,7 +76,7 @@ declare module "./pkg/matrix_sdk_crypto_wasm.js" {
             changed_devices: DeviceLists,
             one_time_keys_counts: Map<string, number>,
             unused_fallback_keys?: Set<string> | null,
-        ): Promise<string>;
+        ): Promise<Array<ProcessedToDeviceEvent>>;
         outgoingRequests(): Promise<Array<OutgoingRequest>>;
         markRequestAsSent(request_id: string, request_type: RequestType, response: string): Promise<boolean>;
         encryptRoomEvent(room_id: RoomId, event_type: string, content: string): Promise<string>;

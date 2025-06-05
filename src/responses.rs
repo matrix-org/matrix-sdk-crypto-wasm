@@ -12,13 +12,13 @@ pub(crate) use matrix_sdk_common::ruma::api::client::{
     to_device::send_event_to_device::v3::Response as ToDeviceResponse,
 };
 use matrix_sdk_common::{
-    deserialized_responses::AlgorithmInfo,
+    deserialized_responses::{AlgorithmInfo, VerificationState},
     ruma::{self, api::IncomingResponse as RumaIncomingResponse},
 };
 use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
-use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
+use crate::{encryption, identifiers, requests::RequestType};
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -216,19 +216,34 @@ impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decrypte
     fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
         Self {
             event: value.raw().json().get().to_owned().into(),
-            encryption_info: value.encryption_info().map(|e| e.clone().into()),
+            encryption_info: value.encryption_info().map(|e| {
+                e.as_ref().clone().try_into().expect("Timeline events are megolm encrypted")
+            }),
         }
     }
 }
 
 /// Struct containing information on how an event was decrypted.
 #[wasm_bindgen()]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EncryptionInfo {
     inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
 }
 
-impl_from_to_inner!(matrix_sdk_common::deserialized_responses::EncryptionInfo => EncryptionInfo);
+impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for EncryptionInfo {
+    type Error = JsError;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    ) -> Result<Self, Self::Error> {
+        match value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Ok(Self { inner: value }),
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(JsError::new(
+                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for megolm EncryptionInfo",
+            )),
+        }
+    }
+}
 
 #[wasm_bindgen()]
 impl EncryptionInfo {
@@ -251,9 +266,12 @@ impl EncryptionInfo {
     /// decryption key originally.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
     pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        Some(match &self.inner.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => curve25519_key.clone().into(),
-        })
+        match &self.inner.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => {
+                Some(curve25519_key.clone().into())
+            }
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => None,
+        }
     }
 
     /// The signing Ed25519 key that created the megolm key that
@@ -264,6 +282,8 @@ impl EncryptionInfo {
             AlgorithmInfo::MegolmV1AesSha2 { sender_claimed_keys, .. } => {
                 sender_claimed_keys.get(&ruma::DeviceKeyAlgorithm::Ed25519).cloned().map(Into::into)
             }
+            // Not applicable for olm info
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => None,
         }
     }
 
@@ -288,5 +308,68 @@ impl EncryptionInfo {
             verification_state.to_shield_state_lax()
         }
         .into()
+    }
+}
+
+/// Struct containing information on how a to-device message was decrypted.
+#[wasm_bindgen()]
+#[derive(Debug, Clone)]
+pub struct OlmEncryptionInfo {
+    inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+}
+
+impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for OlmEncryptionInfo {
+    type Error = JsError;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    ) -> Result<Self, Self::Error> {
+        match value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Err(JsError::new(
+                "AlgorithmInfo::MegolmV1AesSha2 is not applicable for OlmEncryptionInfo",
+            )),
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Ok(Self { inner: value }),
+        }
+    }
+}
+
+#[wasm_bindgen()]
+impl OlmEncryptionInfo {
+    /// The user ID of the to-device message sender. Note this is untrusted data
+    /// unless `isSenderVerified` is also true.
+    #[wasm_bindgen(getter)]
+    pub fn sender(&self) -> identifiers::UserId {
+        identifiers::UserId::from(self.inner.sender.clone())
+    }
+
+    /// The device ID of the device that sent us the to-device message.
+    /// Could be None in the case where the to-device message sender checks are
+    /// delayed (for room keys for example). For custom to-devices there is
+    /// no delay, this will not be None (the decryption would fail if the
+    /// sender device keys cannot be found).
+    /// Note this is untrusted data unless `isSenderVerified` is also true.
+    #[wasm_bindgen(getter, js_name = "senderDevice")]
+    pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
+        Some(self.inner.sender_device.as_ref()?.clone().into())
+    }
+
+    /// The Curve25519 key of the device that encrypted the message.
+    #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
+    pub fn sender_curve25519_key(&self) -> Option<JsString> {
+        match &self.inner.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => {
+                panic!("MegolmV1AesSha2 variant cannot be converted to OlmEncryptionInfo")
+            }
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { curve25519_public_key_base64 } => {
+                Some(curve25519_public_key_base64.clone().into())
+            }
+        }
+    }
+
+    /// Returns whether the sender device is in a verified state.
+    /// This reflects the state at the time of decryption.
+    #[wasm_bindgen(js_name = "isSenderVerified")]
+    pub fn is_sender_verified(&self) -> bool {
+        matches!(&self.inner.verification_state, VerificationState::Verified)
     }
 }
