@@ -1863,11 +1863,8 @@ describe(OlmMachine.name, () => {
             expect(toDeviceEvent.content.foo).toEqual("bar");
 
             let encryptionInfo = processed.encryptionInfo;
-            expect(encryptionInfo.algorithm).toEqual(EncryptionAlgorithm.OlmV1Curve25519AesSha2);
             expect(encryptionInfo.senderCurve25519Key).toEqual(alice.identityKeys.curve25519.toBase64());
-
-            let verificationState = processed.encryptionInfo.shieldState(false);
-            expect(verificationState.code).toBe(ShieldStateCode.UnsignedDevice);
+            expect(encryptionInfo.isSenderVerified()).toBe(false);
         });
     });
 });

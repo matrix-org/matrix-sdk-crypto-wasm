@@ -16,6 +16,7 @@ use crate::{
     encryption::EncryptionAlgorithm,
     identifiers::{DeviceKeyId, UserId},
     impl_from_to_inner,
+    responses::OlmEncryptionInfo,
     vodozemac::Ed25519Signature,
 };
 
@@ -396,8 +397,8 @@ pub struct DecryptedToDeviceEvent {
     pub decrypted_raw_event: JsString,
 
     #[wasm_bindgen(readonly, js_name = "encryptionInfo")]
-    /// The encryption information (olm variant) for the event.
-    pub encryption_info: crate::responses::EncryptionInfo,
+    /// The olm encryption information for the event.
+    pub encryption_info: OlmEncryptionInfo,
 }
 
 #[wasm_bindgen]
@@ -411,10 +412,7 @@ impl DecryptedToDeviceEvent {
 
     /// Create a new `DecryptedToDeviceEvent`.
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        decrypted_raw_event: JsString,
-        encryption_info: crate::responses::EncryptionInfo,
-    ) -> Self {
+    pub fn new(decrypted_raw_event: JsString, encryption_info: OlmEncryptionInfo) -> Self {
         Self { decrypted_raw_event, encryption_info }
     }
 }
@@ -515,7 +513,9 @@ pub fn processed_to_device_event_to_js_value(
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, encryption_info } => {
             JsValue::from(DecryptedToDeviceEvent::new(
                 raw.json().get().into(),
-                encryption_info.into(),
+                encryption_info
+                    .try_into()
+                    .expect("to-device encryption info will always convert to OlmEncryptionInfo"),
             ))
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
