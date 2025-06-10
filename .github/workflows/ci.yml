@@ -56,6 +56,11 @@ jobs:
     name: test
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
@@ -90,54 +95,15 @@ jobs:
       - name: Check typescript types
         run: yarn lint:types
 
-      - name: Test the JavaScript binding
+      - name: Test the JavaScript bindings
         run: yarn test
 
       - name: Build the documentation
         run: yarn doc
 
-  docs:
-    name: docs
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Load cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-
-      - name: Install yarn
-        run: npm install --global yarn
-
-      - name: Build `matrix-sdk-crypto-js` doc
-        run: |
-          yarn install
-          yarn build && yarn doc
-
       # Upload the docs as a build artifiact, so they can be used in the
       # deployment step below, or a subsequent workflow which uploads to netlify.
-      - name: Upload artifact
+      - name: Upload docs artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: docs
