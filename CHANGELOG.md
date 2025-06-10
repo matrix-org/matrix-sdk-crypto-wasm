@@ -1,5 +1,15 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v14.2.1
+
+Update matrix-sdk-crypto to `0.11.1`, which includes:
+
+### Security Fixes
+
+-   Check the sender of an event matches owner of session, preventing sender
+    spoofing by homeserver owners.
+    [13c1d20](https://github.com/matrix-org/matrix-rust-sdk/commit/13c1d2048286bbabf5e7bc6b015aafee98f04d55) (High, [GHSA-x958-rvg6-956w](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-x958-rvg6-956w)).
+
 # matrix-sdk-crypto-wasm v14.2.0
 
 -   Log warnings when we fail to parse a backed-up room key
@@ -7,7 +17,7 @@
 
 # matrix-sdk-crypto-wasm v14.1.0
 
--   Update matrix-rusk-sdk to `0.11.0`, which includees:
+-   Update matrix-rusk-sdk to `0.11.0`, which includes:
 
     -   Add support for the shared history flag defined in
         [MSC3061](https://github.com/matrix-org/matrix-spec-proposals/pull/3061).

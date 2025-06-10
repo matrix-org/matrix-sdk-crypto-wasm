@@ -1136,9 +1136,9 @@ dependencies = [
 
 [[package]]
 name = "matrix-sdk-crypto"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe2a8a811f9809f37c360f7005350e76661cb2bed2624b87b8d772c444bf572a"
+checksum = "b5af2cba80b6e9a3a3b2a66734cb400625b9666b3eb0cd7f7b13eede8d3e075a"
 dependencies = [
  "aes",
  "aquamarine",
