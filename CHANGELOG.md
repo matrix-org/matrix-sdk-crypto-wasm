@@ -1,4 +1,4 @@
-# UNRELEASED
+# matrix-sdk-crypto-wasm v14.2.1
 
 Update matrix-sdk-crypto to `0.11.1`, which includes:
 
