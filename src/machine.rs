@@ -1321,22 +1321,69 @@ impl OlmMachine {
     /// of {@link RoomKeyInfo}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerRoomKeyUpdatedCallback")]
     pub async fn register_room_key_updated_callback(&self, callback: Function) {
+        self.register_room_key_updated_callbacks(callback, None).await
+    }
+
+    /// Register a success and an error callback which will be called whenever
+    /// there is an update to room keys.
+    ///
+    /// `success_callback` should be a function that takes a single argument (an
+    /// array of {@link RoomKeyInfo}) and returns a Promise.
+    ///
+    /// `error_callback` should be a function that takes a single argument (the
+    /// error) and returns a Promise. When such an error happens that means
+    /// that update stream lost track and that all current decryption failures
+    /// should be retried as the key may have been imported without notice..
+    #[wasm_bindgen(js_name = "registerRoomKeyUpdatedCallbacks")]
+    pub async fn register_room_key_updated_callbacks(
+        &self,
+        success_callback: Function,
+        error_callback: Option<Function>,
+    ) {
         let stream = self.inner.store().room_keys_received_stream();
 
-        copy_stream_to_callback(
-            stream,
-            |input| match input {
-                Ok(keys) => iter::once(
-                    keys.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect::<Array>(),
-                ),
-                Err(e) => {
-                    warn!("Error reading  room_keys_received_stream {:?}", e);
-                    iter::once(Array::new())
+        spawn_local(async move {
+            pin_mut!(stream);
+
+            while let Some(item) = stream.next().await {
+                match item {
+                    Ok(input) => {
+                        let js_array = input
+                            .into_iter()
+                            .map(RoomKeyInfo::from)
+                            .map(JsValue::from)
+                            .collect::<Array>();
+                        match promise_result_to_future(
+                            success_callback.call1(&JsValue::NULL, &js_array.into()),
+                        )
+                        .await
+                        {
+                            Ok(_) => (),
+                            Err(e) => {
+                                warn!("Error calling registerRoomKeyUpdatedCallback success callback: {:?}", e);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        if let Some(ref error_callback) = error_callback {
+                            let js_error = JsError::new(&e.to_string());
+                            match promise_result_to_future(
+                                error_callback.call1(&JsValue::NULL, &js_error.into()),
+                            )
+                            .await
+                            {
+                                Ok(_) => (),
+                                Err(e) => {
+                                    warn!("Error calling registerRoomKeyUpdatedCallback error callback: {:?}", e);
+                                }
+                            }
+                        } else {
+                            warn!("Error reading room_keys_received_stream {:?}, no callback specified", e);
+                        }
+                    }
                 }
-            },
-            callback,
-            "room-key-received",
-        );
+            }
+        })
     }
 
     /// Register a callback which will be called whenever we receive a
