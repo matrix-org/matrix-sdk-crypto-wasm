@@ -343,17 +343,19 @@ impl OlmEncryptionInfo {
     }
 
     /// The device ID of the device that sent us the to-device message.
+    ///
     /// Could be None in the case where the to-device message sender checks are
-    /// delayed (for room keys for example). For custom to-devices there is
-    /// no delay, this will not be None (the decryption would fail if the
+    /// delayed (for room keys for example). For custom to-device messages there is
+    /// no delay, so this will not be `undefined` (the decryption would fail if the
     /// sender device keys cannot be found).
+    ///
     /// Note this is untrusted data unless `isSenderVerified` is also true.
     #[wasm_bindgen(getter, js_name = "senderDevice")]
     pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
         Some(self.inner.sender_device.as_ref()?.clone().into())
     }
 
-    /// The Curve25519 key of the device that encrypted the message.
+    /// The base64-encoded public Curve25519 key of the device that encrypted the message.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
     pub fn sender_curve25519_key(&self) -> Option<JsString> {
         match &self.inner.algorithm_info {

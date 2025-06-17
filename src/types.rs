@@ -388,11 +388,12 @@ pub enum ProcessedToDeviceEventType {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone)]
 pub struct DecryptedToDeviceEvent {
-    /// A JSON-encoded object containing the processed event.
-    /// The decrypted message as if it was sent in clear (For room keys or
-    /// secrets some part of the content might have been zeroize'd).
-    /// Represents a Matrix to-device message with `type`, `sender` and
-    /// `content` fields.
+    /// A JSON-encoded object containing the decrypted event, as if it had been
+    /// sent in the clear. 
+    ///
+    /// Typically contains properties `type`, `sender` and `content`.
+    ///
+    /// (For room keys or secrets, some part of the content might have been zeroized).
     #[wasm_bindgen(readonly, js_name = "decryptedRawEvent")]
     pub decrypted_raw_event: JsString,
 
