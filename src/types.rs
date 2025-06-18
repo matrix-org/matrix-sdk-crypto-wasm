@@ -480,7 +480,7 @@ pub fn processed_to_device_event_to_js_value(
     processed_to_device_event: matrix_sdk_crypto::types::ProcessedToDeviceEvent,
 ) -> JsValue {
     match processed_to_device_event {
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted(raw) => {
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, .. } => {
             DecryptedToDeviceEvent { decrypted_raw_event: raw.json().get().into() }.into()
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {

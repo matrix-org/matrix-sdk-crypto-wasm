@@ -512,7 +512,14 @@ impl OlmMachine {
                 .await
                 .map_err(MegolmDecryptionError::from)?
                 .into();
-            Ok(responses::DecryptedRoomEvent::from(room_event))
+
+            responses::DecryptedRoomEvent::try_from(room_event).map_err(|e: anyhow::Error| {
+                // This happens if we somehow encounter a room event whose encryption info we
+                // don't understand (e.g., it is encrypted with Olm rather than
+                // Megolm). That seems pretty unlikely. If it happens, let's
+                // just treat it as a generic UTD.
+                MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
+            })
         }))
     }
 
@@ -545,7 +552,7 @@ impl OlmMachine {
         Ok(future_to_promise(async move {
             let encryption_info =
                 me.get_room_event_encryption_info(&event, room_id.as_ref()).await?;
-            Ok(responses::EncryptionInfo::from(encryption_info))
+            Ok(responses::EncryptionInfo::try_from(encryption_info)?)
         }))
     }
 

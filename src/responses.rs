@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use js_sys::{Array, JsString};
 pub(crate) use matrix_sdk_common::ruma::api::client::{
     backup::add_backup_keys::v3::Response as KeysBackupResponse,
@@ -214,12 +215,18 @@ impl DecryptedRoomEvent {
     }
 }
 
-impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
-    fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
-        Self {
-            event: value.raw().json().get().to_owned().into(),
-            encryption_info: value.encryption_info().map(|e| e.clone().into()),
-        }
+impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::TimelineEvent,
+    ) -> Result<Self, Self::Error> {
+        let encryption_info = match value.encryption_info() {
+            None => None,
+            Some(encryption_info) => Some(encryption_info.clone().try_into()?),
+        };
+
+        Ok(Self { event: value.raw().json().get().to_owned().into(), encryption_info })
     }
 }
 
@@ -280,19 +287,28 @@ impl EncryptionInfo {
     }
 }
 
-impl From<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
-    fn from(value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>) -> Self {
+impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>,
+    ) -> Result<Self, Self::Error> {
         match &value.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, sender_claimed_keys, .. } => Self {
-                sender: value.sender.clone().into(),
-                sender_device: value.sender_device.clone().map(Into::into),
-                sender_curve25519_key_base64: curve25519_key.clone(),
-                sender_claimed_ed25519_key: sender_claimed_keys
-                    .get(&ruma::DeviceKeyAlgorithm::Ed25519)
-                    .cloned()
-                    .into(),
-                verification_state: value.verification_state.clone(),
-            },
+            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, sender_claimed_keys, .. } => {
+                Ok(Self {
+                    sender: value.sender.clone().into(),
+                    sender_device: value.sender_device.clone().map(Into::into),
+                    sender_curve25519_key_base64: curve25519_key.clone(),
+                    sender_claimed_ed25519_key: sender_claimed_keys
+                        .get(&ruma::DeviceKeyAlgorithm::Ed25519)
+                        .cloned()
+                        .into(),
+                    verification_state: value.verification_state.clone(),
+                })
+            }
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(anyhow!(
+                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for room event EncryptionInfo",
+            )),
         }
     }
 }
