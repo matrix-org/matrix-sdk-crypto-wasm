@@ -1,6 +1,6 @@
 # UNRELEASED
 
--   Update matrix-rusk-sdk to `59ecb1edb`.
+-   Update matrix-rusk-sdk to `eeaa091`.
 
 -   **BREAKING**: `OlmMachine.receiveSyncChanges` now returns a list of
     `ProcessedToDeviceEvent` instead of a JSON-encoded list of JSON-encoded events.
