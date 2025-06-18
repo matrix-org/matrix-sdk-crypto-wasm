@@ -1,6 +1,6 @@
 # UNRELEASED
 
--   Update matrix-rusk-sdk to `eeaa09102`, which includes:
+-   Update matrix-rusk-sdk to `022068996`, which includes:
 
     -   Send stable identifier `sender_device_keys` for MSC4147 (Including device
         keys with Olm-encrypted events).
