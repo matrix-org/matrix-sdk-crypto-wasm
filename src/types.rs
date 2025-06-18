@@ -362,3 +362,135 @@ impl From<&RoomSettings> for matrix_sdk_crypto::store::RoomSettings {
         }
     }
 }
+
+/// The type of a {@link ProcessedToDeviceEvent}.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub enum ProcessedToDeviceEventType {
+    /// A successfully-decrypted encrypted to-device message.
+    Decrypted,
+
+    /// An encrypted to-device message which could not be decrypted.
+    UnableToDecrypt,
+
+    /// An unencrypted to-device message (sent in clear).
+    PlainText,
+
+    /// An invalid to-device message that was ignored because it is missing some
+    /// required information to be processed (like no event `type` for
+    /// example)
+    Invalid,
+}
+
+/// Represents an encrypted to-device event, after it has been decrypted.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct DecryptedToDeviceEvent {
+    /// A JSON-encoded object containing the decrypted event, as if it had been
+    /// sent in the clear.
+    ///
+    /// Typically contains properties `type`, `sender` and `content`.
+    ///
+    /// (For room keys or secrets, some part of the content might have been
+    /// zeroized).
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "decryptedRawEvent")]
+    pub decrypted_raw_event: JsString,
+}
+
+#[wasm_bindgen]
+impl DecryptedToDeviceEvent {
+    /// The type of processed to-device event. Always {@link
+    /// ProcessedToDeviceEventType.Decrypted} for this type.
+    #[wasm_bindgen(getter, js_name = "type")]
+    pub fn processed_type(&self) -> ProcessedToDeviceEventType {
+        ProcessedToDeviceEventType::Decrypted
+    }
+}
+
+/// Represents a to-device event sent in the clear.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct PlainTextToDeviceEvent {
+    /// A JSON-encoded object containing the Matrix to-device message with
+    /// `type`, `sender` and `content` fields.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
+    pub raw_event: JsString,
+}
+
+#[wasm_bindgen]
+impl PlainTextToDeviceEvent {
+    /// The type of processed to-device event. Always {@link
+    /// ProcessedToDeviceEventType.PlainText} for this type.
+    #[wasm_bindgen(getter, js_name = "type")]
+    pub fn processed_type(&self) -> ProcessedToDeviceEventType {
+        ProcessedToDeviceEventType::PlainText
+    }
+}
+
+/// Represents an encrypted to-device event that could not be decrypted.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct UTDToDeviceEvent {
+    /// A JSON-encoded object containing the original message of type
+    /// `m.room.encrypted` that failed to be decrypted.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "wireEvent")]
+    pub wire_event: JsString,
+    // TODO: Add some OlmError in the future
+}
+
+#[wasm_bindgen]
+impl UTDToDeviceEvent {
+    /// The type of processed to-device event. Always {@link
+    /// ProcessedToDeviceEventType.UnableToDecrypt} for this type.
+    #[wasm_bindgen(getter, js_name = "type")]
+    pub fn processed_type(&self) -> ProcessedToDeviceEventType {
+        ProcessedToDeviceEventType::UnableToDecrypt
+    }
+}
+
+/// Represents an invalid to-device event that was ignored (because it is
+/// missing some mandatory fields, for example).
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct InvalidToDeviceEvent {
+    /// A JSON-encoded object containing the original message as received from
+    /// sync.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "wireEvent")]
+    pub wire_event: JsString,
+    // TODO: Add some error information here?
+}
+
+#[wasm_bindgen]
+impl InvalidToDeviceEvent {
+    /// The type of processed to-device event. Always {@link
+    /// ProcessedToDeviceEventType.Invalid} for this type.
+    #[wasm_bindgen(getter, js_name = "type")]
+    pub fn processed_type(&self) -> ProcessedToDeviceEventType {
+        ProcessedToDeviceEventType::Invalid
+    }
+}
+
+/// Convert an `ProcessedToDeviceEvent` into a `JsValue`, ready to return to
+/// JavaScript.
+///
+/// JavaScript has no complex enums like Rust. To return structs of
+/// different types, we have no choice other than hiding everything behind a
+/// `JsValue`.
+pub fn processed_to_device_event_to_js_value(
+    processed_to_device_event: matrix_sdk_crypto::types::ProcessedToDeviceEvent,
+) -> JsValue {
+    match processed_to_device_event {
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted(raw) => {
+            DecryptedToDeviceEvent { decrypted_raw_event: raw.json().get().into() }.into()
+        }
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
+            UTDToDeviceEvent { wire_event: utd.json().get().into() }.into()
+        }
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::PlainText(plain) => {
+            PlainTextToDeviceEvent { raw_event: plain.json().get().into() }.into()
+        }
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
+            InvalidToDeviceEvent { wire_event: invalid.json().get().into() }.into()
+        }
+    }
+}

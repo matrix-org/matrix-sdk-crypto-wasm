@@ -1,5 +1,13 @@
 # UNRELEASED
 
+-   Update matrix-rusk-sdk to `59ecb1edb`.
+
+-   **BREAKING**: `OlmMachine.receiveSyncChanges` now returns a list of
+    `ProcessedToDeviceEvent` instead of a JSON-encoded list of JSON-encoded events.
+    This allows making the difference between an event that was sent in clear and
+    the same event successfully decrypted.
+    ([#236](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/236))
+
 # matrix-sdk-crypto-wasm v14.2.1
 
 Update matrix-sdk-crypto to `0.11.1`, which includes:

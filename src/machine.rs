@@ -42,7 +42,10 @@ use crate::{
     store,
     store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
-    types::{self, RoomKeyImportResult, RoomSettings, SignatureVerification},
+    types::{
+        self, processed_to_device_event_to_js_value, RoomKeyImportResult, RoomSettings,
+        SignatureVerification,
+    },
     verification, vodozemac,
 };
 
@@ -298,7 +301,11 @@ impl OlmMachine {
     ///
     /// # Returns
     ///
-    /// A list of JSON strings, containing the decrypted to-device events.
+    /// A list of values, each of which can be any of:
+    ///   * {@link DecryptedToDeviceEvent}
+    ///   * {@link PlainTextToDeviceEvent}
+    ///   * {@link UTDToDeviceEvent}
+    ///   * {@link InvalidToDeviceEvent}
     #[wasm_bindgen(js_name = "receiveSyncChanges")]
     pub fn receive_sync_changes(
         &self,
@@ -341,7 +348,7 @@ impl OlmMachine {
             // we discard the list of updated room keys in the result; JS applications are
             // expected to use register_room_key_updated_callback to receive updated room
             // keys.
-            let (decrypted_to_device_events, _) = me
+            let (processed_to_device_events, _) = me
                 .receive_sync_changes(EncryptionSyncChanges {
                     to_device_events,
                     changed_devices: &changed_devices,
@@ -353,7 +360,10 @@ impl OlmMachine {
                 })
                 .await?;
 
-            Ok(serde_json::to_string(&decrypted_to_device_events)?)
+            Ok(processed_to_device_events
+                .into_iter()
+                .map(processed_to_device_event_to_js_value)
+                .collect::<Vec<_>>())
         }))
     }
 

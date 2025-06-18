@@ -16,10 +16,12 @@ async function addMachineToMachine(machineToAdd, machine) {
     const oneTimeKeyCounts = new Map();
     const unusedFallbackKeys = new Set();
 
-    const receiveSyncChanges = JSON.parse(
-        await machineToAdd.receiveSyncChanges(toDeviceEvents, changedDevices, oneTimeKeyCounts, unusedFallbackKeys),
+    const receiveSyncChanges = await machineToAdd.receiveSyncChanges(
+        toDeviceEvents,
+        changedDevices,
+        oneTimeKeyCounts,
+        unusedFallbackKeys,
     );
-
     expect(receiveSyncChanges).toEqual([]);
 
     const outgoingRequests = await machineToAdd.outgoingRequests();
