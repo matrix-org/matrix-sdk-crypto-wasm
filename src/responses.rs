@@ -230,7 +230,7 @@ impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decry
     }
 }
 
-/// Struct containing information on how an event was decrypted.
+/// Struct containing information on how a room event was decrypted.
 #[wasm_bindgen()]
 #[derive(Debug)]
 pub struct EncryptionInfo {
@@ -310,5 +310,68 @@ impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for
                 "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for room event EncryptionInfo",
             )),
         }
+    }
+}
+
+/// Struct containing information on how a to-device message was decrypted.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct ToDeviceEncryptionInfo {
+    /// The base64-encoded public Curve25519 key of the device that encrypted
+    /// the message.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderCurve25519Key")]
+    pub sender_curve25519_key_base64: String,
+
+    /// The user ID of the sender of the event.
+    ///
+    /// Note this is untrusted data unless {@link isSenderVerified} is true.
+    #[wasm_bindgen(getter_with_clone)]
+    pub sender: identifiers::UserId,
+
+    /// The device ID of the device that sent us the to-device message.
+    ///
+    /// Could be `undefined` in the case where the to-device message sender
+    /// checks are delayed. There is no delay for to-device messages other
+    /// than `m.room_key`, so this will always be truthy for other
+    /// message types (the decryption would fail if the sender device keys
+    /// cannot be found).
+    ///
+    /// Note this is untrusted data unless {@link isSenderVerified} is true.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderDevice")]
+    pub sender_device: Option<identifiers::DeviceId>,
+
+    verification_state: matrix_sdk_common::deserialized_responses::VerificationState,
+}
+
+impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for ToDeviceEncryptionInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    ) -> Result<Self, Self::Error> {
+        match &value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Err(anyhow!(
+                "AlgorithmInfo::MegolmV1AesSha2 is not applicable for ToDeviceEncryptionInfo",
+            )),
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { curve25519_public_key_base64 } => Ok(Self {
+                sender_curve25519_key_base64: curve25519_public_key_base64.clone(),
+                sender: value.sender.clone().into(),
+                sender_device: value.sender_device.clone().map(Into::into),
+                verification_state: value.verification_state.clone(),
+            }),
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl ToDeviceEncryptionInfo {
+    /// Returns whether the sender device is in a verified state.
+    /// This reflects the state at the time of decryption.
+    #[wasm_bindgen(js_name = "isSenderVerified")]
+    pub fn is_sender_verified(&self) -> bool {
+        matches!(
+            &self.verification_state,
+            matrix_sdk_common::deserialized_responses::VerificationState::Verified
+        )
     }
 }

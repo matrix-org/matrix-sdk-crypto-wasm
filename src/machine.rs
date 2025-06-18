@@ -362,7 +362,7 @@ impl OlmMachine {
 
             Ok(processed_to_device_events
                 .into_iter()
-                .map(processed_to_device_event_to_js_value)
+                .filter_map(processed_to_device_event_to_js_value)
                 .collect::<Vec<_>>())
         }))
     }
