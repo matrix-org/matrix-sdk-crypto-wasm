@@ -75,7 +75,7 @@ impl EncryptedAttachment {
     /// It needs encrypted data, stored in an `Uint8Array`, and a
     /// [media encryption
     /// information](https://docs.rs/matrix-sdk-crypto/latest/matrix_sdk_crypto/struct.MediaEncryptionInfo.html),
-    /// as a JSON-encoded string.
+    /// as a JSON-encoded object.
     ///
     /// The media encryption information aren't stored as a string:
     /// they are parsed, validated and fully deserialized.
@@ -102,7 +102,7 @@ impl EncryptedAttachment {
         self.encrypted_data.clone()
     }
 
-    /// Return the media encryption info as a JSON-encoded string. The
+    /// Return the media encryption info as a JSON-encoded object. The
     /// structure is fully valid.
     ///
     /// If the media encryption info have been consumed already, it
