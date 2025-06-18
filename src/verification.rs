@@ -104,10 +104,10 @@ impl TryFrom<Verification> for JsValue {
         use matrix_sdk_crypto::Verification::*;
 
         Ok(match verification.0 {
-            SasV1(sas) => JsValue::from(Sas { inner: sas }),
+            SasV1(sas) => JsValue::from(Sas { inner: *sas }),
 
             #[cfg(feature = "qrcode")]
-            QrV1(qr) => JsValue::from(Qr { inner: qr }),
+            QrV1(qr) => JsValue::from(Qr { inner: *qr }),
 
             _ => {
                 return Err(JsError::new(
@@ -1093,9 +1093,10 @@ impl TryFrom<OutgoingVerificationRequest> for JsValue {
                 JsValue::from(requests::ToDeviceRequest::try_from((request_id, &request))?)
             }
 
-            InRoom(request) => {
-                JsValue::from(requests::RoomMessageRequest::try_from((request_id, &request))?)
-            }
+            InRoom(request) => JsValue::from(requests::RoomMessageRequest::try_from((
+                request_id,
+                request.as_ref(),
+            ))?),
         })
     }
 }

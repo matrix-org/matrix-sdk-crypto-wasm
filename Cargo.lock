@@ -1113,7 +1113,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.11.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=59ecb1edb#59ecb1edbd79dd3bc3dc185c871e9f147c2937bc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=eeaa09102#eeaa091024bcd94421882077d88bd1b65fdeecfa"
 dependencies = [
  "async-trait",
  "eyeball-im",
@@ -1136,7 +1136,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.11.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=59ecb1edb#59ecb1edbd79dd3bc3dc185c871e9f147c2937bc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=eeaa09102#eeaa091024bcd94421882077d88bd1b65fdeecfa"
 dependencies = [
  "aes",
  "aquamarine",
@@ -1204,7 +1204,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.11.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=59ecb1edb#59ecb1edbd79dd3bc3dc185c871e9f147c2937bc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=eeaa09102#eeaa091024bcd94421882077d88bd1b65fdeecfa"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1232,7 +1232,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.11.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=59ecb1edb#59ecb1edbd79dd3bc3dc185c871e9f147c2937bc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=eeaa09102#eeaa091024bcd94421882077d88bd1b65fdeecfa"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1244,7 +1244,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.11.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=59ecb1edb#59ecb1edbd79dd3bc3dc185c871e9f147c2937bc"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=eeaa09102#eeaa091024bcd94421882077d88bd1b65fdeecfa"
 dependencies = [
  "base64",
  "blake3",
@@ -1635,9 +1635,8 @@ dependencies = [
 
 [[package]]
 name = "ruma"
-version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d910a9b75cbf0e88f74295997c1a41c3ab7a117879a029c72db815192c167a0d"
+version = "0.12.2"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "assign",
  "js_int",
@@ -1650,9 +1649,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-client-api"
-version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09cc4ff88a70a3d1e7a2c5b51cca7499cb889b42687608ab664b9a216c49314d"
+version = "0.20.2"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "as_variant",
  "assign",
@@ -1675,8 +1673,7 @@ dependencies = [
 [[package]]
 name = "ruma-common"
 version = "0.15.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b75da013b362664c3e161662902e5da3f77e990525681b59c6035bac27e87b4"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "as_variant",
  "base64",
@@ -1707,9 +1704,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-events"
-version = "0.30.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41ab3d1b54c32a65194ecc44bc7f7575df50ef4255b139547d7dcc1753dc883d"
+version = "0.30.2"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -1732,8 +1728,7 @@ dependencies = [
 [[package]]
 name = "ruma-identifiers-validation"
 version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad674b5e5368c53a2c90fde7dac7e30747004aaf7b1827b72874a25fc06d4d8"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "js_int",
  "thiserror 2.0.12",
@@ -1742,8 +1737,7 @@ dependencies = [
 [[package]]
 name = "ruma-macros"
 version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1182e83ee5cd10121974f163337b16af68a93eedfc7cdbdbd52307ac7e1d743"
+source = "git+https://github.com/ruma/ruma?rev=689d9613a985edc089b5b729e6d9362f09b5df4f#689d9613a985edc089b5b729e6d9362f09b5df4f"
 dependencies = [
  "cfg-if",
  "proc-macro-crate",
