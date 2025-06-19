@@ -979,7 +979,7 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            stream_to_json_array(pin!(
+            Ok(stream_to_json_array(pin!(
                 me.store()
                     .export_room_keys_stream(|session| {
                         let session = session.clone();
@@ -992,7 +992,7 @@ impl OlmMachine {
                     })
                     .await?,
             ))
-            .await
+            .await?)
         })
     }
 
@@ -1696,7 +1696,7 @@ pub(crate) async fn promise_result_to_future(
     }
 }
 
-async fn stream_to_json_array<T, S>(mut stream: Pin<&mut S>) -> Result<String, anyhow::Error>
+async fn stream_to_json_array<T, S>(mut stream: Pin<&mut S>) -> Result<String, serde_json::Error>
 where
     T: Serialize,
     S: Stream<Item = T>,
@@ -1709,5 +1709,5 @@ where
     }
     seq.end()?;
 
-    Ok(String::from_utf8(stream_json)?)
+    Ok(String::from_utf8(stream_json).expect("serde_json generated invalid UTF8"))
 }
