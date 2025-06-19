@@ -1,5 +1,5 @@
-[build]
-target = "wasm32-unknown-unknown"
+[alias]
+xtask = "run --manifest-path xtask/Cargo.toml --"
 
 [target.wasm32-unknown-unknown]
 rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
