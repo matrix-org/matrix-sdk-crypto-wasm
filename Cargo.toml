@@ -58,7 +58,6 @@ default = ["qrcode"]
 qrcode = ["matrix-sdk-crypto/qrcode", "dep:matrix-sdk-qrcode"]
 
 [dependencies]
-anyhow = "1.0.68"
 console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"
 # getrandom is not a direct dependency, but we need to enable the "wasm_js" backend.
