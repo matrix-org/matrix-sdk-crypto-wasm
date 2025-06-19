@@ -1,5 +1,7 @@
 //! Types related to responses.
 
+use std::sync::Arc;
+
 use js_sys::{Array, JsString};
 pub(crate) use matrix_sdk_common::ruma::api::client::{
     backup::add_backup_keys::v3::Response as KeysBackupResponse,
@@ -18,7 +20,7 @@ use matrix_sdk_common::{
 use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
 use wasm_bindgen::prelude::*;
 
-use crate::{encryption, identifiers, impl_from_to_inner, requests::RequestType};
+use crate::{encryption, identifiers, requests::RequestType};
 
 pub(crate) fn response_from_string(body: &str) -> http::Result<http::Response<Vec<u8>>> {
     http::Response::builder().status(200).body(body.as_bytes().to_vec())
@@ -225,10 +227,8 @@ impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for Decrypte
 #[wasm_bindgen()]
 #[derive(Debug)]
 pub struct EncryptionInfo {
-    inner: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    inner: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>,
 }
-
-impl_from_to_inner!(matrix_sdk_common::deserialized_responses::EncryptionInfo => EncryptionInfo);
 
 #[wasm_bindgen()]
 impl EncryptionInfo {
@@ -288,5 +288,11 @@ impl EncryptionInfo {
             verification_state.to_shield_state_lax()
         }
         .into()
+    }
+}
+
+impl From<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
+    fn from(value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>) -> Self {
+        Self { inner: value }
     }
 }
