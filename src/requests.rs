@@ -42,7 +42,7 @@ pub struct KeysUploadRequest {
     #[wasm_bindgen(readonly)]
     pub id: JsString,
 
-    /// A JSON-encoded string containing the rest of the payload: `device_keys`,
+    /// A JSON-encoded object containing the rest of the payload: `device_keys`,
     /// `one_time_keys`, `fallback_keys`.
     ///
     /// It represents the body of the HTTP request.
@@ -78,7 +78,7 @@ pub struct KeysQueryRequest {
     #[wasm_bindgen(readonly)]
     pub id: JsString,
 
-    /// A JSON-encoded string containing the rest of the payload: `timeout`,
+    /// A JSON-encoded object containing the rest of the payload: `timeout`,
     /// `device_keys`, `token`.
     ///
     /// It represents the body of the HTTP request.
@@ -115,7 +115,7 @@ pub struct KeysClaimRequest {
     #[wasm_bindgen(readonly)]
     pub id: JsString,
 
-    /// A JSON-encoded string containing the rest of the payload: `timeout`,
+    /// A JSON-encoded object containing the rest of the payload: `timeout`,
     /// `one_time_keys`.
     ///
     /// It represents the body of the HTTP request.
@@ -163,7 +163,7 @@ pub struct ToDeviceRequest {
     #[wasm_bindgen(readonly)]
     pub txn_id: JsString,
 
-    /// A JSON-encoded string containing the rest of the payload: `messages`.
+    /// A JSON-encoded object containing the rest of the payload: `messages`.
     ///
     /// It represents the body of the HTTP request.
     #[wasm_bindgen(readonly)]
@@ -206,7 +206,7 @@ pub struct SignatureUploadRequest {
     #[wasm_bindgen(readonly)]
     pub id: Option<JsString>,
 
-    /// A JSON-encoded string containing the payload of the request
+    /// A JSON-encoded object containing the payload of the request
     ///
     /// It represents the body of the HTTP request.
     #[wasm_bindgen(readonly, js_name = "body")]
@@ -255,7 +255,7 @@ pub struct RoomMessageRequest {
     #[wasm_bindgen(readonly)]
     pub event_type: JsString,
 
-    /// A JSON-encoded string containing the message's content.
+    /// A JSON-encoded object containing the message's content.
     #[wasm_bindgen(readonly, js_name = "body")]
     pub content: JsString,
 }
@@ -292,7 +292,7 @@ pub struct KeysBackupRequest {
     #[wasm_bindgen(readonly)]
     pub id: JsString,
 
-    /// A JSON-encoded string containing the rest of the payload: `rooms`.
+    /// A JSON-encoded object containing the rest of the payload: `rooms`.
     ///
     /// It represents the body of the HTTP request.
     #[wasm_bindgen(readonly)]
@@ -552,7 +552,7 @@ pub enum RequestType {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone)]
 pub struct UploadSigningKeysRequest {
-    /// A JSON-encoded string containing the rest of the payload: `master_key`,
+    /// A JSON-encoded object containing the rest of the payload: `master_key`,
     /// `self_signing_key`, `user_signing_key`.
     ///
     /// It represents the body of the HTTP request.
@@ -600,7 +600,7 @@ impl TryFrom<&OriginalUploadSigningKeysRequest> for UploadSigningKeysRequest {
 #[derive(Debug)]
 /// A request that will upload a dehydrated device to the server.
 pub struct PutDehydratedDeviceRequest {
-    /// A JSON-encoded string containing the rest of the payload: `rooms`.
+    /// A JSON-encoded object containing the rest of the payload: `rooms`.
     ///
     /// It represents the body of the HTTP request.
     #[wasm_bindgen(readonly)]
