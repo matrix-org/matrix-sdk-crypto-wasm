@@ -1,18 +1,29 @@
 use std::future::Future;
 
-use futures_util::TryFutureExt;
 use js_sys::Promise;
 use wasm_bindgen::{JsError, JsValue, UnwrapThrowExt};
 use wasm_bindgen_futures::spawn_local;
 
+/**
+ * Convert a Rust [`Future`] which returns [`Result<T, JsError>`] into a
+ * Javascript [`Promise`] which either resolves with an object of type `T`,
+ * or rejects with an error of type [`Error`].
+ *
+ * [`Error`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+ */
 pub(crate) fn future_to_promise<F, T>(future: F) -> Promise
 where
-    F: Future<Output = Result<T, anyhow::Error>> + 'static,
+    F: Future<Output = Result<T, JsError>> + 'static,
     T: Into<JsValue>,
 {
-    future_to_promise_with_custom_error(future.map_err(|error| JsError::new(&error.to_string())))
+    future_to_promise_with_custom_error(future)
 }
 
+/**
+ * Convert a Rust [`Future`] which returns [`Result<T, E>`] into a
+ * Javascript [`Promise`] which either resolves with an object of type `T`,
+ * or rejects with an error of type `E`.
+ */
 pub(crate) fn future_to_promise_with_custom_error<F, T, E>(future: F) -> Promise
 where
     F: Future<Output = Result<T, E>> + 'static,

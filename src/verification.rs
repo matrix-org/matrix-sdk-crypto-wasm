@@ -1034,9 +1034,7 @@ impl VerificationRequest {
                 .transpose()
             {
                 Ok(a) => Ok(a),
-                Err(_) => {
-                    Err(anyhow::Error::msg("Failed to build the outgoing verification request"))
-                }
+                Err(_) => Err(JsError::new("Failed to build the outgoing verification request")),
             }
         })
     }
