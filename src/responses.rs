@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use js_sys::{Array, JsString};
 pub(crate) use matrix_sdk_common::ruma::api::client::{
     backup::add_backup_keys::v3::Response as KeysBackupResponse,
@@ -19,6 +18,7 @@ use matrix_sdk_common::{
     ruma::{self, api::IncomingResponse as RumaIncomingResponse},
 };
 use matrix_sdk_crypto::types::requests::AnyIncomingResponse;
+use thiserror::Error;
 use wasm_bindgen::prelude::*;
 
 use crate::{encryption, identifiers, requests::RequestType};
@@ -216,7 +216,7 @@ impl DecryptedRoomEvent {
 }
 
 impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
-    type Error = anyhow::Error;
+    type Error = UnsupportedAlgorithmError;
 
     fn try_from(
         value: matrix_sdk_common::deserialized_responses::TimelineEvent,
@@ -288,7 +288,7 @@ impl EncryptionInfo {
 }
 
 impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
-    type Error = anyhow::Error;
+    type Error = UnsupportedAlgorithmError;
 
     fn try_from(
         value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>,
@@ -306,8 +306,8 @@ impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for
                     verification_state: value.verification_state.clone(),
                 })
             }
-            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(anyhow!(
-                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for room event EncryptionInfo",
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(UnsupportedAlgorithmError(
+                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for room event EncryptionInfo".to_owned()
             )),
         }
     }
@@ -344,14 +344,15 @@ pub struct ToDeviceEncryptionInfo {
 }
 
 impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for ToDeviceEncryptionInfo {
-    type Error = anyhow::Error;
+    type Error = UnsupportedAlgorithmError;
 
     fn try_from(
         value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
     ) -> Result<Self, Self::Error> {
         match &value.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { .. } => Err(anyhow!(
-                "AlgorithmInfo::MegolmV1AesSha2 is not applicable for ToDeviceEncryptionInfo",
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Err(UnsupportedAlgorithmError(
+                "AlgorithmInfo::MegolmV1AesSha2 is not applicable for ToDeviceEncryptionInfo"
+                    .to_owned(),
             )),
             AlgorithmInfo::OlmV1Curve25519AesSha2 { curve25519_public_key_base64 } => Ok(Self {
                 sender_curve25519_key_base64: curve25519_public_key_base64.clone(),
@@ -375,3 +376,11 @@ impl ToDeviceEncryptionInfo {
         )
     }
 }
+
+/// Error type returned when converting
+/// [`matrix_sdk_common::deserialized_responses::EncryptionInfo`] to one of our
+/// own types: the `algorithm_info` on the `EncryptionInfo` was of an unexpected
+/// type.
+#[derive(Error, Debug)]
+#[error("{0}")]
+pub struct UnsupportedAlgorithmError(String);

@@ -38,7 +38,7 @@ use crate::{
     future::{future_to_promise, future_to_promise_with_custom_error},
     identifiers, identities, olm, requests,
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
-    responses::{self, response_from_string},
+    responses::{self, response_from_string, UnsupportedAlgorithmError},
     store,
     store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
@@ -511,13 +511,15 @@ impl OlmMachine {
                 .map_err(MegolmDecryptionError::from)?
                 .into();
 
-            responses::DecryptedRoomEvent::try_from(room_event).map_err(|e: anyhow::Error| {
-                // This happens if we somehow encounter a room event whose encryption info we
-                // don't understand (e.g., it is encrypted with Olm rather than
-                // Megolm). That seems pretty unlikely. If it happens, let's
-                // just treat it as a generic UTD.
-                MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
-            })
+            responses::DecryptedRoomEvent::try_from(room_event).map_err(
+                |e: UnsupportedAlgorithmError| {
+                    // This happens if we somehow encounter a room event whose encryption info we
+                    // don't understand (e.g., it is encrypted with Olm rather than
+                    // Megolm). That seems pretty unlikely. If it happens, let's
+                    // just treat it as a generic UTD.
+                    MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
+                },
+            )
         }))
     }
 
