@@ -99,9 +99,7 @@ impl OlmMachine {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
 
-        let store_handle = StoreHandle::open(store_name, store_passphrase)
-            .await
-            .map_err(|e| JsError::from(&*e))?;
+        let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
         Self::init_helper(user_id, device_id, store_handle).await
     }
 

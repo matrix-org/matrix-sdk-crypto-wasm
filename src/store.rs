@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use anyhow::Context;
 use matrix_sdk_crypto::{
     store::{DynCryptoStore, IntoCryptoStore, MemoryStore},
     types::BackupSecrets,
@@ -50,19 +49,19 @@ impl StoreHandle {
         store_name: Option<String>,
         store_passphrase: Option<String>,
     ) -> Result<StoreHandle, JsError> {
-        StoreHandle::open(store_name, store_passphrase).await.map_err(|e| JsError::from(&*e))
+        StoreHandle::open(store_name, store_passphrase).await
     }
 
     pub(crate) async fn open(
         store_name: Option<String>,
         store_passphrase: Option<String>,
-    ) -> Result<StoreHandle, anyhow::Error> {
+    ) -> Result<StoreHandle, JsError> {
         let store = match store_name {
             Some(store_name) => Self::open_indexeddb(&store_name, store_passphrase).await?,
 
             None => {
                 if store_passphrase.is_some() {
-                    return Err(anyhow::Error::msg(
+                    return Err(JsError::new(
                         "The `store_passphrase` has been set, but it has an effect only if \
                         `store_name` is set, which is not; please provide one",
                     ));
@@ -118,8 +117,7 @@ impl StoreHandle {
             store_key
                 .as_slice()
                 .try_into()
-                .with_context(|| "Expected a key of length 32")
-                .map_err(|e| JsError::from(&*e))?,
+                .map_err(|_| JsError::new("Expected a key of length 32"))?,
         );
         store_key.zeroize();
 
