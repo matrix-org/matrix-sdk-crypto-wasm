@@ -16,7 +16,6 @@
 
 use std::time::Duration;
 
-use anyhow::Context;
 use js_sys::{Date, Uint8Array};
 use matrix_sdk_common::ruma::{
     DeviceKeyAlgorithm, MilliSecondsSinceUnixEpoch, SecondsSinceUnixEpoch, UInt,
@@ -120,8 +119,7 @@ impl Migration {
         store_handle: &StoreHandle,
     ) -> Result<JsValue, JsError> {
         migrate_base_data_to_store(data, &(pickle_key.to_vec()), store_handle.store.as_ref())
-            .await
-            .map_err(|e| JsError::from(&*e))?;
+            .await?;
         Ok(JsValue::UNDEFINED)
     }
 }
@@ -130,13 +128,13 @@ async fn migrate_base_data_to_store(
     data: &BaseMigrationData,
     pickle_key: &[u8],
     store: &DynCryptoStore,
-) -> anyhow::Result<()> {
-    let user_id = data.user_id.clone().context("User ID not specified")?.inner;
+) -> Result<(), JsError> {
+    let user_id = data.user_id.clone().ok_or(JsError::new("User ID not specified"))?.inner;
     let account = vodozemac::olm::Account::from_libolm_pickle(&data.pickled_account, pickle_key)?;
     let account =
         matrix_sdk_crypto::olm::Account::from_pickle(matrix_sdk_crypto::olm::PickledAccount {
             user_id: user_id.clone(),
-            device_id: data.device_id.clone().context("Device ID not specified")?.inner,
+            device_id: data.device_id.clone().ok_or(JsError::new("Device ID not specified"))?.inner,
             pickle: account.pickle(),
             // Legacy crypto in the js-sdk does not keep a record of whether it has published the
             // device keys to the server (it does it every time the stack is started). For safety,
@@ -253,9 +251,7 @@ impl Migration {
             .map(|session| libolm_pickled_session_to_rust_pickled_session(session, &pickle_key))
             .collect::<Result<_>>()?;
 
-        import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
-            .await
-            .map_err(|e| JsError::from(&*e))?;
+        import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
         Ok(JsValue::UNDEFINED)
     }
 }
@@ -295,11 +291,11 @@ fn libolm_pickled_session_to_rust_pickled_session(
 async fn import_olm_sessions_to_store(
     pickled_sessions: Vec<matrix_sdk_crypto::olm::PickledSession>,
     store: &DynCryptoStore,
-) -> anyhow::Result<()> {
+) -> Result<(), JsError> {
     let account = store
         .load_account()
         .await?
-        .context("Base data must be imported before calling `migrateOlmSessions`")?;
+        .ok_or(JsError::new("Base data must be imported before calling `migrateOlmSessions`"))?;
 
     let sessions = pickled_sessions
         .into_iter()
@@ -409,9 +405,7 @@ impl Migration {
             })
             .collect::<Result<_>>()?;
 
-        import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref())
-            .await
-            .map_err(|e| JsError::from(&*e))?;
+        import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
         Ok(JsValue::UNDEFINED)
     }
 }
@@ -455,7 +449,7 @@ fn libolm_pickled_megolm_session_to_rust_pickled_session(
 async fn import_megolm_sessions_to_store(
     pickled_sessions: Vec<matrix_sdk_crypto::olm::PickledInboundGroupSession>,
     store: &DynCryptoStore,
-) -> anyhow::Result<()> {
+) -> Result<(), JsError> {
     let inbound_group_sessions = pickled_sessions
         .into_iter()
         .map(matrix_sdk_crypto::olm::InboundGroupSession::from_pickle)

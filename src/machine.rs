@@ -38,7 +38,7 @@ use crate::{
     future::{future_to_promise, future_to_promise_with_custom_error},
     identifiers, identities, olm, requests,
     requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
-    responses::{self, response_from_string},
+    responses::{self, response_from_string, UnsupportedAlgorithmError},
     store,
     store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
@@ -99,9 +99,7 @@ impl OlmMachine {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
 
-        let store_handle = StoreHandle::open(store_name, store_passphrase)
-            .await
-            .map_err(|e| JsError::from(&*e))?;
+        let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
         Self::init_helper(user_id, device_id, store_handle).await
     }
 
@@ -513,13 +511,15 @@ impl OlmMachine {
                 .map_err(MegolmDecryptionError::from)?
                 .into();
 
-            responses::DecryptedRoomEvent::try_from(room_event).map_err(|e: anyhow::Error| {
-                // This happens if we somehow encounter a room event whose encryption info we
-                // don't understand (e.g., it is encrypted with Olm rather than
-                // Megolm). That seems pretty unlikely. If it happens, let's
-                // just treat it as a generic UTD.
-                MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
-            })
+            responses::DecryptedRoomEvent::try_from(room_event).map_err(
+                |e: UnsupportedAlgorithmError| {
+                    // This happens if we somehow encounter a room event whose encryption info we
+                    // don't understand (e.g., it is encrypted with Olm rather than
+                    // Megolm). That seems pretty unlikely. If it happens, let's
+                    // just treat it as a generic UTD.
+                    MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
+                },
+            )
         }))
     }
 
@@ -979,7 +979,7 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         future_to_promise(async move {
-            stream_to_json_array(pin!(
+            Ok(stream_to_json_array(pin!(
                 me.store()
                     .export_room_keys_stream(|session| {
                         let session = session.clone();
@@ -992,7 +992,7 @@ impl OlmMachine {
                     })
                     .await?,
             ))
-            .await
+            .await?)
         })
     }
 
@@ -1696,7 +1696,7 @@ pub(crate) async fn promise_result_to_future(
     }
 }
 
-async fn stream_to_json_array<T, S>(mut stream: Pin<&mut S>) -> Result<String, anyhow::Error>
+async fn stream_to_json_array<T, S>(mut stream: Pin<&mut S>) -> Result<String, serde_json::Error>
 where
     T: Serialize,
     S: Stream<Item = T>,
@@ -1709,5 +1709,5 @@ where
     }
     seq.end()?;
 
-    Ok(String::from_utf8(stream_json)?)
+    Ok(String::from_utf8(stream_json).expect("serde_json generated invalid UTF8"))
 }

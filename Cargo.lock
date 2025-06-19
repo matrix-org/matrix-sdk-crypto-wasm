@@ -1240,7 +1240,6 @@ dependencies = [
 name = "matrix-sdk-crypto-wasm"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "console_error_panic_hook",
  "futures-util",
  "getrandom 0.3.3",
@@ -1253,6 +1252,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "thiserror 2.0.12",
  "tracing",
  "tracing-subscriber",
  "url",
