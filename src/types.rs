@@ -10,12 +10,14 @@ use matrix_sdk_common::ruma::OwnedRoomId;
 use matrix_sdk_crypto::backups::{
     SignatureState as InnerSignatureState, SignatureVerification as InnerSignatureVerification,
 };
+use tracing::warn;
 use wasm_bindgen::prelude::*;
 
 use crate::{
     encryption::EncryptionAlgorithm,
     identifiers::{DeviceKeyId, UserId},
     impl_from_to_inner,
+    responses::ToDeviceEncryptionInfo,
     vodozemac::Ed25519Signature,
 };
 
@@ -395,6 +397,10 @@ pub struct DecryptedToDeviceEvent {
     /// zeroized).
     #[wasm_bindgen(readonly, getter_with_clone, js_name = "decryptedRawEvent")]
     pub decrypted_raw_event: JsString,
+
+    /// The encryption information for the event.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "encryptionInfo")]
+    pub encryption_info: ToDeviceEncryptionInfo,
 }
 
 #[wasm_bindgen]
@@ -473,15 +479,41 @@ impl InvalidToDeviceEvent {
 /// Convert an `ProcessedToDeviceEvent` into a `JsValue`, ready to return to
 /// JavaScript.
 ///
-/// JavaScript has no complex enums like Rust. To return structs of
-/// different types, we have no choice other than hiding everything behind a
-/// `JsValue`.
+/// JavaScript has no complex enums like Rust. To return structs of different
+/// types, we have no choice other than hiding everything behind a `JsValue`.
+///
+/// We attempt to map the event onto one of the following types:
+///  * [`DecryptedToDeviceEvent`]
+///  * [`UTDToDeviceEvent`]
+///  * [`PlainTextToDeviceEvent`]
+///  * [`InvalidToDeviceEvent`].
+///
+/// We then convert that result into a [`JsValue`].
+///
+/// If the event cannot be mapped into one of those types, we instead return
+/// `None`, indicating the event should be discarded.
 pub fn processed_to_device_event_to_js_value(
     processed_to_device_event: matrix_sdk_crypto::types::ProcessedToDeviceEvent,
-) -> JsValue {
-    match processed_to_device_event {
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted(raw) => {
-            DecryptedToDeviceEvent { decrypted_raw_event: raw.json().get().into() }.into()
+) -> Option<JsValue> {
+    let result = match processed_to_device_event {
+        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, encryption_info } => {
+            match encryption_info.try_into() {
+                Ok(encryption_info) => DecryptedToDeviceEvent {
+                    decrypted_raw_event: raw.json().get().into(),
+                    encryption_info,
+                }
+                .into(),
+                Err(e) => {
+                    // This can only happen if we receive an encrypted to-device event which is
+                    // encrypted with an algorithm we don't recognise. This
+                    // shouldn't really happen, unless the wasm bindings have
+                    // gotten way out of step with the underlying SDK.
+                    //
+                    // There's not a lot we can do here: we just throw away the event.
+                    warn!("Dropping incoming to-device event with invalid encryption_info: {e:?}");
+                    return None;
+                }
+            }
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
             UTDToDeviceEvent { wire_event: utd.json().get().into() }.into()
@@ -492,5 +524,6 @@ pub fn processed_to_device_event_to_js_value(
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
             InvalidToDeviceEvent { wire_event: invalid.json().get().into() }.into()
         }
-    }
+    };
+    Some(result)
 }

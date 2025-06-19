@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use js_sys::{Array, JsString};
 pub(crate) use matrix_sdk_common::ruma::api::client::{
     backup::add_backup_keys::v3::Response as KeysBackupResponse,
@@ -166,7 +167,7 @@ impl DecryptedRoomEvent {
     /// unless the `verification_state` is as well trusted.
     #[wasm_bindgen(getter)]
     pub fn sender(&self) -> Option<identifiers::UserId> {
-        Some(self.encryption_info.as_ref()?.sender())
+        Some(self.encryption_info.as_ref()?.sender.clone())
     }
 
     /// The device ID of the device that sent us the event, note this
@@ -174,21 +175,21 @@ impl DecryptedRoomEvent {
     /// trusted.
     #[wasm_bindgen(getter, js_name = "senderDevice")]
     pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
-        self.encryption_info.as_ref()?.sender_device()
+        self.encryption_info.as_ref()?.sender_device.clone()
     }
 
     /// The Curve25519 key of the device that created the megolm
     /// decryption key originally.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
     pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        self.encryption_info.as_ref()?.sender_curve25519_key()
+        Some(self.encryption_info.as_ref()?.sender_curve25519_key_base64.as_str().into())
     }
 
     /// The signing Ed25519 key that have created the megolm key that
     /// was used to decrypt this session.
     #[wasm_bindgen(getter, js_name = "senderClaimedEd25519Key")]
     pub fn sender_claimed_ed25519_key(&self) -> Option<JsString> {
-        self.encryption_info.as_ref()?.sender_claimed_ed25519_key()
+        Some(self.encryption_info.as_ref()?.sender_claimed_ed25519_key.as_ref()?.as_str().into())
     }
 
     /// Returns an empty array
@@ -214,59 +215,54 @@ impl DecryptedRoomEvent {
     }
 }
 
-impl From<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
-    fn from(value: matrix_sdk_common::deserialized_responses::TimelineEvent) -> Self {
-        Self {
-            event: value.raw().json().get().to_owned().into(),
-            encryption_info: value.encryption_info().map(|e| e.clone().into()),
-        }
+impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::TimelineEvent,
+    ) -> Result<Self, Self::Error> {
+        let encryption_info = match value.encryption_info() {
+            None => None,
+            Some(encryption_info) => Some(encryption_info.clone().try_into()?),
+        };
+
+        Ok(Self { event: value.raw().json().get().to_owned().into(), encryption_info })
     }
 }
 
-/// Struct containing information on how an event was decrypted.
+/// Struct containing information on how a room event was decrypted.
 #[wasm_bindgen()]
 #[derive(Debug)]
 pub struct EncryptionInfo {
-    inner: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>,
+    /// The user ID of the sender of the event.
+    ///
+    /// Note this is untrusted data unless {@link shieldState} shows that the
+    /// sender is verified.
+    #[wasm_bindgen(getter_with_clone)]
+    pub sender: identifiers::UserId,
+
+    /// The device ID of the device that sent us the event.
+    ///
+    /// Note this is untrusted data unless {@link shieldState} shows that the
+    /// sender is verified.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderDevice")]
+    pub sender_device: Option<identifiers::DeviceId>,
+
+    /// The base64-encoded public Curve25519 key of the device that created the
+    /// megolm decryption key originally.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderCurve25519Key")]
+    pub sender_curve25519_key_base64: String,
+
+    /// The signing Ed25519 key that created the megolm key that
+    /// was used to decrypt this session.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderClaimedEd25519Key")]
+    pub sender_claimed_ed25519_key: Option<String>,
+
+    verification_state: matrix_sdk_common::deserialized_responses::VerificationState,
 }
 
 #[wasm_bindgen()]
 impl EncryptionInfo {
-    /// The user ID of the event sender. Note this is untrusted data
-    /// unless `verification_state` is also trusted.
-    #[wasm_bindgen(getter)]
-    pub fn sender(&self) -> identifiers::UserId {
-        identifiers::UserId::from(self.inner.sender.clone())
-    }
-
-    /// The device ID of the device that sent us the event. Note this
-    /// is untrusted data unless `verification_state` is also
-    /// trusted.
-    #[wasm_bindgen(getter, js_name = "senderDevice")]
-    pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
-        Some(self.inner.sender_device.as_ref()?.clone().into())
-    }
-
-    /// The Curve25519 key of the device that created the megolm
-    /// decryption key originally.
-    #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
-    pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        Some(match &self.inner.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, .. } => curve25519_key.clone().into(),
-        })
-    }
-
-    /// The signing Ed25519 key that created the megolm key that
-    /// was used to decrypt this session.
-    #[wasm_bindgen(getter, js_name = "senderClaimedEd25519Key")]
-    pub fn sender_claimed_ed25519_key(&self) -> Option<JsString> {
-        match &self.inner.algorithm_info {
-            AlgorithmInfo::MegolmV1AesSha2 { sender_claimed_keys, .. } => {
-                sender_claimed_keys.get(&ruma::DeviceKeyAlgorithm::Ed25519).cloned().map(Into::into)
-            }
-        }
-    }
-
     /// The verification state of the device that sent us the event.
     /// Note this is the state of the device at the time of
     /// decryption. It may change in the future if a device gets
@@ -280,7 +276,7 @@ impl EncryptionInfo {
     ///   (both get a red shield in strict mode).
     #[wasm_bindgen(js_name = "shieldState")]
     pub fn shield_state(&self, strict: bool) -> encryption::ShieldState {
-        let verification_state = &self.inner.verification_state;
+        let verification_state = &self.verification_state;
 
         if strict {
             verification_state.to_shield_state_strict()
@@ -291,8 +287,91 @@ impl EncryptionInfo {
     }
 }
 
-impl From<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
-    fn from(value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>) -> Self {
-        Self { inner: value }
+impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for EncryptionInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>,
+    ) -> Result<Self, Self::Error> {
+        match &value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { curve25519_key, sender_claimed_keys, .. } => {
+                Ok(Self {
+                    sender: value.sender.clone().into(),
+                    sender_device: value.sender_device.clone().map(Into::into),
+                    sender_curve25519_key_base64: curve25519_key.clone(),
+                    sender_claimed_ed25519_key: sender_claimed_keys
+                        .get(&ruma::DeviceKeyAlgorithm::Ed25519)
+                        .cloned()
+                        .into(),
+                    verification_state: value.verification_state.clone(),
+                })
+            }
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { .. } => Err(anyhow!(
+                "AlgorithmInfo::OlmV1Curve25519AesSha2 is not applicable for room event EncryptionInfo",
+            )),
+        }
+    }
+}
+
+/// Struct containing information on how a to-device message was decrypted.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct ToDeviceEncryptionInfo {
+    /// The base64-encoded public Curve25519 key of the device that encrypted
+    /// the message.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderCurve25519Key")]
+    pub sender_curve25519_key_base64: String,
+
+    /// The user ID of the sender of the event.
+    ///
+    /// Note this is untrusted data unless {@link isSenderVerified} is true.
+    #[wasm_bindgen(getter_with_clone)]
+    pub sender: identifiers::UserId,
+
+    /// The device ID of the device that sent us the to-device message.
+    ///
+    /// Could be `undefined` in the case where the to-device message sender
+    /// checks are delayed. There is no delay for to-device messages other
+    /// than `m.room_key`, so this will always be truthy for other
+    /// message types (the decryption would fail if the sender device keys
+    /// cannot be found).
+    ///
+    /// Note this is untrusted data unless {@link isSenderVerified} is true.
+    #[wasm_bindgen(getter_with_clone, js_name = "senderDevice")]
+    pub sender_device: Option<identifiers::DeviceId>,
+
+    verification_state: matrix_sdk_common::deserialized_responses::VerificationState,
+}
+
+impl TryFrom<matrix_sdk_common::deserialized_responses::EncryptionInfo> for ToDeviceEncryptionInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(
+        value: matrix_sdk_common::deserialized_responses::EncryptionInfo,
+    ) -> Result<Self, Self::Error> {
+        match &value.algorithm_info {
+            AlgorithmInfo::MegolmV1AesSha2 { .. } => Err(anyhow!(
+                "AlgorithmInfo::MegolmV1AesSha2 is not applicable for ToDeviceEncryptionInfo",
+            )),
+            AlgorithmInfo::OlmV1Curve25519AesSha2 { curve25519_public_key_base64 } => Ok(Self {
+                sender_curve25519_key_base64: curve25519_public_key_base64.clone(),
+                sender: value.sender.clone().into(),
+                sender_device: value.sender_device.clone().map(Into::into),
+                verification_state: value.verification_state.clone(),
+            }),
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl ToDeviceEncryptionInfo {
+    /// Returns whether the sender device is in a verified state.
+    /// This reflects the state at the time of decryption.
+    #[wasm_bindgen(js_name = "isSenderVerified")]
+    pub fn is_sender_verified(&self) -> bool {
+        matches!(
+            &self.verification_state,
+            matrix_sdk_common::deserialized_responses::VerificationState::Verified
+        )
     }
 }

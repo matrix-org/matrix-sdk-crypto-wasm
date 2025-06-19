@@ -1851,6 +1851,10 @@ describe(OlmMachine.name, () => {
             expect(toDeviceEvent.sender).toEqual("@alice:example.org");
             expect(toDeviceEvent.type).toEqual("custom.type");
             expect(toDeviceEvent.content.foo).toEqual("bar");
+
+            const encryptionInfo = (processed as DecryptedToDeviceEvent).encryptionInfo;
+            expect(encryptionInfo.senderCurve25519Key).toEqual(alice.identityKeys.curve25519.toBase64());
+            expect(encryptionInfo.isSenderVerified()).toBe(false);
         });
     });
 });
