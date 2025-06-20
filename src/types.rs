@@ -388,15 +388,15 @@ pub enum ProcessedToDeviceEventType {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct DecryptedToDeviceEvent {
-    /// A JSON-encoded object containing the decrypted event, as if it had been
-    /// sent in the clear.
+    /// The decrypted event, as if it had been sent in the clear, encoded as
+    /// JSON.
     ///
     /// Typically contains properties `type`, `sender` and `content`.
     ///
     /// (For room keys or secrets, some part of the content might have been
     /// zeroized).
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "decryptedRawEvent")]
-    pub decrypted_raw_event: JsString,
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
+    pub raw_event: JsString,
 
     /// The encryption information for the event.
     #[wasm_bindgen(readonly, getter_with_clone, js_name = "encryptionInfo")]
@@ -417,8 +417,8 @@ impl DecryptedToDeviceEvent {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct PlainTextToDeviceEvent {
-    /// A JSON-encoded object containing the Matrix to-device message with
-    /// `type`, `sender` and `content` fields.
+    /// The to-device message, containing `type`, `sender` and `content` fields,
+    /// encoded as JSON.
     #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
     pub raw_event: JsString,
 }
@@ -437,10 +437,10 @@ impl PlainTextToDeviceEvent {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct UTDToDeviceEvent {
-    /// A JSON-encoded object containing the original message of type
-    /// `m.room.encrypted` that failed to be decrypted.
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "wireEvent")]
-    pub wire_event: JsString,
+    /// The original message (of type `m.room.encrypted`) that failed to be
+    /// decrypted, encoded as JSON.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
+    pub raw_event: JsString,
     // TODO: Add some OlmError in the future
 }
 
@@ -459,10 +459,9 @@ impl UTDToDeviceEvent {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct InvalidToDeviceEvent {
-    /// A JSON-encoded object containing the original message as received from
-    /// sync.
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "wireEvent")]
-    pub wire_event: JsString,
+    /// The original message as received from sync, encoded as JSON.
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
+    pub raw_event: JsString,
     // TODO: Add some error information here?
 }
 
@@ -498,11 +497,10 @@ pub fn processed_to_device_event_to_js_value(
     let result = match processed_to_device_event {
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, encryption_info } => {
             match encryption_info.try_into() {
-                Ok(encryption_info) => DecryptedToDeviceEvent {
-                    decrypted_raw_event: raw.json().get().into(),
-                    encryption_info,
+                Ok(encryption_info) => {
+                    DecryptedToDeviceEvent { raw_event: raw.json().get().into(), encryption_info }
+                        .into()
                 }
-                .into(),
                 Err(e) => {
                     // This can only happen if we receive an encrypted to-device event which is
                     // encrypted with an algorithm we don't recognise. This
@@ -516,13 +514,13 @@ pub fn processed_to_device_event_to_js_value(
             }
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
-            UTDToDeviceEvent { wire_event: utd.json().get().into() }.into()
+            UTDToDeviceEvent { raw_event: utd.json().get().into() }.into()
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::PlainText(plain) => {
             PlainTextToDeviceEvent { raw_event: plain.json().get().into() }.into()
         }
         matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
-            InvalidToDeviceEvent { wire_event: invalid.json().get().into() }.into()
+            InvalidToDeviceEvent { raw_event: invalid.json().get().into() }.into()
         }
     };
     Some(result)

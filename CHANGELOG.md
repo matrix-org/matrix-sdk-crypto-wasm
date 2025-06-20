@@ -18,7 +18,7 @@
     `ProcessedToDeviceEvent` instead of a JSON-encoded list of JSON-encoded events.
     This allows making the difference between an event that was sent in clear and
     the same event successfully decrypted.
-    ([#236](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/236))
+    ([#236](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/236)), ([#246](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/246))
 
 -   A number of the properties and methods on `DecryptedRoomEvent` no longer return `undefined`
     ([#243](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/243))
