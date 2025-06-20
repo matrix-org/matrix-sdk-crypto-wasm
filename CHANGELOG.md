@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v15.0.0
+
 -   Update matrix-rusk-sdk to `0.12.0`, which includes:
 
     -   Send stable identifier `sender_device_keys` for MSC4147 (Including device
@@ -27,6 +29,9 @@
 
 -   A number of the properties and methods on `DecryptedRoomEvent` no longer return `undefined`
     ([#243](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/243))
+
+-   Add more JS/TS Framework support by adding the ability to choose the URL of wasm files.
+    ([#227](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/227))
 
 # matrix-sdk-crypto-wasm v14.2.1
 
