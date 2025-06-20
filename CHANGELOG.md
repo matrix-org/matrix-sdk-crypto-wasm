@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v15.0.0
+
 -   Update matrix-rusk-sdk to `0.12.0`, which includes:
 
     -   Send stable identifier `sender_device_keys` for MSC4147 (Including device
