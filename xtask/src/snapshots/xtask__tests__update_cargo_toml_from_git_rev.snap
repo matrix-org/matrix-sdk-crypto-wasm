@@ -1,0 +1,21 @@
+---
+source: src/main.rs
+expression: doc
+---
+[package]
+name = "matrix-sdk-crypto-wasm"
+
+[dependencies]
+anyhow = "1.0.68"
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", default-features = false, features = ["e2e-encryption"] }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", optional = true }
+wasm-bindgen-test = "0.3.37"
+
+[build-dependencies]
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
+
+[dependencies.matrix-sdk-crypto]
+git = "https://github.com/matrix-org/matrix-rust-sdk"
+default-features = false
+features = ["js", "automatic-room-key-forwarding"]
