@@ -6,7 +6,7 @@
         keys with Olm-encrypted events).
         ([#4964](https://github.com/matrix-org/matrix-rust-sdk/pull/4964))
 
-    -   Check the `sender_device_keys` field on *all* incoming Olm-encrypted to-device messages
+    -   Check the `sender_device_keys` field on _all_ incoming Olm-encrypted to-device messages
         and ignore any to-device messages which include the field but whose data is invalid
         (as per [MSC4147](https://github.com/matrix-org/matrix-spec-proposals/pull/4147)).
         ([#4922](https://github.com/matrix-org/matrix-rust-sdk/pull/4922))
