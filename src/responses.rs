@@ -215,18 +215,14 @@ impl DecryptedRoomEvent {
     }
 }
 
-impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
+impl TryFrom<matrix_sdk_common::deserialized_responses::DecryptedRoomEvent> for DecryptedRoomEvent {
     type Error = UnsupportedAlgorithmError;
 
     fn try_from(
-        value: matrix_sdk_common::deserialized_responses::TimelineEvent,
+        value: matrix_sdk_common::deserialized_responses::DecryptedRoomEvent,
     ) -> Result<Self, Self::Error> {
-        let encryption_info = match value.encryption_info() {
-            None => None,
-            Some(encryption_info) => Some(encryption_info.clone().try_into()?),
-        };
-
-        Ok(Self { event: value.raw().json().get().to_owned().into(), encryption_info })
+        let encryption_info = Some(value.encryption_info.clone().try_into()?);
+        Ok(Self { event: value.event.json().get().into(), encryption_info })
     }
 }
 
