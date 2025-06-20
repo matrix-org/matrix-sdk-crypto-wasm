@@ -38,7 +38,10 @@ fn unstable_rust_sdk() -> Result<()> {
     //
     // So, let's edit the `Cargo.toml`.
 
-    update_cargo_toml()?;
+    let cargo_toml = "Cargo.toml";
+    if let Some(modified_doc) = update_cargo_toml(&fs::read_to_string(cargo_toml)?)? {
+        fs::write(cargo_toml, modified_doc)?;
+    }
     cargo_update()?;
     Ok(())
 }
@@ -46,10 +49,10 @@ fn unstable_rust_sdk() -> Result<()> {
 /// Update the `matrix-rust-sdk` entries in `Cargo.toml`, so that they use a
 /// `git` uri, with no `version` or `rev`, meaning that we will pull the latest
 /// version from git.
-fn update_cargo_toml() -> Result<()> {
-    let cargo_toml = "Cargo.toml";
-
-    let mut doc: DocumentMut = fs::read_to_string(cargo_toml)?.parse()?;
+///
+/// Returns `Some(modified_doc)` if the toml needs an update, otherwise `None`.
+fn update_cargo_toml(doc: &str) -> Result<Option<String>> {
+    let mut doc: DocumentMut = doc.parse()?;
 
     let dependencies = doc["dependencies"].as_table_mut().expect("'dependencies' not a table");
 
@@ -69,13 +72,69 @@ fn update_cargo_toml() -> Result<()> {
     }
 
     if modified {
-        fs::write(cargo_toml, doc.to_string())?;
+        Ok(Some(doc.to_string()))
+    } else {
+        Ok(None)
     }
-    Ok(())
 }
 
 fn cargo_update() -> Result<()> {
     let sh = Shell::new()?;
     cmd!(sh, "cargo update").run()?;
     Ok(())
+}
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    pub fn test_update_cargo_toml_from_git_rev() {
+        let input = r#"
+[package]
+name = "matrix-sdk-crypto-wasm"
+
+[dependencies]
+anyhow = "1.0.68"
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0f73ffde6", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0f73ffde6", default-features = false, features = ["e2e-encryption"] }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0f73ffde6", optional = true }
+wasm-bindgen-test = "0.3.37"
+
+[build-dependencies]
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
+
+[dependencies.matrix-sdk-crypto]
+git = "https://github.com/matrix-org/matrix-rust-sdk"
+rev = "0f73ffde6"
+default-features = false
+features = ["js", "automatic-room-key-forwarding"]
+"#;
+        let doc = super::update_cargo_toml(input).unwrap().unwrap();
+        insta::assert_snapshot!(doc)
+    }
+
+    #[test]
+    pub fn test_update_cargo_toml_from_release() {
+        let input = r#"
+[package]
+name = "matrix-sdk-crypto-wasm"
+
+[dependencies]
+anyhow = "1.0.68"
+matrix-sdk-common = { version = "0.11.1", features = ["js"] }
+matrix-sdk-indexeddb = { version = "0.11.1", default-features = false, features = ["e2e-encryption"] }
+matrix-sdk-qrcode = { version = "0.11.1", optional = true }
+wasm-bindgen-test = "0.3.37"
+
+[build-dependencies]
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
+
+[dependencies.matrix-sdk-crypto]
+version = "0.11.1"
+default-features = false
+features = ["js", "automatic-room-key-forwarding"]
+"#;
+        let doc = super::update_cargo_toml(input).unwrap().unwrap();
+        insta::assert_snapshot!(doc)
+    }
 }
