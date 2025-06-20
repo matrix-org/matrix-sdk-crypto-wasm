@@ -104,8 +104,28 @@ rev = "0f73ffde6"
 default-features = false
 features = ["js", "automatic-room-key-forwarding"]
 "#;
-        let doc = super::update_cargo_toml(input).unwrap().unwrap();
-        insta::assert_snapshot!(doc)
+
+        let expected_output = r#"
+[package]
+name = "matrix-sdk-crypto-wasm"
+
+[dependencies]
+anyhow = "1.0.68"
+matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk", features = ["js"] }
+matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk", default-features = false, features = ["e2e-encryption"] }
+matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk", optional = true }
+wasm-bindgen-test = "0.3.37"
+
+[build-dependencies]
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
+
+[dependencies.matrix-sdk-crypto]
+git = "https://github.com/matrix-org/matrix-rust-sdk"
+default-features = false
+features = ["js", "automatic-room-key-forwarding"]
+"#;
+
+        assert_eq!(super::update_cargo_toml(input).unwrap().unwrap(), expected_output)
     }
 
     #[test]
@@ -129,7 +149,27 @@ version = "0.11.1"
 default-features = false
 features = ["js", "automatic-room-key-forwarding"]
 "#;
-        let doc = super::update_cargo_toml(input).unwrap().unwrap();
-        insta::assert_snapshot!(doc)
+
+        let expected_output = r#"
+[package]
+name = "matrix-sdk-crypto-wasm"
+
+[dependencies]
+anyhow = "1.0.68"
+matrix-sdk-common = { features = ["js"] , git = "https://github.com/matrix-org/matrix-rust-sdk" }
+matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"] , git = "https://github.com/matrix-org/matrix-rust-sdk" }
+matrix-sdk-qrcode = { optional = true , git = "https://github.com/matrix-org/matrix-rust-sdk" }
+wasm-bindgen-test = "0.3.37"
+
+[build-dependencies]
+vergen-gitcl = { version = "1.0.0", features = ["build"] }
+
+[dependencies.matrix-sdk-crypto]
+default-features = false
+features = ["js", "automatic-room-key-forwarding"]
+git = "https://github.com/matrix-org/matrix-rust-sdk"
+"#;
+
+        assert_eq!(super::update_cargo_toml(input).unwrap().unwrap(), expected_output)
     }
 }

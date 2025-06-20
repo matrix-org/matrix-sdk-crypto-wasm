@@ -8,6 +8,3 @@ anyhow = "1.0.98"
 clap = { version = "4.5.40", features = ["derive"] }
 toml_edit = "0.22.26"
 xshell = "0.2.2"
-
-[dev-dependencies]
-insta = "1.43.1"
