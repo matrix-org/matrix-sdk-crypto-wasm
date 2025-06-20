@@ -28,6 +28,9 @@
 -   A number of the properties and methods on `DecryptedRoomEvent` no longer return `undefined`
     ([#243](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/243))
 
+-   Add more JS/TS Framework support by adding the ability to choose the URL of wasm files.
+    ([#227](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/227))
+
 # matrix-sdk-crypto-wasm v14.2.1
 
 Update matrix-sdk-crypto to `0.11.1`, which includes:
