@@ -71,11 +71,7 @@ fn update_cargo_toml(doc: &str) -> Result<Option<String>> {
         }
     }
 
-    if modified {
-        Ok(Some(doc.to_string()))
-    } else {
-        Ok(None)
-    }
+    if modified { Ok(Some(doc.to_string())) } else { Ok(None) }
 }
 
 fn cargo_update() -> Result<()> {
@@ -83,7 +79,6 @@ fn cargo_update() -> Result<()> {
     cmd!(sh, "cargo update").run()?;
     Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {
