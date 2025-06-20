@@ -158,7 +158,7 @@ pub struct DecryptedRoomEvent {
     #[wasm_bindgen(readonly)]
     pub event: JsString,
 
-    encryption_info: Option<EncryptionInfo>,
+    encryption_info: EncryptionInfo,
 }
 
 #[wasm_bindgen]
@@ -166,8 +166,8 @@ impl DecryptedRoomEvent {
     /// The user ID of the event sender, note this is untrusted data
     /// unless the `verification_state` is as well trusted.
     #[wasm_bindgen(getter)]
-    pub fn sender(&self) -> Option<identifiers::UserId> {
-        Some(self.encryption_info.as_ref()?.sender.clone())
+    pub fn sender(&self) -> identifiers::UserId {
+        self.encryption_info.sender.clone()
     }
 
     /// The device ID of the device that sent us the event, note this
@@ -175,21 +175,21 @@ impl DecryptedRoomEvent {
     /// trusted.
     #[wasm_bindgen(getter, js_name = "senderDevice")]
     pub fn sender_device(&self) -> Option<identifiers::DeviceId> {
-        self.encryption_info.as_ref()?.sender_device.clone()
+        self.encryption_info.sender_device.clone()
     }
 
     /// The Curve25519 key of the device that created the megolm
     /// decryption key originally.
     #[wasm_bindgen(getter, js_name = "senderCurve25519Key")]
-    pub fn sender_curve25519_key(&self) -> Option<JsString> {
-        Some(self.encryption_info.as_ref()?.sender_curve25519_key_base64.as_str().into())
+    pub fn sender_curve25519_key(&self) -> String {
+        self.encryption_info.sender_curve25519_key_base64.as_str().to_owned()
     }
 
     /// The signing Ed25519 key that have created the megolm key that
     /// was used to decrypt this session.
     #[wasm_bindgen(getter, js_name = "senderClaimedEd25519Key")]
     pub fn sender_claimed_ed25519_key(&self) -> Option<JsString> {
-        Some(self.encryption_info.as_ref()?.sender_claimed_ed25519_key.as_ref()?.as_str().into())
+        Some(self.encryption_info.sender_claimed_ed25519_key.as_ref()?.as_str().into())
     }
 
     /// Returns an empty array
@@ -210,23 +210,19 @@ impl DecryptedRoomEvent {
     /// decryption. It may change in the future if a device gets
     /// verified or deleted.
     #[wasm_bindgen(js_name = "shieldState")]
-    pub fn shield_state(&self, strict: bool) -> Option<encryption::ShieldState> {
-        Some(self.encryption_info.as_ref()?.shield_state(strict))
+    pub fn shield_state(&self, strict: bool) -> encryption::ShieldState {
+        self.encryption_info.shield_state(strict)
     }
 }
 
-impl TryFrom<matrix_sdk_common::deserialized_responses::TimelineEvent> for DecryptedRoomEvent {
+impl TryFrom<matrix_sdk_common::deserialized_responses::DecryptedRoomEvent> for DecryptedRoomEvent {
     type Error = UnsupportedAlgorithmError;
 
     fn try_from(
-        value: matrix_sdk_common::deserialized_responses::TimelineEvent,
+        value: matrix_sdk_common::deserialized_responses::DecryptedRoomEvent,
     ) -> Result<Self, Self::Error> {
-        let encryption_info = match value.encryption_info() {
-            None => None,
-            Some(encryption_info) => Some(encryption_info.clone().try_into()?),
-        };
-
-        Ok(Self { event: value.raw().json().get().to_owned().into(), encryption_info })
+        let encryption_info = value.encryption_info.clone().try_into()?;
+        Ok(Self { event: value.event.json().get().into(), encryption_info })
     }
 }
 

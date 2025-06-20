@@ -10,12 +10,9 @@ use std::{
 
 use futures_util::{pin_mut, Stream, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
-use matrix_sdk_common::{
-    deserialized_responses::TimelineEvent,
-    ruma::{
-        self, events::secret::request::SecretName, serde::Raw, OneTimeKeyAlgorithm, OwnedDeviceId,
-        OwnedTransactionId, OwnedUserId, UInt,
-    },
+use matrix_sdk_common::ruma::{
+    self, events::secret::request::SecretName, serde::Raw, OneTimeKeyAlgorithm, OwnedDeviceId,
+    OwnedTransactionId, OwnedUserId, UInt,
 };
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
@@ -505,13 +502,12 @@ impl OlmMachine {
             responses::DecryptedRoomEvent,
             MegolmDecryptionError,
         >(async move {
-            let room_event: TimelineEvent = me
+            let decrypted = me
                 .decrypt_room_event(&event, room_id.as_ref(), &decryption_settings)
                 .await
-                .map_err(MegolmDecryptionError::from)?
-                .into();
+                .map_err(MegolmDecryptionError::from)?;
 
-            responses::DecryptedRoomEvent::try_from(room_event).map_err(
+            responses::DecryptedRoomEvent::try_from(decrypted).map_err(
                 |e: UnsupportedAlgorithmError| {
                     // This happens if we somehow encounter a room event whose encryption info we
                     // don't understand (e.g., it is encrypted with Olm rather than
