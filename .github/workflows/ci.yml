@@ -36,6 +36,7 @@ jobs:
       - name: Check formatting
         run: |
           cargo fmt -- --check
+          (cd xtask && cargo fmt -- --check)
 
       - name: Install Node.js
         uses: actions/setup-node@v3

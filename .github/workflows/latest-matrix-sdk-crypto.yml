@@ -53,16 +53,7 @@ jobs:
 
       - name: Update to the latest matrix-sdk-crypto version
         run: |
-           tee >> .cargo/config.toml << EOF
-           [patch.crates-io]
-           matrix-sdk-common = { git = "https://github.com/matrix-org/matrix-rust-sdk" }
-           matrix-sdk-crypto = { git = "https://github.com/matrix-org/matrix-rust-sdk" }
-           matrix-sdk-indexeddb = { git = "https://github.com/matrix-org/matrix-rust-sdk" }
-           matrix-sdk-qrcode = { git = "https://github.com/matrix-org/matrix-rust-sdk" }
-           matrix-sdk-store-encryption = { git = "https://github.com/matrix-org/matrix-rust-sdk" }
-           EOF
-
-           cargo update matrix-sdk-crypto
+           cargo xtask unstable-rust-sdk
 
       - name: Install Node.js
         uses: actions/setup-node@v3
