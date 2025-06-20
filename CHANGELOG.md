@@ -1,10 +1,15 @@
 # UNRELEASED
 
--   Update matrix-rusk-sdk to `0f73ffde6`, which includes:
+-   Update matrix-rusk-sdk to `0.12.0`, which includes:
 
     -   Send stable identifier `sender_device_keys` for MSC4147 (Including device
         keys with Olm-encrypted events).
         ([#4964](https://github.com/matrix-org/matrix-rust-sdk/pull/4964))
+
+    -   Check the `sender_device_keys` field on _all_ incoming Olm-encrypted to-device messages
+        and ignore any to-device messages which include the field but whose data is invalid
+        (as per [MSC4147](https://github.com/matrix-org/matrix-spec-proposals/pull/4147)).
+        ([#4922](https://github.com/matrix-org/matrix-rust-sdk/pull/4922))
 
     -   Fix bug which caused room keys to be unnecessarily rotated on every send in the
         presence of blacklisted/withheld devices in the room.
