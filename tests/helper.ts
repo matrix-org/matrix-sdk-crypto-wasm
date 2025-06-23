@@ -1,6 +1,28 @@
-const { DeviceLists, RequestType, KeysUploadRequest, KeysQueryRequest } = require("@matrix-org/matrix-sdk-crypto-wasm");
+/*
+Copyright 2022-2025 The Matrix.org Foundation C.I.C.
 
-function* zip(...arrays) {
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import {
+    DeviceLists,
+    RequestType,
+    KeysUploadRequest,
+    KeysQueryRequest,
+    OlmMachine,
+} from "@matrix-org/matrix-sdk-crypto-wasm";
+
+export function* zip(...arrays: Array<Array<any>>): Generator<any> {
     const len = Math.min(...arrays.map((array) => array.length));
 
     for (let nth = 0; nth < len; ++nth) {
@@ -10,7 +32,7 @@ function* zip(...arrays) {
 
 // Add a machine to another machine, i.e. be sure a machine knows
 // another exists.
-async function addMachineToMachine(machineToAdd, machine) {
+export async function addMachineToMachine(machineToAdd: OlmMachine, machine: OlmMachine): Promise<void> {
     const toDeviceEvents = JSON.stringify([]);
     const changedDevices = new DeviceLists();
     const oneTimeKeyCounts = new Map();
@@ -29,9 +51,12 @@ async function addMachineToMachine(machineToAdd, machine) {
     expect(outgoingRequests).toHaveLength(2);
 
     let keysUploadRequest;
+
     // Read the `KeysUploadRequest`.
     {
         expect(outgoingRequests[0]).toBeInstanceOf(KeysUploadRequest);
+        keysUploadRequest = outgoingRequests[0] as KeysUploadRequest;
+
         expect(outgoingRequests[0].id).toBeDefined();
         expect(outgoingRequests[0].type).toStrictEqual(RequestType.KeysUpload);
         expect(outgoingRequests[0].body).toBeDefined();
@@ -48,27 +73,26 @@ async function addMachineToMachine(machineToAdd, machine) {
             },
         });
         const marked = await machineToAdd.markRequestAsSent(
-            outgoingRequests[0].id,
+            keysUploadRequest.id,
             outgoingRequests[0].type,
             hypotheticalResponse,
         );
         expect(marked).toStrictEqual(true);
-
-        keysUploadRequest = outgoingRequests[0];
     }
 
     {
         expect(outgoingRequests[1]).toBeInstanceOf(KeysQueryRequest);
+        let keysQueryRequest = outgoingRequests[1] as KeysQueryRequest;
 
         let bootstrapCrossSigningResult = await machineToAdd.bootstrapCrossSigning(true);
         let signingKeysUploadRequest = bootstrapCrossSigningResult.uploadSigningKeysRequest;
 
         // Let's forge a `KeysQuery`'s response.
         let keyQueryResponse = {
-            device_keys: {},
-            master_keys: {},
-            self_signing_keys: {},
-            user_signing_keys: {},
+            device_keys: {} as Record<string, any>,
+            master_keys: {} as Record<string, any>,
+            self_signing_keys: {} as Record<string, any>,
+            user_signing_keys: {} as Record<string, any>,
         };
         const userId = machineToAdd.userId.toString();
         const deviceId = machineToAdd.deviceId.toString();
@@ -81,15 +105,10 @@ async function addMachineToMachine(machineToAdd, machine) {
         keyQueryResponse.user_signing_keys[userId] = keys.user_signing_key;
 
         const marked = await machine.markRequestAsSent(
-            outgoingRequests[1].id,
-            outgoingRequests[1].type,
+            keysQueryRequest.id,
+            keysQueryRequest.type,
             JSON.stringify(keyQueryResponse),
         );
         expect(marked).toStrictEqual(true);
     }
 }
-
-module.exports = {
-    zip,
-    addMachineToMachine,
-};
