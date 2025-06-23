@@ -2,7 +2,9 @@
     "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
         "lib": ["DOM"],
-        "allowJs": true
+        "allowJs": true,
+        // Allow .ts file extensions in `import`, otherwise Jest can't find `helper.ts`.
+        "allowImportingTsExtensions": true
     },
     "typedocOptions": {
         "entryPoints": ["index.d.ts"],
