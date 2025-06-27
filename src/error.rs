@@ -3,6 +3,7 @@
 use js_sys::JsString;
 use matrix_sdk_common::deserialized_responses::{VerificationLevel, WithheldCode};
 use matrix_sdk_crypto::{vodozemac, MegolmError};
+use tracing::warn;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 /// Decryption error codes
@@ -73,15 +74,25 @@ impl From<MegolmError> for MegolmDecryptionError {
             MegolmError::MismatchedIdentityKeys { .. } => {
                 decryption_error(DecryptionErrorCode::UnknownMessageIndex, None)
             }
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::VerificationViolation) => {
-                decryption_error(DecryptionErrorCode::SenderIdentityVerificationViolation, None)
-            }
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::UnsignedDevice) => {
-                decryption_error(DecryptionErrorCode::UnsignedSenderDevice, None)
-            }
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::None(..)) => {
-                decryption_error(DecryptionErrorCode::UnknownSenderDevice, None)
-            }
+            MegolmError::SenderIdentityNotTrusted(vl) => match vl {
+                VerificationLevel::VerificationViolation => {
+                    decryption_error(DecryptionErrorCode::SenderIdentityVerificationViolation, None)
+                }
+                VerificationLevel::UnsignedDevice => {
+                    decryption_error(DecryptionErrorCode::UnsignedSenderDevice, None)
+                }
+                VerificationLevel::None(..) => {
+                    decryption_error(DecryptionErrorCode::UnknownSenderDevice, None)
+                }
+                VerificationLevel::UnverifiedIdentity => {
+                    // We do not expect to find this in a MegolmError, since even at the strictest
+                    // `TrustRequirement` level, we are happy to accept events from users whose
+                    // identities we have not verified. We spit out a warning and then treat
+                    // it as a generic UTD.
+                    warn!("Unexpected verification level in megolm decryption error {}", value);
+                    decryption_error(DecryptionErrorCode::UnableToDecrypt, None)
+                }
+            },
             _ => decryption_error(DecryptionErrorCode::UnableToDecrypt, None),
         }
     }
