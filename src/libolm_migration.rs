@@ -22,7 +22,10 @@ use matrix_sdk_common::ruma::{
 };
 use matrix_sdk_crypto::{
     olm::PrivateCrossSigningIdentity,
-    store::{BackupDecryptionKey, Changes, DynCryptoStore, PendingChanges},
+    store::{
+        types::{BackupDecryptionKey, Changes, PendingChanges},
+        DynCryptoStore,
+    },
     types::{EventEncryptionAlgorithm, SigningKeys},
     vodozemac,
     vodozemac::{Curve25519PublicKey, Ed25519PublicKey},

@@ -10,10 +10,10 @@ use crate::impl_from_to_inner;
 #[derive(Debug, Clone)]
 #[wasm_bindgen]
 pub struct BackupDecryptionKey {
-    pub(crate) inner: store::BackupDecryptionKey,
+    pub(crate) inner: store::types::BackupDecryptionKey,
 }
 
-impl_from_to_inner!(store::BackupDecryptionKey => BackupDecryptionKey);
+impl_from_to_inner!(store::types::BackupDecryptionKey => BackupDecryptionKey);
 
 /// The public part of the backup key.
 #[derive(Debug, Clone)]
@@ -43,7 +43,7 @@ impl BackupDecryptionKey {
     #[wasm_bindgen(js_name = "createRandomKey")]
     pub fn create_random_key() -> BackupDecryptionKey {
         BackupDecryptionKey {
-            inner: store::BackupDecryptionKey::new()
+            inner: store::types::BackupDecryptionKey::new()
                 .expect("Can't gather enough randomness to create a recovery key"),
         }
     }
@@ -51,7 +51,7 @@ impl BackupDecryptionKey {
     /// Try to create a [`BackupDecryptionKey`] from a base 64 encoded string.
     #[wasm_bindgen(js_name = "fromBase64")]
     pub fn from_base64(key: String) -> Result<BackupDecryptionKey, JsError> {
-        Ok(Self { inner: store::BackupDecryptionKey::from_base64(&key)? })
+        Ok(Self { inner: store::types::BackupDecryptionKey::from_base64(&key)? })
     }
 
     /// Convert the backup decryption key to a base 64 encoded string.
@@ -92,8 +92,8 @@ pub struct RoomKeyCounts {
     pub backed_up: f64,
 }
 
-impl From<matrix_sdk_crypto::store::RoomKeyCounts> for RoomKeyCounts {
-    fn from(inner: matrix_sdk_crypto::store::RoomKeyCounts) -> Self {
+impl From<store::types::RoomKeyCounts> for RoomKeyCounts {
+    fn from(inner: store::types::RoomKeyCounts) -> Self {
         RoomKeyCounts {
             // There is no `TryFrom<usize> for f64`, so first downcast the usizes to u32, then back
             // up to f64

@@ -142,10 +142,10 @@ impl IntoCryptoStore for StoreHandle {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct CrossSigningKeyExport {
-    pub(crate) inner: matrix_sdk_crypto::store::CrossSigningKeyExport,
+    pub(crate) inner: matrix_sdk_crypto::store::types::CrossSigningKeyExport,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::store::CrossSigningKeyExport => CrossSigningKeyExport);
+impl_from_to_inner!(matrix_sdk_crypto::store::types::CrossSigningKeyExport => CrossSigningKeyExport);
 
 #[wasm_bindgen]
 impl CrossSigningKeyExport {
@@ -172,10 +172,10 @@ impl CrossSigningKeyExport {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct RoomKeyInfo {
-    pub(crate) inner: matrix_sdk_crypto::store::RoomKeyInfo,
+    pub(crate) inner: matrix_sdk_crypto::store::types::RoomKeyInfo,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::store::RoomKeyInfo => RoomKeyInfo);
+impl_from_to_inner!(matrix_sdk_crypto::store::types::RoomKeyInfo => RoomKeyInfo);
 
 #[wasm_bindgen]
 impl RoomKeyInfo {
@@ -209,10 +209,10 @@ impl RoomKeyInfo {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct RoomKeyWithheldInfo {
-    pub(crate) inner: matrix_sdk_crypto::store::RoomKeyWithheldInfo,
+    pub(crate) inner: matrix_sdk_crypto::store::types::RoomKeyWithheldInfo,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::store::RoomKeyWithheldInfo => RoomKeyWithheldInfo);
+impl_from_to_inner!(matrix_sdk_crypto::store::types::RoomKeyWithheldInfo => RoomKeyWithheldInfo);
 
 #[wasm_bindgen]
 impl RoomKeyWithheldInfo {

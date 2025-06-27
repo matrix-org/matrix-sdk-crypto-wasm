@@ -17,7 +17,7 @@ use matrix_sdk_common::ruma::{
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
     olm::{BackedUpRoomKey, ExportedRoomKey},
-    store::{DeviceChanges, IdentityChanges},
+    store::types::{DeviceChanges, IdentityChanges},
     types::RoomKeyBackupInfo,
     CryptoStoreError, EncryptionSyncChanges, GossippedSecret,
 };
@@ -632,7 +632,7 @@ impl OlmMachine {
         user_signing_key: Option<String>,
     ) -> Promise {
         let me = self.inner.clone();
-        let export = matrix_sdk_crypto::store::CrossSigningKeyExport {
+        let export = matrix_sdk_crypto::store::types::CrossSigningKeyExport {
             master_key,
             self_signing_key,
             user_signing_key,
