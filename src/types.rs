@@ -492,10 +492,13 @@ impl InvalidToDeviceEvent {
 /// If the event cannot be mapped into one of those types, we instead return
 /// `None`, indicating the event should be discarded.
 pub fn processed_to_device_event_to_js_value(
-    processed_to_device_event: matrix_sdk_crypto::types::ProcessedToDeviceEvent,
+    processed_to_device_event: matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent,
 ) -> Option<JsValue> {
     let result = match processed_to_device_event {
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Decrypted { raw, encryption_info } => {
+        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::Decrypted {
+            raw,
+            encryption_info,
+        } => {
             match encryption_info.try_into() {
                 Ok(encryption_info) => {
                     DecryptedToDeviceEvent { raw_event: raw.json().get().into(), encryption_info }
@@ -513,13 +516,13 @@ pub fn processed_to_device_event_to_js_value(
                 }
             }
         }
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
+        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
             UTDToDeviceEvent { raw_event: utd.json().get().into() }.into()
         }
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::PlainText(plain) => {
+        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::PlainText(plain) => {
             PlainTextToDeviceEvent { raw_event: plain.json().get().into() }.into()
         }
-        matrix_sdk_crypto::types::ProcessedToDeviceEvent::Invalid(invalid) => {
+        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::Invalid(invalid) => {
             InvalidToDeviceEvent { raw_event: invalid.json().get().into() }.into()
         }
     };
