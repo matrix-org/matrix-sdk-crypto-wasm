@@ -1,6 +1,8 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `0e9ce0271`.
+-   Update matrix-rust-sdk to `6ab11a032`.
+
+-   Add a new error code for `MegolmDecryptionError`, `DecryptionErrorCode::MismatchedSender`, indicating that the sender of the event does not match the owner of the device that established the Megolm session. ([#248](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/248))
 
 # matrix-sdk-crypto-wasm v15.0.0
 

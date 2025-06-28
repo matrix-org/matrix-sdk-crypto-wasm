@@ -26,6 +26,9 @@ pub enum DecryptionErrorCode {
     SenderIdentityVerificationViolation,
     /// Other failure.
     UnableToDecrypt,
+    /// The `sender` field on the event does not match the owner of the device
+    /// that established the Megolm session.
+    MismatchedSender,
 }
 
 /// Js Decryption error with code.
@@ -91,6 +94,9 @@ impl From<MegolmError> for MegolmDecryptionError {
                     // it as a generic UTD.
                     warn!("Unexpected verification level in megolm decryption error {}", value);
                     decryption_error(DecryptionErrorCode::UnableToDecrypt, None)
+                }
+                VerificationLevel::MismatchedSender => {
+                    decryption_error(DecryptionErrorCode::MismatchedSender, None)
                 }
             },
             _ => decryption_error(DecryptionErrorCode::UnableToDecrypt, None),
