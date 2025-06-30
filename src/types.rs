@@ -335,8 +335,8 @@ impl Default for RoomSettings {
     }
 }
 
-impl From<matrix_sdk_crypto::store::RoomSettings> for RoomSettings {
-    fn from(value: matrix_sdk_crypto::store::RoomSettings) -> Self {
+impl From<matrix_sdk_crypto::store::types::RoomSettings> for RoomSettings {
+    fn from(value: matrix_sdk_crypto::store::types::RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.into(),
             only_allow_trusted_devices: value.only_allow_trusted_devices,
@@ -350,7 +350,7 @@ impl From<matrix_sdk_crypto::store::RoomSettings> for RoomSettings {
     }
 }
 
-impl From<&RoomSettings> for matrix_sdk_crypto::store::RoomSettings {
+impl From<&RoomSettings> for matrix_sdk_crypto::store::types::RoomSettings {
     fn from(value: &RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.clone().into(),

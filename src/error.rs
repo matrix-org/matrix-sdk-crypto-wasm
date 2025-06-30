@@ -1,8 +1,9 @@
 //! Errors related to room event decryption.
 
 use js_sys::JsString;
-use matrix_sdk_common::deserialized_responses::VerificationLevel;
+use matrix_sdk_common::deserialized_responses::{VerificationLevel, WithheldCode};
 use matrix_sdk_crypto::{vodozemac, MegolmError};
+use tracing::warn;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 /// Decryption error codes
@@ -25,6 +26,9 @@ pub enum DecryptionErrorCode {
     SenderIdentityVerificationViolation,
     /// Other failure.
     UnableToDecrypt,
+    /// The `sender` field on the event does not match the owner of the device
+    /// that established the Megolm session.
+    MismatchedSender,
 }
 
 /// Js Decryption error with code.
@@ -55,52 +59,47 @@ impl MegolmDecryptionError {
 
 impl From<MegolmError> for MegolmDecryptionError {
     fn from(value: MegolmError) -> Self {
+        let decryption_error = |code: DecryptionErrorCode,
+                                maybe_withheld: Option<&WithheldCode>|
+         -> MegolmDecryptionError {
+            let description = value.to_string().into();
+            let maybe_withheld = maybe_withheld.map(|code| code.to_string().to_owned().into());
+            MegolmDecryptionError { code, description, maybe_withheld }
+        };
+
         match &value {
-            MegolmError::MissingRoomKey(withheld_code) => MegolmDecryptionError {
-                code: DecryptionErrorCode::MissingRoomKey,
-                description: value.to_string().into(),
-                maybe_withheld: withheld_code
-                    .as_ref()
-                    .map(|code| code.to_string().to_owned().into()),
-            },
+            MegolmError::MissingRoomKey(withheld_code) => {
+                decryption_error(DecryptionErrorCode::MissingRoomKey, withheld_code.as_ref())
+            }
             MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(
                 ..,
-            )) => MegolmDecryptionError {
-                code: DecryptionErrorCode::UnknownMessageIndex,
-                description: value.to_string().into(),
-                maybe_withheld: None,
-            },
-            MegolmError::MismatchedIdentityKeys { .. } => MegolmDecryptionError {
-                code: DecryptionErrorCode::UnknownMessageIndex,
-                description: value.to_string().into(),
-                maybe_withheld: None,
-            },
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::VerificationViolation) => {
-                MegolmDecryptionError {
-                    code: DecryptionErrorCode::SenderIdentityVerificationViolation,
-                    description: value.to_string().into(),
-                    maybe_withheld: None,
-                }
+            )) => decryption_error(DecryptionErrorCode::UnknownMessageIndex, None),
+            MegolmError::MismatchedIdentityKeys { .. } => {
+                decryption_error(DecryptionErrorCode::UnknownMessageIndex, None)
             }
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::UnsignedDevice) => {
-                MegolmDecryptionError {
-                    code: DecryptionErrorCode::UnsignedSenderDevice,
-                    description: value.to_string().into(),
-                    maybe_withheld: None,
+            MegolmError::SenderIdentityNotTrusted(vl) => match vl {
+                VerificationLevel::VerificationViolation => {
+                    decryption_error(DecryptionErrorCode::SenderIdentityVerificationViolation, None)
                 }
-            }
-            MegolmError::SenderIdentityNotTrusted(VerificationLevel::None(..)) => {
-                MegolmDecryptionError {
-                    code: DecryptionErrorCode::UnknownSenderDevice,
-                    description: value.to_string().into(),
-                    maybe_withheld: None,
+                VerificationLevel::UnsignedDevice => {
+                    decryption_error(DecryptionErrorCode::UnsignedSenderDevice, None)
                 }
-            }
-            _ => MegolmDecryptionError {
-                code: DecryptionErrorCode::UnableToDecrypt,
-                description: value.to_string().into(),
-                maybe_withheld: None,
+                VerificationLevel::None(..) => {
+                    decryption_error(DecryptionErrorCode::UnknownSenderDevice, None)
+                }
+                VerificationLevel::UnverifiedIdentity => {
+                    // We do not expect to find this in a MegolmError, since even at the strictest
+                    // `TrustRequirement` level, we are happy to accept events from users whose
+                    // identities we have not verified. We spit out a warning and then treat
+                    // it as a generic UTD.
+                    warn!("Unexpected verification level in megolm decryption error {}", value);
+                    decryption_error(DecryptionErrorCode::UnableToDecrypt, None)
+                }
+                VerificationLevel::MismatchedSender => {
+                    decryption_error(DecryptionErrorCode::MismatchedSender, None)
+                }
             },
+            _ => decryption_error(DecryptionErrorCode::UnableToDecrypt, None),
         }
     }
 }

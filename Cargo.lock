@@ -1187,8 +1187,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df1029695dcc9f5c343e76a02824d679e32264928e1a202481430add2991b6c0"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=6ab11a032#6ab11a03239933cedfd3d55856ffd9ae8d27eb96"
 dependencies = [
  "eyeball-im",
  "futures-core",
@@ -1211,8 +1210,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46a2d75518e77b54d5aa2d0a5f49c4efb534dd580dca07f50e62b74cbbca77b1"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=6ab11a032#6ab11a03239933cedfd3d55856ffd9ae8d27eb96"
 dependencies = [
  "aes",
  "aquamarine",
@@ -1280,8 +1278,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6d3d7f2a4daea5100b45d82d2e62dd2f9e82f69e12af01838104460bd9955b6"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=6ab11a032#6ab11a03239933cedfd3d55856ffd9ae8d27eb96"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1309,8 +1306,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6ba86b8f305339c84c5749551e32cdce042de852def1c521ea4b79c6795dafb"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=6ab11a032#6ab11a03239933cedfd3d55856ffd9ae8d27eb96"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1322,8 +1318,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "773f6c701ef4ff241dd19fd5d6999f68f86d5438903398f33b1f524da0c3ac99"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=6ab11a032#6ab11a03239933cedfd3d55856ffd9ae8d27eb96"
 dependencies = [
  "base64",
  "blake3",

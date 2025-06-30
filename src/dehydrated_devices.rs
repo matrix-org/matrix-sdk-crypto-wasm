@@ -4,7 +4,7 @@
 
 use js_sys::{Array, JsString, Uint8Array};
 use matrix_sdk_crypto::{
-    dehydrated_devices, store::DehydratedDeviceKey as InnerDehydratedDeviceKey,
+    dehydrated_devices, store::types::DehydratedDeviceKey as InnerDehydratedDeviceKey,
 };
 use wasm_bindgen::prelude::*;
 
