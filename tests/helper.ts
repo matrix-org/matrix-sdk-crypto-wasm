@@ -19,7 +19,9 @@ import {
     RequestType,
     KeysUploadRequest,
     KeysQueryRequest,
+    ToDeviceRequest,
     OlmMachine,
+    UserId,
 } from "@matrix-org/matrix-sdk-crypto-wasm";
 
 export function* zip(...arrays: Array<Array<any>>): Generator<any> {
@@ -111,4 +113,46 @@ export async function addMachineToMachine(machineToAdd: OlmMachine, machine: Olm
         );
         expect(marked).toStrictEqual(true);
     }
+}
+
+/**
+ * Forward an outgoing to-device message returned by one OlmMachine into another OlmMachine.
+ */
+export async function forwardToDeviceMessage(
+    sendingUser: UserId,
+    recipientMachine: OlmMachine,
+    toDeviceRequest: ToDeviceRequest,
+): Promise<void> {
+    expect(toDeviceRequest).toBeInstanceOf(ToDeviceRequest);
+    await sendToDeviceMessageIntoMachine(
+        sendingUser,
+        toDeviceRequest.event_type,
+        JSON.parse(toDeviceRequest.body).messages[recipientMachine.userId.toString()][
+            recipientMachine.deviceId.toString()
+        ],
+        recipientMachine,
+    );
+}
+
+/**
+ * Send a to-device message into an OlmMachine.
+ */
+export async function sendToDeviceMessageIntoMachine(
+    sendingUser: UserId,
+    eventType: string,
+    content: object,
+    recipientMachine: OlmMachine,
+): Promise<void> {
+    await recipientMachine.receiveSyncChanges(
+        JSON.stringify([
+            {
+                sender: sendingUser.toString(),
+                type: eventType,
+                content: content,
+            },
+        ]),
+        new DeviceLists(),
+        new Map(),
+        undefined,
+    );
 }
