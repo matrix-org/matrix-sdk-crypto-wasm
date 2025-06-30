@@ -26,7 +26,7 @@ const {
     QrCode,
     QrCodeScan,
 } = require("@matrix-org/matrix-sdk-crypto-wasm");
-const { zip, addMachineToMachine } = require("./helper");
+const { zip, addMachineToMachine, forwardToDeviceMessage } = require("./helper");
 const { VerificationRequestPhase, QrState } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 // Uncomment to enable debug logging for tests
@@ -1122,36 +1122,3 @@ describe("VerificationMethod", () => {
         expect(VerificationMethod.ReciprocateV1).toStrictEqual(3);
     });
 });
-
-/**
- * Forward an outgoing to-device message returned by one OlmMachine into another OlmMachine.
- */
-async function forwardToDeviceMessage(sendingUser, recipientMachine, outgoingVerificationRequest) {
-    expect(outgoingVerificationRequest).toBeInstanceOf(ToDeviceRequest);
-    await sendToDeviceMessageIntoMachine(
-        sendingUser,
-        outgoingVerificationRequest.event_type,
-        JSON.parse(outgoingVerificationRequest.body).messages[recipientMachine.userId.toString()][
-            recipientMachine.deviceId.toString()
-        ],
-        recipientMachine,
-    );
-}
-
-/**
- * Send a to-device message into an OlmMachine.
- */
-async function sendToDeviceMessageIntoMachine(sendingUser, eventType, content, recipientMachine) {
-    await recipientMachine.receiveSyncChanges(
-        JSON.stringify([
-            {
-                sender: sendingUser.toString(),
-                type: eventType,
-                content: content,
-            },
-        ]),
-        new DeviceLists(),
-        new Map(),
-        undefined,
-    );
-}
