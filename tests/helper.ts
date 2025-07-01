@@ -16,11 +16,12 @@ limitations under the License.
 
 import {
     DeviceLists,
-    RequestType,
-    KeysUploadRequest,
     KeysQueryRequest,
-    ToDeviceRequest,
+    KeysUploadRequest,
     OlmMachine,
+    RequestType,
+    RoomId,
+    ToDeviceRequest,
     UserId,
 } from "@matrix-org/matrix-sdk-crypto-wasm";
 
@@ -88,6 +89,7 @@ export async function addMachineToMachine(machineToAdd: OlmMachine, machine: Olm
 
         let bootstrapCrossSigningResult = await machineToAdd.bootstrapCrossSigning(true);
         let signingKeysUploadRequest = bootstrapCrossSigningResult.uploadSigningKeysRequest;
+        const uploadSignaturesRequestBody = JSON.parse(bootstrapCrossSigningResult.uploadSignaturesRequest.body);
 
         // Let's forge a `KeysQuery`'s response.
         let keyQueryResponse = {
@@ -100,6 +102,13 @@ export async function addMachineToMachine(machineToAdd: OlmMachine, machine: Olm
         const deviceId = machineToAdd.deviceId.toString();
         keyQueryResponse.device_keys[userId] = {};
         keyQueryResponse.device_keys[userId][deviceId] = JSON.parse(keysUploadRequest.body).device_keys;
+
+        // Hack in the cross-signing signature on the device from `bootstrapCrossSigning`
+        expect(uploadSignaturesRequestBody[userId][deviceId]).toBeDefined();
+        Object.assign(
+            keyQueryResponse.device_keys[userId][deviceId].signatures[userId],
+            uploadSignaturesRequestBody[userId][deviceId].signatures[userId],
+        );
 
         const keys = JSON.parse(signingKeysUploadRequest.body);
         keyQueryResponse.master_keys[userId] = keys.master_key;
@@ -155,4 +164,56 @@ export async function sendToDeviceMessageIntoMachine(
         new Map(),
         undefined,
     );
+}
+
+/**
+ * Have `senderMachine` claim one of `receiverMachine`'s OTKs, to establish an olm session.
+ *
+ * Requires that `senderMachine` already know about `receiverMachine`, normally via
+ * `addMachineToMachine(receiverMachine, senderMachine)`.
+ */
+export async function establishOlmSession(senderMachine: OlmMachine, receiverMachine: OlmMachine) {
+    const keysClaimRequest = await senderMachine.getMissingSessions([receiverMachine.userId]);
+    const keysClaimRequestBody = JSON.parse(keysClaimRequest!.body);
+    expect(keysClaimRequestBody.one_time_keys).toEqual({
+        [receiverMachine.userId.toString()]: { [receiverMachine.deviceId.toString()]: "signed_curve25519" },
+    });
+
+    const outgoing = await receiverMachine.outgoingRequests();
+    const keysUploadRequest = outgoing.find((req) => req instanceof KeysUploadRequest);
+    expect(keysUploadRequest).toBeDefined();
+    const keysUploadRequestBody = JSON.parse(keysUploadRequest!.body);
+    const [otk_id, otk] = Object.entries(keysUploadRequestBody.one_time_keys)[0];
+
+    const keysClaimResponse = {
+        one_time_keys: {
+            [receiverMachine.userId.toString()]: { [receiverMachine.deviceId.toString()]: { [otk_id]: otk } },
+        },
+    };
+
+    await senderMachine.markRequestAsSent(
+        keysClaimRequest!.id,
+        RequestType.KeysClaim,
+        JSON.stringify(keysClaimResponse),
+    );
+}
+
+/**
+ * Encrypt an event using the given OlmMachine. Returns the JSON for the encrypted event.
+ *
+ * Assumes that a megolm session has already been established.
+ */
+export async function encryptEvent(
+    senderMachine: OlmMachine,
+    room: RoomId,
+    eventType: string,
+    eventContent: string,
+): Promise<string> {
+    return JSON.stringify({
+        sender: senderMachine.userId.toString(),
+        event_id: `\$${Date.now()}:example.com`,
+        type: "m.room.encrypted",
+        origin_server_ts: Date.now(),
+        content: JSON.parse(await senderMachine.encryptRoomEvent(room, eventType, eventContent)),
+    });
 }
