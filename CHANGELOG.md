@@ -4,6 +4,8 @@
 
     -   Add support for received room key bundle data, as required by encrypted history sharing ((MSC4268)[https://github.com/matrix-org/matrix-spec-proposals/pull/4268)). ([#5276](https://github.com/matrix-org/matrix-rust-sdk/pull/5276))
 
+-   Expose experimental new functionality for sharing encrypted room history, per [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268). ([#250](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/250))
+
 -   Extend `OlmMachine` constructor functions to accept an optional `logger` instance. This logger is associated with the machine for its lifetime, and used instead of the global `console` to write any log messages from the underlying rust library. Similarly, the legacy store migration functions (in the `Migration` class), and the `StoreHandle` open functions are extended to accept an optional logger, to be used for the duration of that operation. ([#251](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/251))
 
 -   Add a new error code for `MegolmDecryptionError`, `DecryptionErrorCode::MismatchedSender`, indicating that the sender of the event does not match the owner of the device that established the Megolm session. ([#248](https://github.com/matrix-org/matrix-rust-sdk-crypto-wasm/pull/248))
