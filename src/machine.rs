@@ -23,11 +23,13 @@ use matrix_sdk_crypto::{
 };
 use serde::{ser::SerializeSeq, Serialize, Serializer};
 use serde_json::json;
-use tracing::warn;
+use tracing::{info, warn};
 use wasm_bindgen::{convert::TryFromJsValue, prelude::*};
 use wasm_bindgen_futures::{spawn_local, JsFuture};
+use zeroize::Zeroizing;
 
 use crate::{
+    attachment,
     backup::{BackupDecryptionKey, BackupKeys, RoomKeyCounts},
     dehydrated_devices::DehydratedDevices,
     device, encryption,
@@ -41,7 +43,7 @@ use crate::{
     sync_events,
     types::{
         self, processed_to_device_event_to_js_value, RoomKeyImportResult, RoomSettings,
-        SignatureVerification,
+        SignatureVerification, StoredRoomKeyBundleData,
     },
     verification, vodozemac,
 };
@@ -1582,6 +1584,146 @@ impl OlmMachine {
     #[wasm_bindgen(js_name = "dehydratedDevices")]
     pub fn dehydrated_devices(&self) -> DehydratedDevices {
         self.inner.dehydrated_devices().into()
+    }
+
+    /// Assemble, and encrypt, a room key bundle for sharing encrypted history,
+    /// as per {@link MSC4268 | https://github.com/matrix-org/matrix-spec-proposals/pull/4268}.
+    ///
+    /// Returns `undefined` if there are no keys to share in the given room,
+    /// otherwise an {@link EncryptedAttachment}.
+    ///
+    /// The data should be uploaded to the media server, and the details then
+    /// passed to {@link shareRoomKeyBundleData}.
+    ///
+    /// @experimental
+    #[wasm_bindgen(
+        js_name = "buildRoomKeyBundle",
+        unchecked_return_type = "Promise<EncryptedAttachment | undefined>"
+    )]
+    pub fn build_room_key_bundle(&self, room_id: &identifiers::RoomId) -> Promise {
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+
+        future_to_promise(async move {
+            let bundle = me.store().build_room_key_bundle(&room_id).await?;
+
+            if bundle.is_empty() {
+                info!("No keys to share");
+                return Ok(None);
+            }
+
+            // Remember to zeroize the json as soon as we're done with it
+            let json = Zeroizing::new(serde_json::to_vec(&bundle)?);
+
+            Ok(Some(attachment::Attachment::encrypt(json.as_slice())?))
+        })
+    }
+
+    /// Collect the devices belonging to the given user, and send the details
+    /// of a room key bundle to those devices.
+    ///
+    /// Returns a list of to-device requests which must be sent.
+    ///
+    /// @experimental
+    #[wasm_bindgen(
+        js_name = "shareRoomKeyBundleData",
+        unchecked_return_type = "Promise<ToDeviceRequest[]>"
+    )]
+    pub fn share_room_key_bundle_data(
+        &self,
+        user: &identifiers::UserId,
+        sharing_strategy: encryption::CollectStrategy,
+        content: JsValue,
+    ) -> Result<Promise, JsError> {
+        let me = self.inner.clone();
+        let user_id = user.inner.clone();
+        let bundle_data = serde_wasm_bindgen::from_value(content).map_err(|e| {
+            JsError::new(&format!("Unable to validate room key bundle content: {e}"))
+        })?;
+
+        Ok(future_to_promise(async move {
+            let to_device_requests = me
+                .share_room_key_bundle_data(&user_id, &sharing_strategy.into(), bundle_data)
+                .await?;
+
+            // convert each request to our own ToDeviceRequest struct, and then wrap it in a
+            // JsValue.
+            //
+            // Then collect the results into a javascript Array, throwing any errors into
+            // the promise.
+            let result = to_device_requests
+                .into_iter()
+                .map(|td| ToDeviceRequest::try_from(&td).map(JsValue::from))
+                .collect::<Result<Array, _>>()?;
+
+            Ok(result)
+        }))
+    }
+
+    /// See if we have received an {@link MSC4268 | https://github.com/matrix-org/matrix-spec-proposals/pull/4268}
+    /// room key bundle for the given room from the given user.
+    ///
+    /// Returns either `undefined` if no suitable bundle has been received,
+    /// or an {@link StoredRoomKeyBundleData}, in which case, the bundle
+    /// should be downloaded, and then passed to {@link
+    /// receiveRoomKeyBundle}.
+    ///
+    /// @experimental
+    #[wasm_bindgen(
+        js_name = "getReceivedRoomKeyBundleData",
+        unchecked_return_type = "Promise<StoredRoomKeyBundleData | undefined>"
+    )]
+    pub fn get_received_room_key_bundle_data(
+        &self,
+        room_id: &identifiers::RoomId,
+        inviter: &identifiers::UserId,
+    ) -> Promise {
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+        let inviter = inviter.inner.clone();
+
+        future_to_promise(async move {
+            let result = me
+                .store()
+                .get_received_room_key_bundle_data(&room_id, &inviter)
+                .await?
+                .map(types::StoredRoomKeyBundleData::from);
+            Ok(result)
+        })
+    }
+
+    /// Import the message keys from a downloaded room key bundle.
+    ///
+    /// After {@link getReceivedRoomKeyBundleData} returns a truthy result, the
+    /// media file should be downloaded and then passed into this method to
+    /// actually do the import.
+    ///
+    /// @experimental
+    #[wasm_bindgen(js_name = "receiveRoomKeyBundle", unchecked_return_type = "Promise<undefined>")]
+    pub fn receive_room_key_bundle(
+        &self,
+        bundle_data: &StoredRoomKeyBundleData,
+        mut bundle: attachment::EncryptedAttachment,
+    ) -> Result<Promise, JsError> {
+        let me = self.inner.clone();
+        let bundle_data = bundle_data.clone();
+
+        let decrypted_bundle = attachment::Attachment::decrypt(&mut bundle)?;
+        let deserialized_bundle = serde_json::from_slice(&decrypted_bundle)?;
+
+        Ok(future_to_promise(async move {
+            me.store()
+                .receive_room_key_bundle(
+                    &bundle_data.room_id.inner,
+                    &bundle_data.sender_user.inner,
+                    &bundle_data.sender_data,
+                    deserialized_bundle,
+                    /* TODO: Use the progress listener and expose an argument for it. */
+                    |_, _| {},
+                )
+                .await?;
+            Ok(JsValue::UNDEFINED)
+        }))
     }
 
     /// Shut down the `OlmMachine`.
