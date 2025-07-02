@@ -74,7 +74,7 @@ thiserror = "2.0.12"
 tracing = { version = "0.1.36", default-features = false, features = ["std"] }
 tracing-subscriber = { version = "0.3.14", default-features = false, features = ["registry", "std", "ansi"] }
 url = "2.5.0"
-wasm-bindgen = "0.2.89"
+wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.33"
 zeroize = "1.6.0"
 wasm-bindgen-test = "0.3.37"

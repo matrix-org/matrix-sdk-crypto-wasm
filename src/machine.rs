@@ -60,7 +60,7 @@ impl OlmMachine {
     /// the `initialize` method.
     ///
     /// Why this pattern? `initialize` returns a `Promise`. Returning a
-    // `Promise` from a constructor is not idiomatic in JavaScript.
+    /// `Promise` from a constructor is not idiomatic in JavaScript.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<OlmMachine, JsError> {
         Err(JsError::new("To build an `OlmMachine`, please use the `initialize` method"))
@@ -87,17 +87,19 @@ impl OlmMachine {
     ///
     /// * `store_passphrase` - The passphrase that should be used to encrypt the
     ///   IndexedDB-based store.
-    pub async fn initialize(
+    #[wasm_bindgen(unchecked_return_type = "Promise<OlmMachine>")]
+    pub fn initialize(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_name: Option<String>,
         store_passphrase: Option<String>,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Promise {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
-
-        let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
-        Self::init_helper(user_id, device_id, store_handle).await
+        future_to_promise(async {
+            let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
+            Self::init_helper(user_id, device_id, store_handle).await
+        })
     }
 
     /// Create a new `OlmMachine` backed by an existing store.
@@ -112,22 +114,25 @@ impl OlmMachine {
     ///
     /// * `store_handle` - the connection to the crypto store to be used for
     ///   this machine.
-    #[wasm_bindgen(js_name = "initFromStore")]
-    pub async fn init_from_store(
+    #[wasm_bindgen(js_name = "initFromStore", unchecked_return_type = "Promise<OlmMachine>")]
+    pub fn init_from_store(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_handle: &StoreHandle,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Promise {
         let user_id = user_id.inner.clone();
         let device_id = device_id.inner.clone();
-        Self::init_helper(user_id, device_id, store_handle.clone()).await
+        let store_handle = store_handle.clone();
+        future_to_promise(async move {
+            Self::init_helper(user_id, device_id, store_handle).await
+        })
     }
 
     async fn init_helper(
         user_id: OwnedUserId,
         device_id: OwnedDeviceId,
         store_handle: StoreHandle,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<OlmMachine, JsError> {
         Ok(OlmMachine {
             inner: matrix_sdk_crypto::OlmMachine::with_store(
                 user_id.as_ref(),
@@ -135,10 +140,8 @@ impl OlmMachine {
                 store_handle,
                 None,
             )
-            .await
-            .map_err(JsError::from)?,
-        }
-        .into())
+            .await?,
+        })
     }
 
     /// The unique user ID that owns this `OlmMachine` instance.
@@ -266,10 +269,13 @@ impl OlmMachine {
     ///
     /// All users *whose device lists we are tracking* are flagged as needing a
     /// key query. Users whose devices we are not tracking are ignored.
-    #[wasm_bindgen(js_name = "markAllTrackedUsersAsDirty")]
-    pub async fn mark_all_tracked_users_as_dirty(&self) -> Result<(), JsError> {
-        self.inner.mark_all_tracked_users_as_dirty().await?;
-        Ok(())
+    #[wasm_bindgen(js_name = "markAllTrackedUsersAsDirty", unchecked_return_type = "Promise<void>")]
+    pub fn mark_all_tracked_users_as_dirty(&self) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            me.mark_all_tracked_users_as_dirty().await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
     /// Handle to-device events and one-time key counts from a sync
@@ -577,9 +583,15 @@ impl OlmMachine {
     ///
     /// **Warning**: Only export this and share it with a trusted recipient,
     /// i.e. if an existing device is sharing this with a new device.
-    #[wasm_bindgen(js_name = "exportSecretsBundle")]
-    pub async fn export_secrets_bundle(&self) -> Result<store::SecretsBundle, JsError> {
-        Ok(self.inner.store().export_secrets_bundle().await?.into())
+    #[wasm_bindgen(
+        js_name = "exportSecretsBundle",
+        unchecked_return_type = "Promise<SecretsBundle>"
+    )]
+    pub async fn export_secrets_bundle(&self) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            Ok(store::SecretsBundle::from(me.store().export_secrets_bundle().await?))
+        })
     }
 
     /// Import and persists secrets from a {@link SecretsBundle}.
@@ -597,10 +609,13 @@ impl OlmMachine {
     ///
     /// The provided `SecretsBundle` is freed by this method; be careful not to
     /// use it once this method has been called.
-    #[wasm_bindgen(js_name = "importSecretsBundle")]
-    pub async fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Result<(), JsError> {
-        self.inner.store().import_secrets_bundle(&bundle.inner).await?;
-        Ok(())
+    #[wasm_bindgen(js_name = "importSecretsBundle", unchecked_return_type = "Promise<void>")]
+    pub fn import_secrets_bundle(&self, bundle: store::SecretsBundle) -> Promise {
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            me.store().import_secrets_bundle(&bundle.inner).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
     /// Export all the private cross signing keys we have.
@@ -1550,13 +1565,17 @@ impl OlmMachine {
     /// # Returns
     ///
     /// `Promise<RoomSettings|undefined>`
-    #[wasm_bindgen(js_name = "getRoomSettings")]
-    pub async fn get_room_settings(
-        &self,
-        room_id: &identifiers::RoomId,
-    ) -> Result<JsValue, JsError> {
-        let result = self.inner.room_settings(&room_id.inner).await?;
-        Ok(result.map(RoomSettings::from).into())
+    #[wasm_bindgen(
+        js_name = "getRoomSettings",
+        unchecked_return_type = "Promise<RoomSettings|undefined>"
+    )]
+    pub async fn get_room_settings(&self, room_id: &identifiers::RoomId) -> Promise {
+        let me = self.inner.clone();
+        let room = room_id.inner.clone();
+        future_to_promise(async move {
+            let result = me.room_settings(&room).await?;
+            Ok(result.map(RoomSettings::from))
+        })
     }
 
     /// Store encryption settings for the given room.
@@ -1568,14 +1587,19 @@ impl OlmMachine {
     /// If the settings are valid, they will be persisted to the crypto store.
     /// These settings are not used directly by this library, but the saved
     /// settings can be retrieved via {@link getRoomSettings}.
-    #[wasm_bindgen(js_name = "setRoomSettings")]
-    pub async fn set_room_settings(
+    #[wasm_bindgen(js_name = "setRoomSettings", unchecked_return_type = "Promise<void>")]
+    pub fn set_room_settings(
         &self,
         room_id: &identifiers::RoomId,
         room_settings: &RoomSettings,
-    ) -> Result<(), JsError> {
-        self.inner.set_room_settings(&room_id.inner, &room_settings.into()).await?;
-        Ok(())
+    ) -> Promise {
+        let me = self.inner.clone();
+        let room = room_id.inner.clone();
+        let room_settings = room_settings.into();
+        future_to_promise(async move {
+            me.set_room_settings(&room, &room_settings).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
     /// Manage dehydrated devices
