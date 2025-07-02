@@ -1333,7 +1333,7 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of {@link RoomKeyInfo}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerRoomKeyUpdatedCallback")]
-    pub async fn register_room_key_updated_callback(&self, callback: Function) {
+    pub fn register_room_key_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().room_keys_received_stream();
 
         copy_stream_to_callback(
@@ -1358,7 +1358,7 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of {@link RoomKeyWithheldInfo}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerRoomKeysWithheldCallback")]
-    pub async fn register_room_keys_withheld_callback(&self, callback: Function) {
+    pub fn register_room_keys_withheld_callback(&self, callback: Function) {
         let stream = self.inner.store().room_keys_withheld_received_stream();
 
         copy_stream_to_callback(
@@ -1383,7 +1383,7 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (a {@link
     /// UserId}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerUserIdentityUpdatedCallback")]
-    pub async fn register_user_identity_updated_callback(&self, callback: Function) {
+    pub fn register_user_identity_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().identities_stream_raw();
 
         copy_stream_to_callback(
@@ -1406,7 +1406,7 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of user IDs as strings) and returns a Promise.
     #[wasm_bindgen(js_name = "registerDevicesUpdatedCallback")]
-    pub async fn register_devices_updated_callback(&self, callback: Function) {
+    pub fn register_devices_updated_callback(&self, callback: Function) {
         let stream = self.inner.store().identities_stream_raw();
 
         fn mapper(changes: (IdentityChanges, DeviceChanges)) -> iter::Once<Array> {
@@ -1454,7 +1454,7 @@ impl OlmMachine {
     /// secret inbox should be cleared by calling
     /// `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
-    pub async fn register_receive_secret_callback(&self, callback: Function) {
+    pub fn register_receive_secret_callback(&self, callback: Function) {
         let stream = self.inner.store().secrets_stream();
         // fire up a promise chain which will call `callback` on each result from the
         // stream
@@ -1487,7 +1487,7 @@ impl OlmMachine {
     /// If the secret is valid and handled, the secret inbox should be cleared
     /// by calling `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "getSecretsFromInbox")]
-    pub async fn get_secrets_from_inbox(&self, secret_name: String) -> Promise {
+    pub fn get_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let set = Set::new(&JsValue::UNDEFINED);
         let me = self.inner.clone();
 
@@ -1509,7 +1509,7 @@ impl OlmMachine {
     ///
     /// * `secret_name` - The name of the secret to delete.
     #[wasm_bindgen(js_name = "deleteSecretsFromInbox")]
-    pub async fn delete_secrets_from_inbox(&self, secret_name: String) -> Promise {
+    pub fn delete_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let me = self.inner.clone();
         future_to_promise(async move {
             let name = SecretName::from(secret_name);
@@ -1534,7 +1534,7 @@ impl OlmMachine {
     /// A `Promise` for a `bool` result, which will be true if  secrets were
     /// missing, and a request was generated.
     #[wasm_bindgen(js_name = "requestMissingSecretsIfNeeded")]
-    pub async fn request_missing_secrets_if_needed(&self) -> Promise {
+    pub fn request_missing_secrets_if_needed(&self) -> Promise {
         let me = self.inner.clone();
         future_to_promise(async move {
             let has_missing_secrets = me.query_missing_secrets_from_other_sessions().await?;
