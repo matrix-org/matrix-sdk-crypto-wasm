@@ -51,6 +51,13 @@ export declare function initAsync(url?: URL | string): Promise<void>;
 // The auto-generated typescript definitions are a good start, but could do with tightening up in a lot of areas.
 // The following is a manually-curated set of typescript definitions.
 declare module "./pkg/matrix_sdk_crypto_wasm.js" {
+    interface JsLogger {
+        debug(data: any): void;
+        info(data: any): void;
+        warn(data: any): void;
+        error(data: any): void;
+    }
+
     /** The types returned by {@link OlmMachine.outgoingRequests}. */
     type OutgoingRequest =
         | KeysUploadRequest

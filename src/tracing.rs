@@ -3,8 +3,11 @@ use std::{
     sync::{Arc, Mutex, OnceLock},
 };
 
+/// The type of a javascript-side `Logger` object which we can use to log
+/// from the rust side.
+pub use matrix_sdk_common::js_tracing::JsLogger;
 use matrix_sdk_common::js_tracing::{make_tracing_subscriber, JsLoggingSubscriber};
-use tracing::Level;
+use tracing::{dispatcher, Dispatch, Level};
 use tracing_subscriber::{filter::LevelFilter, prelude::*, reload};
 use wasm_bindgen::prelude::*;
 
@@ -92,12 +95,16 @@ impl Tracing {
             .clone()
     }
 
+    /// Ensure the tracing layer is installed, without changing the log level
+    pub(crate) fn init() -> Tracing {
+        Tracing { inner: Tracing::install_or_get_inner() }
+    }
+
     /// Install the tracing layer.
     #[wasm_bindgen(constructor)]
     pub fn new(min_level: LoggerLevel) -> Result<Tracing, JsError> {
-        let tracing = Tracing { inner: Tracing::install_or_get_inner() };
+        let tracing = Self::init();
         tracing.min_level(min_level)?;
-
         Ok(tracing)
     }
 
@@ -144,6 +151,25 @@ impl From<LoggerLevel> for Level {
             Info => Self::INFO,
             Warn => Self::WARN,
             Error => Self::ERROR,
+        }
+    }
+}
+
+/// If a logger is supplied, make a [`tracing::Dispatch`](Dispatch) which will
+/// write logs to it.
+///
+/// Otherwise, ensure that the Tracing system is initialised and then return the
+/// default `Dispatch`.
+pub fn logger_to_dispatcher(logger: Option<JsLogger>) -> Dispatch {
+    match logger {
+        Some(logger) => Dispatch::new(make_tracing_subscriber(Some(logger))),
+        None => {
+            // If anyone calls `OlmMachine::init` or similar without initialising `Tracing`,
+            // set it up now, and then use the resulting subscriber for the
+            // lifetime of the OlmMachine, so that a later call to `Tracing::turn_on` will
+            // have the desired effect.
+            Tracing::init();
+            dispatcher::get_default(|dispatch| dispatch.clone())
         }
     }
 }
