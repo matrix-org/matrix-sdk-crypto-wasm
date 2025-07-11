@@ -32,9 +32,9 @@ describe("dehydrated devices", () => {
 
         await dehydratedDevices.saveDehydratedDeviceKey(key);
 
-        const loaded_key: DehydratedDeviceKey = await dehydratedDevices.getDehydratedDeviceKey();
+        const loaded_key = await dehydratedDevices.getDehydratedDeviceKey();
 
-        expect(key.toBase64()).toEqual(loaded_key.toBase64());
+        expect(key.toBase64()).toEqual(loaded_key!.toBase64());
     });
 
     test("can delete a previously saved dehydrated device key", async () => {

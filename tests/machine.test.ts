@@ -1422,7 +1422,7 @@ describe(OlmMachine.name, () => {
             expect(request).toBeInstanceOf(KeysQueryRequest);
 
             await secondMachine.markRequestAsSent(
-                request.id,
+                request.id!,
                 RequestType.KeysQuery,
                 JSON.stringify(hypotheticalResponse),
             );
@@ -1568,10 +1568,10 @@ describe(OlmMachine.name, () => {
             await m.setRoomSettings(new RoomId("!test:room"), settings);
 
             const loadedSettings = await m.getRoomSettings(new RoomId("!test:room"));
-            expect(loadedSettings.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
-            expect(loadedSettings.onlyAllowTrustedDevices).toBe(true);
-            expect(loadedSettings.sessionRotationPeriodMs).toEqual(10000);
-            expect(loadedSettings.sessionRotationPeriodMessages).toEqual(1234);
+            expect(loadedSettings!.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
+            expect(loadedSettings!.onlyAllowTrustedDevices).toBe(true);
+            expect(loadedSettings!.sessionRotationPeriodMs).toEqual(10000);
+            expect(loadedSettings!.sessionRotationPeriodMessages).toEqual(1234);
         });
 
         test("Should reject unsupported algorithms", async () => {
@@ -1596,10 +1596,10 @@ describe(OlmMachine.name, () => {
 
             // Check the old settings persist
             const loadedSettings = await m.getRoomSettings(new RoomId("!test:room"));
-            expect(loadedSettings.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
-            expect(loadedSettings.onlyAllowTrustedDevices).toBe(true);
-            expect(loadedSettings.sessionRotationPeriodMs).toEqual(100);
-            expect(loadedSettings.sessionRotationPeriodMessages).toEqual(10);
+            expect(loadedSettings!.algorithm).toEqual(EncryptionAlgorithm.MegolmV1AesSha2);
+            expect(loadedSettings!.onlyAllowTrustedDevices).toBe(true);
+            expect(loadedSettings!.sessionRotationPeriodMs).toEqual(100);
+            expect(loadedSettings!.sessionRotationPeriodMessages).toEqual(10);
         });
 
         test("Should ignore no-op changes", async () => {
