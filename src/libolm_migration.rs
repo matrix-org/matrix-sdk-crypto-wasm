@@ -16,9 +16,10 @@
 
 use std::time::Duration;
 
-use js_sys::{Date, Uint8Array};
-use matrix_sdk_common::ruma::{
-    DeviceKeyAlgorithm, MilliSecondsSinceUnixEpoch, SecondsSinceUnixEpoch, UInt,
+use js_sys::{Date, Promise, Uint8Array};
+use matrix_sdk_common::{
+    js_tracing::JsLogger,
+    ruma::{DeviceKeyAlgorithm, MilliSecondsSinceUnixEpoch, SecondsSinceUnixEpoch, UInt},
 };
 use matrix_sdk_crypto::{
     olm::PrivateCrossSigningIdentity,
@@ -31,11 +32,14 @@ use matrix_sdk_crypto::{
     vodozemac::{Curve25519PublicKey, Ed25519PublicKey},
     Session,
 };
+use tracing::dispatcher;
 use wasm_bindgen::prelude::*;
 
 use crate::{
+    future::future_to_promise,
     identifiers::{DeviceId, RoomId, UserId},
     store::StoreHandle,
+    tracing::logger_to_dispatcher,
 };
 
 type Result<T, E = JsError> = std::result::Result<T, E>;
@@ -52,7 +56,7 @@ pub struct Migration {}
 ///
 /// Can be imported into the rust store with {@link Migration::migrateBaseData}.
 #[wasm_bindgen(getter_with_clone)]
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct BaseMigrationData {
     /// The user id of the account owner.
     #[wasm_bindgen(js_name = "userId")]
@@ -115,15 +119,23 @@ impl Migration {
     ///   account objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
-    #[wasm_bindgen(js_name = "migrateBaseData")]
-    pub async fn migrate_base_data(
+    /// * `logger` - An optional logger instance to use for writing log messages
+    ///   during the migration operation. An instance of `JsLogger`.
+    #[wasm_bindgen(js_name = "migrateBaseData", unchecked_return_type = "Promise<void>")]
+    pub fn migrate_base_data(
         data: &BaseMigrationData,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-    ) -> Result<JsValue, JsError> {
-        migrate_base_data_to_store(data, &(pickle_key.to_vec()), store_handle.store.as_ref())
-            .await?;
-        Ok(JsValue::UNDEFINED)
+        logger: Option<JsLogger>,
+    ) -> Promise {
+        let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
+        let store_handle = store_handle.clone();
+        let data = data.clone();
+        future_to_promise(async move {
+            migrate_base_data_to_store(&data, &(pickle_key.to_vec()), store_handle.store.as_ref())
+                .await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 }
 
@@ -241,12 +253,17 @@ impl Migration {
     ///   session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
-    #[wasm_bindgen(js_name = "migrateOlmSessions")]
-    pub async fn migrate_olm_sessions(
+    /// * `logger` - An optional logger instance to use for writing log messages
+    ///   during the migration operation. An instance of `JsLogger`.
+    #[wasm_bindgen(js_name = "migrateOlmSessions", unchecked_return_type = "Promise<void>")]
+    pub fn migrate_olm_sessions(
         sessions: Vec<PickledSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-    ) -> Result<JsValue, JsError> {
+        logger: Option<JsLogger>,
+    ) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
+
         let pickle_key = pickle_key.to_vec();
 
         let rust_sessions = sessions
@@ -254,8 +271,12 @@ impl Migration {
             .map(|session| libolm_pickled_session_to_rust_pickled_session(session, &pickle_key))
             .collect::<Result<_>>()?;
 
-        import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
-        Ok(JsValue::UNDEFINED)
+        let store_handle = store_handle.clone();
+
+        Ok(future_to_promise(async move {
+            import_olm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
+            Ok(JsValue::UNDEFINED)
+        }))
     }
 }
 
@@ -393,12 +414,16 @@ impl Migration {
     ///   megolm session objects.
     /// * `store_handle` - A connection to the CryptoStore which will be used to
     ///   store the vodozemac data.
-    #[wasm_bindgen(js_name = "migrateMegolmSessions")]
-    pub async fn migrate_megolm_sessions(
+    /// * `logger` - An optional logger instance to use for writing log messages
+    ///   during the migration operation. An instance of `JsLogger`.
+    #[wasm_bindgen(js_name = "migrateMegolmSessions", unchecked_return_type = "Promise<void>")]
+    pub fn migrate_megolm_sessions(
         sessions: Vec<PickledInboundGroupSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-    ) -> Result<JsValue, JsError> {
+        logger: Option<JsLogger>,
+    ) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
         let pickle_key = pickle_key.to_vec();
 
         let rust_sessions = sessions
@@ -408,8 +433,11 @@ impl Migration {
             })
             .collect::<Result<_>>()?;
 
-        import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
-        Ok(JsValue::UNDEFINED)
+        let store_handle = store_handle.clone();
+        Ok(future_to_promise(async move {
+            import_megolm_sessions_to_store(rust_sessions, store_handle.store.as_ref()).await?;
+            Ok(JsValue::UNDEFINED)
+        }))
     }
 }
 
