@@ -1,6 +1,8 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `cef1f8c5`, which includes:
+# matrix-sdk-crypto-wasm v15.1.0
+
+-   Update matrix-rust-sdk to `0.13.0`, which includes:
 
     -   Add support for received room key bundle data, as required by encrypted history sharing ((MSC4268)[https://github.com/matrix-org/matrix-spec-proposals/pull/4268)). ([#5276](https://github.com/matrix-org/matrix-rust-sdk/pull/5276))
 
