@@ -12,7 +12,7 @@ use matrix_sdk_common::ruma::{
             upload_signatures::v3::Request as OriginalSignatureUploadRequest,
         },
     },
-    events::EventContent,
+    events::MessageLikeEventContent,
     exports::serde::ser::Error,
 };
 use matrix_sdk_crypto::{

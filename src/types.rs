@@ -437,6 +437,59 @@ impl PlainTextToDeviceEvent {
     }
 }
 
+/// Reason code for a to-device decryption failure
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ToDeviceUnableToDecryptReason {
+    /// An error occurred while encrypting the event. This covers all
+    /// `OlmError` types.
+    DecryptionFailure,
+
+    /// We refused to decrypt the message because the sender's device is not
+    /// verified, or more generally, the sender's identity did not match the
+    /// trust requirement we were asked to provide.
+    UnverifiedSenderDevice,
+
+    /// We have no `OlmMachine`. This should not happen unless we forget to set
+    /// things up by calling `OlmMachine::activate()`.
+    NoOlmMachine,
+
+    /// The Matrix SDK was compiled without encryption support.
+    EncryptionIsDisabled,
+}
+
+impl From<matrix_sdk_common::deserialized_responses::ToDeviceUnableToDecryptReason>
+    for ToDeviceUnableToDecryptReason
+{
+    fn from(
+        value: matrix_sdk_common::deserialized_responses::ToDeviceUnableToDecryptReason,
+    ) -> Self {
+        use matrix_sdk_common::deserialized_responses::ToDeviceUnableToDecryptReason::*;
+        match value {
+            DecryptionFailure => Self::DecryptionFailure,
+            UnverifiedSenderDevice => Self::UnverifiedSenderDevice,
+            NoOlmMachine => Self::NoOlmMachine,
+            EncryptionIsDisabled => Self::EncryptionIsDisabled,
+        }
+    }
+}
+
+/// Metadata about a to-device event that could not be decrypted.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct ToDeviceUnableToDecryptInfo {
+    /// Reason code for the decryption failure
+    pub reason: ToDeviceUnableToDecryptReason,
+}
+
+impl From<matrix_sdk_common::deserialized_responses::ToDeviceUnableToDecryptInfo>
+    for ToDeviceUnableToDecryptInfo
+{
+    fn from(value: matrix_sdk_common::deserialized_responses::ToDeviceUnableToDecryptInfo) -> Self {
+        Self { reason: value.reason.into() }
+    }
+}
+
 /// Represents an encrypted to-device event that could not be decrypted.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -445,6 +498,9 @@ pub struct UTDToDeviceEvent {
     /// decrypted, encoded as JSON.
     #[wasm_bindgen(readonly, getter_with_clone, js_name = "rawEvent")]
     pub raw_event: JsString,
+    /// Information on the reason we failed to decrypt
+    #[wasm_bindgen(readonly, getter_with_clone, js_name = "utdInfo")]
+    pub utd_info: ToDeviceUnableToDecryptInfo,
     // TODO: Add some OlmError in the future
 }
 
@@ -520,9 +576,14 @@ pub fn processed_to_device_event_to_js_value(
                 }
             }
         }
-        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::UnableToDecrypt(utd) => {
-            UTDToDeviceEvent { raw_event: utd.json().get().into() }.into()
+        matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::UnableToDecrypt {
+            encrypted_event,
+            utd_info,
+        } => UTDToDeviceEvent {
+            raw_event: encrypted_event.json().get().into(),
+            utd_info: utd_info.into(),
         }
+        .into(),
         matrix_sdk_common::deserialized_responses::ProcessedToDeviceEvent::PlainText(plain) => {
             PlainTextToDeviceEvent { raw_event: plain.json().get().into() }.into()
         }

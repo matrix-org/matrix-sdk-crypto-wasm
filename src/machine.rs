@@ -331,6 +331,9 @@ impl OlmMachine {
     /// * `unused_fallback_keys`: Optionally, a `Set` of unused fallback keys on
     ///   the server, from the `/sync` response. If this is set, it is used to
     ///   determine if new fallback keys should be uploaded.
+    /// * `decryption_settings`: Optionally, the settings to use when decrypting
+    ///   to-device events. If not set, to-device events will be decrypted with
+    ///   a {@link TrustRequirement} of `Untrusted`.
     ///
     /// # Returns
     ///
@@ -346,6 +349,7 @@ impl OlmMachine {
         changed_devices: &sync_events::DeviceLists,
         one_time_keys_counts: &Map,
         unused_fallback_keys: Option<Set>,
+        decryption_settings: Option<encryption::DecryptionSettings>,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let to_device_events = serde_json::from_str(to_device_events)?;
@@ -377,21 +381,28 @@ impl OlmMachine {
             });
 
         let me = self.inner.clone();
+        let decryption_settings = (&decryption_settings.unwrap_or(
+            encryption::DecryptionSettings::new(encryption::TrustRequirement::Untrusted),
+        ))
+            .into();
 
         Ok(future_to_promise(async move {
             // we discard the list of updated room keys in the result; JS applications are
             // expected to use register_room_key_updated_callback to receive updated room
             // keys.
             let (processed_to_device_events, _) = me
-                .receive_sync_changes(EncryptionSyncChanges {
-                    to_device_events,
-                    changed_devices: &changed_devices,
-                    one_time_keys_counts: &one_time_keys_counts,
-                    unused_fallback_keys: unused_fallback_keys.as_deref(),
+                .receive_sync_changes(
+                    EncryptionSyncChanges {
+                        to_device_events,
+                        changed_devices: &changed_devices,
+                        one_time_keys_counts: &one_time_keys_counts,
+                        unused_fallback_keys: unused_fallback_keys.as_deref(),
 
-                    // matrix-sdk-crypto does not (currently) use `next_batch_token`.
-                    next_batch_token: None,
-                })
+                        // matrix-sdk-crypto does not (currently) use `next_batch_token`.
+                        next_batch_token: None,
+                    },
+                    &decryption_settings,
+                )
                 .await?;
 
             Ok(processed_to_device_events
