@@ -501,7 +501,6 @@ pub struct UTDToDeviceEvent {
     /// Information on the reason we failed to decrypt
     #[wasm_bindgen(readonly, getter_with_clone, js_name = "utdInfo")]
     pub utd_info: ToDeviceUnableToDecryptInfo,
-    // TODO: Add some OlmError in the future
 }
 
 #[wasm_bindgen]
