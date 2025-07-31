@@ -1856,5 +1856,105 @@ describe(OlmMachine.name, () => {
             expect(encryptionInfo.senderCurve25519Key).toEqual(alice.identityKeys.curve25519.toBase64());
             expect(encryptionInfo.isSenderVerified()).toBe(false);
         });
+
+        test("Should refuse to decrypt from senders that are not sufficiently trusted", async () => {
+            const aliceUserId = new UserId("@alice:example.org");
+            const aliceDeviceId = new DeviceId("ALICE_DEV");
+
+            const bobUserId = new UserId("@bob:example.org");
+            const bobDeviceId = new DeviceId("BOB_DEV");
+
+            const alice = await machine(aliceUserId, aliceDeviceId);
+            const bob = await machine(bobUserId, bobDeviceId);
+
+            const [keysUploadRequest, keysQueryRequest] = await bob.outgoingRequests();
+            expect(keysUploadRequest).toBeInstanceOf(KeysUploadRequest);
+            expect(keysQueryRequest).toBeInstanceOf(KeysQueryRequest);
+            const keysUploadBody = JSON.parse(keysUploadRequest.body);
+            const otks = Object.values(keysUploadBody.one_time_keys);
+            await bob.markRequestAsSent(
+                keysUploadRequest.id!,
+                keysUploadRequest.type,
+                JSON.stringify({
+                    one_time_key_counts: {
+                        signed_curve25519: otks.length,
+                    },
+                }),
+            );
+
+            // Let Alice know about bob keys
+            await alice.markRequestAsSent(
+                "SomeUniqueId",
+                RequestType.KeysQuery,
+                JSON.stringify({
+                    device_keys: {
+                        "@bob:example.org": {
+                            BOB_DEV: keysUploadBody.device_keys,
+                        },
+                    },
+                    failures: {},
+                }),
+            );
+
+            // Let Alice claim one otk for bob to establish the olm session
+            const [otkId, otk] = Object.entries(keysUploadBody.one_time_keys)[0];
+            await alice.markRequestAsSent(
+                "foo",
+                RequestType.KeysClaim,
+                JSON.stringify({
+                    one_time_keys: {
+                        "@bob:example.org": {
+                            BOB_DEV: {
+                                [otkId]: otk,
+                            },
+                        },
+                    },
+                }),
+            );
+
+            {
+                // Let bob be aware of alice device
+                // If not olm decryption will fail because of MissingSigningKeys
+                const [keysUploadRequest, keysQueryRequest] = await alice.outgoingRequests();
+                const keysUploadBody = JSON.parse(keysUploadRequest.body);
+                await bob.markRequestAsSent(
+                    "SomeUniqueId",
+                    RequestType.KeysQuery,
+                    JSON.stringify({
+                        device_keys: {
+                            "@alice:example.org": {
+                                ALICE_DEV: keysUploadBody.device_keys,
+                            },
+                        },
+                        failures: {},
+                    }),
+                );
+            }
+
+            const aliceBobDevice = (await alice.getDevice(bobUserId, bobDeviceId))!;
+            const encryptedContent = await aliceBobDevice.encryptToDeviceEvent("custom.type", {
+                foo: "bar",
+            });
+
+            const encryptedToDevice = {
+                type: "m.room.encrypted",
+                content: JSON.parse(encryptedContent),
+                sender: "@alice:example.org",
+            };
+
+            // Bob should be able to decrypt this
+
+            const receivedToDeviceArray = await bob.receiveSyncChanges(
+                JSON.stringify([encryptedToDevice]),
+                new DeviceLists(),
+                new Map<string, number>(),
+                undefined,
+                new DecryptionSettings(TrustRequirement.CrossSigned),
+            );
+            expect(receivedToDeviceArray.length).toBe(1);
+            const processed = receivedToDeviceArray[0];
+            expect(processed.type).toEqual(ProcessedToDeviceEventType.UnableToDecrypt);
+            expect(processed).toBeInstanceOf(UTDToDeviceEvent);
+        });
     });
 });

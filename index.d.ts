@@ -83,6 +83,7 @@ declare module "./pkg/matrix_sdk_crypto_wasm.js" {
             changed_devices: DeviceLists,
             one_time_keys_counts: Map<string, number>,
             unused_fallback_keys?: Set<string> | null,
+            decryption_settings?: DecryptionSettings,
         ): Promise<Array<ProcessedToDeviceEvent>>;
         outgoingRequests(): Promise<Array<OutgoingRequest>>;
         markRequestAsSent(request_id: string, request_type: RequestType, response: string): Promise<boolean>;

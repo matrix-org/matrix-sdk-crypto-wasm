@@ -8,7 +8,10 @@ use matrix_sdk_crypto::{
 };
 use wasm_bindgen::prelude::*;
 
-use crate::{identifiers::DeviceId, requests::PutDehydratedDeviceRequest, store::RoomKeyInfo};
+use crate::{
+    encryption::DecryptionSettings, identifiers::DeviceId, requests::PutDehydratedDeviceRequest,
+    store::RoomKeyInfo,
+};
 
 #[wasm_bindgen]
 #[derive(Debug)]
@@ -139,15 +142,28 @@ impl RehydratedDevice {
     /// The rehydrated device will decrypt the events and pass the room keys
     /// into the `OlmMachine`.
     ///
-    /// `to_device_events` is a JSON-encoded result of the `events` array from
-    /// `/dehydrated_device/{device_id}/events`.
+    /// # Arguments
+    ///
+    /// * `to_device_events` is a JSON-encoded result of the `events` array from
+    ///   `/dehydrated_device/{device_id}/events`.
+    /// * `decryption_settings`: Optionally, the settings to use when decrypting
+    ///   to-device events. If not set, to-device events will be decrypted with
+    ///   a {@link TrustRequirement} of `Untrusted`.
     ///
     /// Returns an array of `RoomKeyInfo`, indicating the room keys that were
     /// received.
-    pub async fn receive_events(&self, to_device_events: &str) -> Result<Array, JsError> {
+    pub async fn receive_events(
+        &self,
+        to_device_events: &str,
+        decryption_settings: Option<DecryptionSettings>,
+    ) -> Result<Array, JsError> {
         let to_device_events = serde_json::from_str(to_device_events)?;
+        let decryption_settings = (&decryption_settings
+            .unwrap_or(DecryptionSettings::new(crate::encryption::TrustRequirement::Untrusted)))
+            .into();
 
-        let room_key_info = self.inner.receive_events(to_device_events).await?;
+        let room_key_info =
+            self.inner.receive_events(to_device_events, &decryption_settings).await?;
         Ok(room_key_info.into_iter().map(RoomKeyInfo::from).map(JsValue::from).collect())
     }
 }

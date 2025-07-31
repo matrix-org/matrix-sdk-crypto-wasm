@@ -64,9 +64,9 @@ futures-util = "0.3.27"
 getrandom = { version = "0.3.0", features = ["wasm_js"] }
 http = "1.1.0"
 js-sys = "0.3.49"
-matrix-sdk-common = { version = "0.13.0", features = ["js"] }
-matrix-sdk-indexeddb = { version = "0.13.0", default-features = false, features = ["e2e-encryption"] }
-matrix-sdk-qrcode = { version = "0.13.0", optional = true }
+matrix-sdk-common = { features = ["js"] , git = "https://github.com/matrix-org/matrix-rust-sdk" }
+matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"] , git = "https://github.com/matrix-org/matrix-rust-sdk" }
+matrix-sdk-qrcode = { optional = true , git = "https://github.com/matrix-org/matrix-rust-sdk" }
 serde = "1.0.91"
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.6.5"
@@ -83,9 +83,9 @@ wasm-bindgen-test = "0.3.37"
 vergen-gitcl = { version = "1.0.0", features = ["build"] }
 
 [dependencies.matrix-sdk-crypto]
-version = "0.13.0"
 default-features = false
 features = ["js", "automatic-room-key-forwarding"]
+git = "https://github.com/matrix-org/matrix-rust-sdk"
 
 [lints.rust]
 # Workaround for https://github.com/rustwasm/wasm-bindgen/issues/4283, while we work up the courage to upgrade
