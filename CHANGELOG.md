@@ -1,5 +1,14 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk, which includes:
+
+    -   When in "exclude insecure devices" mode, refuse to decrypt
+        incoming to-device messages from unverified devices, except for some
+        exceptions for certain event types. `OlmMachine.receiveSyncChanges` and
+        `RehydratedDevice.receiveEvents` now have optional arguments of type
+        `DecryptionSettings` to specify the required trust level.
+        ([#5319](https://github.com/matrix-org/matrix-rust-sdk/pull/5319)
+
 # matrix-sdk-crypto-wasm v15.1.0
 
 -   Update matrix-rust-sdk to `0.13.0`, which includes:
