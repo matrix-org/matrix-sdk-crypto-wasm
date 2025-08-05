@@ -6,8 +6,11 @@
         incoming to-device messages from unverified devices, except for some
         exceptions for certain event types. `OlmMachine.receiveSyncChanges` and
         `RehydratedDevice.receiveEvents` now have optional arguments of type
-        `DecryptionSettings` to specify the required trust level.
+        `DecryptionSettings` to specify the required trust level of senders.
         ([#5319](https://github.com/matrix-org/matrix-rust-sdk/pull/5319)
+    -   `Device.encryptToDeviceEvent` now takes an optional argument of type
+        `CollectStrategy` to specify the required trust level of recipients.
+        ([#5457](https://github.com/matrix-org/matrix-rust-sdk/pull/5457/))
 
 # matrix-sdk-crypto-wasm v15.1.0
 

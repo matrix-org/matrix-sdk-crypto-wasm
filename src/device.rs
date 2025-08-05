@@ -5,7 +5,7 @@ use serde_json::Value;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    encryption::EncryptionAlgorithm,
+    encryption::{CollectStrategy, EncryptionAlgorithm},
     future::future_to_promise,
     identifiers::{self, DeviceId, UserId},
     impl_from_to_inner, requests, types, verification, vodozemac,
@@ -71,13 +71,16 @@ impl Device {
         &self,
         event_type: String,
         content: JsValue,
+        share_strategy: Option<CollectStrategy>,
     ) -> Result<String, JsError> {
         let me = self.inner.clone();
+        let share_strategy = share_strategy.unwrap_or(CollectStrategy::all_devices());
 
         // JSON-serialize the payload
         let content: Value = serde_wasm_bindgen::from_value(content)?;
 
-        let raw_encrypted = me.encrypt_event_raw(event_type.as_str(), &content).await?;
+        let raw_encrypted =
+            me.encrypt_event_raw(event_type.as_str(), &content, share_strategy.into()).await?;
         Ok(raw_encrypted.into_json().get().to_owned())
     }
 

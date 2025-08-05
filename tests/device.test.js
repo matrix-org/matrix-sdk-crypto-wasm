@@ -1,4 +1,5 @@
 const {
+    CollectStrategy,
     OlmMachine,
     UserId,
     DeviceId,
@@ -225,6 +226,77 @@ describe("Send to-device message", () => {
         expect(toDevice.algorithm).toStrictEqual("m.olm.v1.curve25519-aes-sha2");
         expect(toDevice.ciphertext).toBeDefined();
         expect(toDevice.ciphertext["boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo"]).toBeDefined();
+    });
+
+    it("does not encrypt a to-device message if recipient is not trusted enough", async () => {
+        // Olm machine.
+        const m = await machine(userId1, deviceId1);
+
+        // Make m aware of another device, and get some OTK to be able to establish a session.
+        await m.markRequestAsSent(
+            "foo",
+            RequestType.KeysQuery,
+            JSON.stringify({
+                device_keys: {
+                    "@example:localhost": {
+                        AFGUOBTZWM: {
+                            algorithms: ["m.olm.v1.curve25519-aes-sha2", "m.megolm.v1.aes-sha2"],
+                            device_id: "AFGUOBTZWM",
+                            keys: {
+                                "curve25519:AFGUOBTZWM": "boYjDpaC+7NkECQEeMh5dC+I1+AfriX0VXG2UV7EUQo",
+                                "ed25519:AFGUOBTZWM": "NayrMQ33ObqMRqz6R9GosmHdT6HQ6b/RX/3QlZ2yiec",
+                            },
+                            signatures: {
+                                "@example:localhost": {
+                                    "ed25519:AFGUOBTZWM":
+                                        "RoSWvru1jj6fs2arnTedWsyIyBmKHMdOu7r9gDi0BZ61h9SbCK2zLXzuJ9ZFLao2VvA0yEd7CASCmDHDLYpXCA",
+                                },
+                            },
+                            user_id: "@example:localhost",
+                            unsigned: {
+                                device_display_name: "rust-sdk",
+                            },
+                        },
+                    },
+                },
+                failures: {},
+            }),
+        );
+
+        await m.markRequestAsSent(
+            "bar",
+            RequestType.KeysClaim,
+            JSON.stringify({
+                one_time_keys: {
+                    "@example:localhost": {
+                        AFGUOBTZWM: {
+                            "signed_curve25519:AAAABQ": {
+                                key: "9IGouMnkB6c6HOd4xUsNv4i3Dulb4IS96TzDordzOws",
+                                signatures: {
+                                    "@example:localhost": {
+                                        "ed25519:AFGUOBTZWM":
+                                            "2bvUbbmJegrV0eVP/vcJKuIWC3kud+V8+C0dZtg4dVovOSJdTP/iF36tQn2bh5+rb9xLlSeztXBdhy4c+LiOAg",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                failures: {},
+            }),
+        );
+
+        // Pick the device we want to encrypt to.
+        const device2 = await m.getDevice(new UserId("@example:localhost"), new DeviceId("AFGUOBTZWM"));
+
+        const content = {
+            body: "Hello, World!",
+        };
+        const type = "some.custom.event.type";
+
+        await expect(device2.encryptToDeviceEvent(type, content, CollectStrategy.onlyTrustedDevices())).rejects.toThrow(
+            "The sender has disabled encrypting to unverified devices.",
+        );
     });
 });
 
