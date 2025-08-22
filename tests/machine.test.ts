@@ -75,6 +75,8 @@ describe("Versions", () => {
 
 jest.setTimeout(15000);
 
+const EXPECTED_DB_VERSION = 14;
+
 describe(OlmMachine.name, () => {
     test("can be instantiated with the async initializer", async () => {
         expect(await OlmMachine.initialize(new UserId("@foo:bar.org"), new DeviceId("baz"))).toBeInstanceOf(OlmMachine);
@@ -111,7 +113,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 13 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: EXPECTED_DB_VERSION },
         ]);
 
         // Creating a new Olm machine, with the stored state.
@@ -230,7 +232,7 @@ describe(OlmMachine.name, () => {
         expect(databases).toHaveLength(2);
         expect(databases).toStrictEqual([
             { name: `${storeName}::matrix-sdk-crypto-meta`, version: 1 },
-            { name: `${storeName}::matrix-sdk-crypto`, version: 13 },
+            { name: `${storeName}::matrix-sdk-crypto`, version: EXPECTED_DB_VERSION },
         ]);
 
         // Let's force to close the `OlmMachine`.
