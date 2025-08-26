@@ -1843,16 +1843,17 @@ impl OlmMachine {
     #[wasm_bindgen(js_name = "receiveRoomKeyBundle", unchecked_return_type = "Promise<undefined>")]
     pub fn receive_room_key_bundle(
         &self,
-        bundle_data: &StoredRoomKeyBundleData,
+        bundle_data: StoredRoomKeyBundleData,
         encrypted_bundle: Vec<u8>,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
 
+        // Decrypt and deserialize the downloaded media file.
         let deserialized_bundle = {
             let mut cursor = Cursor::new(encrypted_bundle.as_slice());
             let mut decryptor = matrix_sdk_crypto::AttachmentDecryptor::new(
                 &mut cursor,
-                serde_json::from_str(&bundle_data.encryption_info)?,
+                MediaEncryptionInfo::from(bundle_data.inner.bundle_data.file.clone()),
             )?;
 
             let mut decrypted_bundle = Zeroizing::new(Vec::new());
@@ -1862,13 +1863,10 @@ impl OlmMachine {
         };
 
         let me = self.inner.clone();
-        let bundle_data = bundle_data.clone();
         Ok(future_to_promise(async move {
             me.store()
                 .receive_room_key_bundle(
-                    &bundle_data.room_id.inner,
-                    &bundle_data.sender_user.inner,
-                    &bundle_data.sender_data,
+                    &bundle_data.inner,
                     deserialized_bundle,
                     /* TODO: Use the progress listener and expose an argument for it. */
                     |_, _| {},

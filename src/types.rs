@@ -11,7 +11,6 @@ use matrix_sdk_crypto::{
     backups::{
         SignatureState as InnerSignatureState, SignatureVerification as InnerSignatureVerification,
     },
-    olm::SenderData,
     MediaEncryptionInfo,
 };
 use tracing::warn;
@@ -597,43 +596,41 @@ pub fn processed_to_device_event_to_js_value(
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct StoredRoomKeyBundleData {
-    /// The user that sent us this data.
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "senderUser")]
-    pub sender_user: UserId,
+    pub(crate) inner: matrix_sdk_crypto::store::types::StoredRoomKeyBundleData,
+}
 
-    /// Information about the sender of this data and how much we trust that
-    /// information.
-    ///
-    /// This is held here because we need the `SenderData` back again in
-    /// [`OlmMachine::receive_room_key_bundle`]. It's not exposed over the wasm
-    /// boundary because `SenderData` doesn't implement `Into<JsValue>`.
-    pub(crate) sender_data: SenderData,
+#[wasm_bindgen]
+impl StoredRoomKeyBundleData {
+    /// The user that sent us this data.
+    #[wasm_bindgen(getter, js_name = "senderUser")]
+    pub fn sender_user(&self) -> UserId {
+        self.inner.sender_user.clone().into()
+    }
 
     /// The room that these keys are for.
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "roomId")]
-    pub room_id: RoomId,
+    #[wasm_bindgen(getter, js_name = "roomId")]
+    pub fn room_id(&self) -> RoomId {
+        self.inner.bundle_data.room_id.clone().into()
+    }
 
     /// The location of the bundle.
-    #[wasm_bindgen(readonly, getter_with_clone)]
-    pub url: String,
+    #[wasm_bindgen(getter)]
+    pub fn url(&self) -> String {
+        self.inner.bundle_data.file.url.to_string()
+    }
 
     /// The JSON-encoded encryption info for the key bundle.
-    #[wasm_bindgen(readonly, getter_with_clone, js_name = "encryptionInfo")]
-    pub encryption_info: String,
+    ///
+    /// @deprecated Should not be used within applications.
+    #[wasm_bindgen(getter, js_name = "encryptionInfo")]
+    pub fn encryption_info(&self) -> String {
+        serde_json::to_string(&MediaEncryptionInfo::from(self.inner.bundle_data.file.clone()))
+            .expect("Unable to serialize MediaEncryptionInfo")
+    }
 }
 
 impl From<matrix_sdk_crypto::store::types::StoredRoomKeyBundleData> for StoredRoomKeyBundleData {
     fn from(value: matrix_sdk_crypto::store::types::StoredRoomKeyBundleData) -> Self {
-        let url = value.bundle_data.file.url.to_string();
-        let encryption_info =
-            serde_json::to_string(&MediaEncryptionInfo::from(value.bundle_data.file))
-                .expect("Unable to serialize MediaEncryptionInfo");
-        Self {
-            sender_user: value.sender_user.into(),
-            sender_data: value.sender_data,
-            room_id: value.bundle_data.room_id.into(),
-            url,
-            encryption_info,
-        }
+        Self { inner: value }
     }
 }
