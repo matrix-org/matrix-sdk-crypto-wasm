@@ -527,6 +527,34 @@ impl OlmMachine {
         }))
     }
 
+    /// Encrypt a state message for the given room.
+    #[cfg(feature = "experimental-encrypted-state-events")]
+    #[wasm_bindgen(js_name = "encryptStateEvent")]
+    pub fn encrypt_state_event(
+        &self,
+        room_id: &identifiers::RoomId,
+        event_type: String,
+        state_key: String,
+        content: &str,
+    ) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let room_id = room_id.inner.clone();
+        let content = serde_json::from_str(content)?;
+        let me = self.inner.clone();
+
+        Ok(future_to_promise(async move {
+            Ok(serde_json::to_string(
+                &me.encrypt_state_event_raw(
+                    &room_id,
+                    event_type.as_ref(),
+                    state_key.as_ref(),
+                    &content,
+                )
+                .await?,
+            )?)
+        }))
+    }
+
     /// Decrypt an event from a room timeline.
     ///
     /// # Arguments

@@ -57,6 +57,13 @@ crate-type = ["cdylib"]
 default = ["qrcode"]
 qrcode = ["matrix-sdk-crypto/qrcode", "dep:matrix-sdk-qrcode"]
 
+# Enable experimental support for encrypting state events; see
+# https://github.com/matrix-org/matrix-rust-sdk/issues/5397.
+experimental-encrypted-state-events = [
+    "matrix-sdk-common/experimental-encrypted-state-events",
+    "matrix-sdk-crypto/experimental-encrypted-state-events"
+]
+
 [dependencies]
 console_error_panic_hook = "0.1.7"
 futures-util = "0.3.27"

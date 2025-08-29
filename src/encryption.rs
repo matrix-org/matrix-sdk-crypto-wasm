@@ -18,6 +18,11 @@ pub struct EncryptionSettings {
     /// The encryption algorithm that should be used in the room.
     pub algorithm: EncryptionAlgorithm,
 
+    /// Whether state event encryption is enabled.
+    #[cfg(feature = "experimental-encrypted-state-events")]
+    #[wasm_bindgen(js_name = "encryptStateEvents")]
+    pub encrypt_state_events: bool,
+
     /// How long the session should be used before changing it,
     /// expressed in microseconds.
     #[wasm_bindgen(js_name = "rotationPeriod")]
@@ -44,6 +49,8 @@ impl Default for EncryptionSettings {
 
         Self {
             algorithm: default.algorithm.into(),
+            #[cfg(feature = "experimental-encrypted-state-events")]
+            encrypt_state_events: default.encrypt_state_events,
             rotation_period: default.rotation_period.as_micros().try_into().unwrap(),
             rotation_period_messages: default.rotation_period_msgs,
             history_visibility: default.history_visibility.into(),
@@ -67,6 +74,8 @@ impl From<&EncryptionSettings> for matrix_sdk_crypto::olm::EncryptionSettings {
 
         Self {
             algorithm,
+            #[cfg(feature = "experimental-encrypted-state-events")]
+            encrypt_state_events: value.encrypt_state_events,
             rotation_period: Duration::from_micros(value.rotation_period),
             rotation_period_msgs: value.rotation_period_messages,
             history_visibility: value.history_visibility.clone().into(),
