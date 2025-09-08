@@ -1,6 +1,8 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk, which includes:
+# matrix-sdk-crypto-wasm v16.0.0
+
+-   Update matrix-rust-sdk to 0.14.0, which includes:
 
     -   When in "exclude insecure devices" mode, refuse to decrypt
         incoming to-device messages from unverified devices, except for some
@@ -11,6 +13,19 @@
     -   `Device.encryptToDeviceEvent` now takes an optional argument of type
         `CollectStrategy` to specify the required trust level of recipients.
         ([#5457](https://github.com/matrix-org/matrix-rust-sdk/pull/5457/))
+    -   Add support to accept historic room key bundles that arrive out of order,
+        i.e. the bundle arrives after the invite has already been accepted.
+        ([#5322](https://github.com/matrix-org/matrix-rust-sdk/pull/5322))
+    -   Upgrade ruma to 0.13.0
+        ([#5623](https://github.com/matrix-org/matrix-rust-sdk/pull/5623))
+
+### Bugfix
+
+-   The event handlers APIs now properly support events whose type is not fully statically-known. Before, those events would never trigger an event handler.
+    ([#5444](https://github.com/matrix-org/matrix-rust-sdk/pull/5444))
+-   All HTTP requests now have a default `read_timeout` of 60s, which means they'll disconnect if the connection stalls.
+    `RequestConfig::timeout` is now optional and can be disabled on a per-request basis. This will be done for the requests used to download media, so they don't get cancelled after the default 30s timeout for no good reason.
+    ([#5437](https://github.com/matrix-org/matrix-rust-sdk/pull/5437))
 
 # matrix-sdk-crypto-wasm v15.1.0
 
