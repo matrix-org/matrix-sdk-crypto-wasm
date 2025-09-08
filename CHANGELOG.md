@@ -1,6 +1,8 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk, which includes:
+# matrix-sdk-crypto-wasm v15.2.0
+
+-   Update matrix-rust-sdk to 0.14.0, which includes:
 
     -   When in "exclude insecure devices" mode, refuse to decrypt
         incoming to-device messages from unverified devices, except for some
@@ -11,6 +13,11 @@
     -   `Device.encryptToDeviceEvent` now takes an optional argument of type
         `CollectStrategy` to specify the required trust level of recipients.
         ([#5457](https://github.com/matrix-org/matrix-rust-sdk/pull/5457/))
+    -   Add support to accept historic room key bundles that arrive out of order,
+        i.e. the bundle arrives after the invite has already been accepted.
+        ([#5322](https://github.com/matrix-org/matrix-rust-sdk/pull/5322))
+    -   Upgrade ruma to 0.13.0
+        ([#5623](https://github.com/matrix-org/matrix-rust-sdk/pull/5623))
 
 # matrix-sdk-crypto-wasm v15.1.0
 
