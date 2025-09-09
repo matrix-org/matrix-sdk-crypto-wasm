@@ -19,7 +19,6 @@ pub struct EncryptionSettings {
     pub algorithm: EncryptionAlgorithm,
 
     /// Whether state event encryption is enabled.
-    #[cfg(feature = "experimental-encrypted-state-events")]
     #[wasm_bindgen(js_name = "encryptStateEvents")]
     pub encrypt_state_events: bool,
 
@@ -49,7 +48,6 @@ impl Default for EncryptionSettings {
 
         Self {
             algorithm: default.algorithm.into(),
-            #[cfg(feature = "experimental-encrypted-state-events")]
             encrypt_state_events: default.encrypt_state_events,
             rotation_period: default.rotation_period.as_micros().try_into().unwrap(),
             rotation_period_messages: default.rotation_period_msgs,
@@ -74,7 +72,6 @@ impl From<&EncryptionSettings> for matrix_sdk_crypto::olm::EncryptionSettings {
 
         Self {
             algorithm,
-            #[cfg(feature = "experimental-encrypted-state-events")]
             encrypt_state_events: value.encrypt_state_events,
             rotation_period: Duration::from_micros(value.rotation_period),
             rotation_period_msgs: value.rotation_period_messages,

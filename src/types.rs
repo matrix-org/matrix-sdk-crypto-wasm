@@ -303,7 +303,6 @@ pub struct RoomSettings {
     pub algorithm: EncryptionAlgorithm,
 
     /// Whether state event encryption is enabled.
-    #[cfg(feature = "experimental-encrypted-state-events")]
     #[wasm_bindgen(js_name = "encryptStateEvents")]
     pub encrypt_state_events: bool,
 
@@ -336,7 +335,6 @@ impl Default for RoomSettings {
     fn default() -> Self {
         Self {
             algorithm: EncryptionAlgorithm::MegolmV1AesSha2,
-            #[cfg(feature = "experimental-encrypted-state-events")]
             encrypt_state_events: false,
             only_allow_trusted_devices: false,
             session_rotation_period_ms: None,
@@ -349,7 +347,6 @@ impl From<matrix_sdk_crypto::store::types::RoomSettings> for RoomSettings {
     fn from(value: matrix_sdk_crypto::store::types::RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.into(),
-            #[cfg(feature = "experimental-encrypted-state-events")]
             encrypt_state_events: value.encrypt_state_events,
             only_allow_trusted_devices: value.only_allow_trusted_devices,
             session_rotation_period_ms: value
@@ -366,7 +363,6 @@ impl From<&RoomSettings> for matrix_sdk_crypto::store::types::RoomSettings {
     fn from(value: &RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.clone().into(),
-            #[cfg(feature = "experimental-encrypted-state-events")]
             encrypt_state_events: value.encrypt_state_events,
             only_allow_trusted_devices: value.only_allow_trusted_devices,
             session_rotation_period: value

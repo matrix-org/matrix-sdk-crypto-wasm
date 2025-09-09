@@ -554,7 +554,6 @@ impl OlmMachine {
     /// # Panics
     ///
     /// Panics if a group session for the given room was not previously shared.
-    #[cfg(feature = "experimental-encrypted-state-events")]
     #[wasm_bindgen(js_name = "encryptStateEvent")]
     pub fn encrypt_state_event(
         &self,
