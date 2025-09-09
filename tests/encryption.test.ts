@@ -17,6 +17,7 @@ describe(EncryptionSettings.name, () => {
         const es = new EncryptionSettings();
 
         expect(es.algorithm).toStrictEqual(EncryptionAlgorithm.MegolmV1AesSha2);
+        expect(es.encryptStateEvents).toStrictEqual(false);
         expect(es.rotationPeriod).toStrictEqual(604800000000n);
         expect(es.rotationPeriodMessages).toStrictEqual(100n);
         expect(es.historyVisibility).toStrictEqual(HistoryVisibility.Shared);
