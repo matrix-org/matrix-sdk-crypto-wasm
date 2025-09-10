@@ -662,6 +662,65 @@ describe(OlmMachine.name, () => {
             expect(decryptionInfo.shieldState(false)?.color).toStrictEqual(ShieldColor.Red);
             expect(decryptionInfo.shieldState(false)?.code).toStrictEqual(ShieldStateCode.UnsignedDevice);
         });
+
+        test("can encrypt a state event", async () => {
+            encrypted = JSON.parse(
+                await m.encryptStateEvent(
+                    room,
+                    "m.room.topic",
+                    "",
+                    JSON.stringify({
+                        topic: "It's a secret!",
+                    }),
+                ),
+            );
+
+            expect(encrypted.algorithm).toBeDefined();
+            expect(encrypted.ciphertext).toBeDefined();
+            expect(encrypted.sender_key).toBeDefined();
+            expect(encrypted.device_id).toStrictEqual(device.toString());
+            expect(encrypted.session_id).toBeDefined();
+        });
+
+        test("can decrypt a state event", async () => {
+            const stringifiedEvent = JSON.stringify({
+                type: "m.room.encrypted",
+                event_id: "$xxxxx:example.org",
+                origin_server_ts: Date.now(),
+                sender: user.toString(),
+                content: encrypted,
+                unsigned: {
+                    age: 1234,
+                },
+            });
+
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            const decrypted = await m.decryptRoomEvent(stringifiedEvent, room, decryptionSettings)!;
+            expect(decrypted).toBeInstanceOf(DecryptedRoomEvent);
+
+            const event = JSON.parse(decrypted.event);
+            expect(event.content.topic).toStrictEqual("It's a secret!");
+
+            expect(decrypted.sender?.toString()).toStrictEqual(user.toString());
+            expect(decrypted.senderDevice?.toString()).toStrictEqual(device.toString());
+            expect(decrypted.senderCurve25519Key).toBeDefined();
+            expect(decrypted.senderClaimedEd25519Key).toBeDefined();
+            expect(decrypted.forwardingCurve25519KeyChain).toHaveLength(0);
+            expect(decrypted.shieldState(true)?.color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(true)?.code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
+            expect(decrypted.shieldState(false)?.color).toStrictEqual(ShieldColor.Red);
+            expect(decrypted.shieldState(false)?.code).toStrictEqual(ShieldStateCode.UnsignedDevice);
+
+            const decryptionInfo = await m.getRoomEventEncryptionInfo(stringifiedEvent, room);
+            expect(decryptionInfo.sender?.toString()).toStrictEqual(user.toString());
+            expect(decryptionInfo.senderDevice?.toString()).toStrictEqual(device.toString());
+            expect(decryptionInfo.senderCurve25519Key).toBeDefined();
+            expect(decryptionInfo.senderClaimedEd25519Key).toBeDefined();
+            expect(decryptionInfo.shieldState(true)?.color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(true)?.code).toStrictEqual(ShieldStateCode.UnverifiedIdentity);
+            expect(decryptionInfo.shieldState(false)?.color).toStrictEqual(ShieldColor.Red);
+            expect(decryptionInfo.shieldState(false)?.code).toStrictEqual(ShieldStateCode.UnsignedDevice);
+        });
     });
 
     test("failure to decrypt returns a valid error", async () => {

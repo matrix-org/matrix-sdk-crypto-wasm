@@ -527,6 +527,59 @@ impl OlmMachine {
         }))
     }
 
+    /// Encrypt a state event for the given room.
+    ///
+    /// This method encrypts a state event for the specified room, using the
+    /// current group session. The event will be encrypted so that only
+    /// authorized room members can decrypt it.
+    ///
+    /// **Note**: A room key must have been shared with the group of users in
+    /// the room before calling this method. If not, this method will panic.
+    ///
+    /// The usual flow to encrypt a state event using this machine is identical
+    /// to that outlined for [`OlmMachine::encrypt_room_event`].
+    ///
+    /// # Arguments
+    ///
+    /// * `room_id` - The ID of the room for which the state event should be
+    ///   encrypted.
+    /// * `event_type` - The type of the state event.
+    /// * `state_key` - The state key for the event.
+    /// * `content` - The plaintext JSON content of the event to encrypt.
+    ///
+    /// # Returns
+    ///
+    /// A `Promise` resolving to a JSON string containing the encrypted event.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a group session for the given room was not previously shared.
+    #[wasm_bindgen(js_name = "encryptStateEvent")]
+    pub fn encrypt_state_event(
+        &self,
+        room_id: &identifiers::RoomId,
+        event_type: String,
+        state_key: String,
+        content: &str,
+    ) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let room_id = room_id.inner.clone();
+        let content = serde_json::from_str(content)?;
+        let me = self.inner.clone();
+
+        Ok(future_to_promise(async move {
+            Ok(serde_json::to_string(
+                &me.encrypt_state_event_raw(
+                    &room_id,
+                    event_type.as_ref(),
+                    state_key.as_ref(),
+                    &content,
+                )
+                .await?,
+            )?)
+        }))
+    }
+
     /// Decrypt an event from a room timeline.
     ///
     /// # Arguments

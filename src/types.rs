@@ -302,6 +302,10 @@ pub struct RoomSettings {
     /// Should be one of the members of {@link EncryptionAlgorithm}.
     pub algorithm: EncryptionAlgorithm,
 
+    /// Whether state event encryption is enabled.
+    #[wasm_bindgen(js_name = "encryptStateEvents")]
+    pub encrypt_state_events: bool,
+
     /// Whether untrusted devices should receive room keys. If this is `false`,
     /// they will be excluded from the conversation.
     #[wasm_bindgen(js_name = "onlyAllowTrustedDevices")]
@@ -331,6 +335,7 @@ impl Default for RoomSettings {
     fn default() -> Self {
         Self {
             algorithm: EncryptionAlgorithm::MegolmV1AesSha2,
+            encrypt_state_events: false,
             only_allow_trusted_devices: false,
             session_rotation_period_ms: None,
             session_rotation_period_messages: None,
@@ -342,6 +347,7 @@ impl From<matrix_sdk_crypto::store::types::RoomSettings> for RoomSettings {
     fn from(value: matrix_sdk_crypto::store::types::RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.into(),
+            encrypt_state_events: value.encrypt_state_events,
             only_allow_trusted_devices: value.only_allow_trusted_devices,
             session_rotation_period_ms: value
                 .session_rotation_period
@@ -357,6 +363,7 @@ impl From<&RoomSettings> for matrix_sdk_crypto::store::types::RoomSettings {
     fn from(value: &RoomSettings) -> Self {
         Self {
             algorithm: value.algorithm.clone().into(),
+            encrypt_state_events: value.encrypt_state_events,
             only_allow_trusted_devices: value.only_allow_trusted_devices,
             session_rotation_period: value
                 .session_rotation_period_ms
