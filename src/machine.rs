@@ -1856,6 +1856,12 @@ impl OlmMachine {
     /// See if we have received an {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4268|MSC4268}
     /// room key bundle for the given room from the given user.
     ///
+    /// Before calling this, the application must make sure that we have an
+    /// up-to-date copy of the inviter's cross-signing keys, so that we can
+    /// verify the device that send us the key bundle data message. (For
+    /// now, the easiest way to do that is by calling {@link queryKeysForUsers}
+    /// for the inviter, and making the resultant request.)
+    ///
     /// Returns either `undefined` if no suitable bundle has been received,
     /// or an {@link StoredRoomKeyBundleData}, in which case, the bundle
     /// should be downloaded, and then passed to {@link
