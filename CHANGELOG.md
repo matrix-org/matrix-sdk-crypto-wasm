@@ -1,8 +1,8 @@
 # UNRELEASED
 
--   **BREAKING** Add support for experimental encrypted state events, introduce
-    `EncryptionSettings::encrypt_state_events`, `RoomSettings::encrypt_state_events`,
-    and `OlmMachine::encrypt_state_event`.
+-   Add support for experimental encrypted state events, introduce
+    `EncryptionSettings:.encryptStateEvents`, `RoomSettings.encryptStateEvents`,
+    and `OlmMachine.encryptStateEvent`.
     ([#260](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/260/files))
 
 # matrix-sdk-crypto-wasm v15.2.0
