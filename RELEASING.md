@@ -5,13 +5,16 @@
 Assuming you are making a release to get the latest Rust code, you should bump
 the version of `matrix-rust-sdk` we are depending on in `Cargo.lock`.
 
-At time of writing, Cargo.toml has `git = "https://github.com/matrix-org/matrix-rust-sdk"`,
-which picks up the latest version on the default branch in Git. This means that
-we can update the version by following these steps:
+Ideally, release versions of `matrix-sdk-crypto-wasm` will depend on release
+versions of `matrix-rust-sdk`. The best way to upgrade is:
+ 1. Edit `Cargo.toml` to remove any `git` settings for `matrix-sdk-*`, and set
+    `version` to the latest version (see [crates.io](https://crates.io/crates/matrix_sdk_crypto/versions)).
+ 2. Ensure `.cargo/config` does **not** contain the `patch` section for local
+    development recommended in `README.md`.
+ 3. Run `cargo update`.
 
-1. Ensure `.cargo/config` does **not** contain the `patch` section for local
-   development recommended in `README.md`.
-2. Run `cargo update`.
+Occasionally, we may need to use a git version of `matrix-rust-sdk`. For that,
+you can `cargo xtask unstable-rust-sdk`.
 
 ## Doing the release
 
