@@ -1858,7 +1858,7 @@ impl OlmMachine {
     ///
     /// Before calling this, the application must make sure that we have an
     /// up-to-date copy of the inviter's cross-signing keys, so that we can
-    /// verify the device that send us the key bundle data message. (For
+    /// verify the device that sent us the key bundle data message. (For
     /// now, the easiest way to do that is by calling {@link queryKeysForUsers}
     /// for the inviter, and making the resultant request.)
     ///
