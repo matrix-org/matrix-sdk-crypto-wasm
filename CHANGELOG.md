@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v15.3.0
+
 -   Add support for experimental encrypted state events, introduce
     `EncryptionSettings:.encryptStateEvents`, `RoomSettings.encryptStateEvents`,
     and `OlmMachine.encryptStateEvent`.
