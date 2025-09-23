@@ -689,6 +689,7 @@ describe(OlmMachine.name, () => {
                 origin_server_ts: Date.now(),
                 sender: user.toString(),
                 content: encrypted,
+                state_key: "m.room.topic:",
                 unsigned: {
                     age: 1234,
                 },
