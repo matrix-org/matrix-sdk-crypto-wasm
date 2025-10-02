@@ -234,20 +234,28 @@ impl_from_to_inner!(matrix_sdk_crypto::store::types::RoomKeyWithheldInfo => Room
 
 #[wasm_bindgen]
 impl RoomKeyWithheldInfo {
-    /// The User ID of the user that sent us the `m.room_key.withheld` message.
+    /// The User ID of the sender of the withheld information.
+    ///
+    /// This may be the sender of an `m.room_key.withheld` event, or the sender
+    /// of a shared room key bundle under MSC4268.
     #[wasm_bindgen(getter)]
     pub fn sender(&self) -> UserId {
         self.inner.withheld_event.sender.to_owned().into()
     }
 
     /// The encryption algorithm of the session that is being withheld.
+    ///
+    /// This may be from an `m.room_key.withheld` event, or from a shared room
+    /// key bundle under MSC4268.
     #[wasm_bindgen(getter)]
     pub fn algorithm(&self) -> EncryptionAlgorithm {
         self.inner.withheld_event.content.algorithm().into()
     }
 
-    /// The `code` from the `m.room_key.withheld` message, such as
-    /// `m.unverified`.
+    /// The `code` indicating why the key was withheld, such as `m.unverified`.
+    ///
+    /// This may be from an `m.room_key.withheld` event (such as
+    /// `m.unverified`), or from a shared room key bundle under MSC4268.
     #[wasm_bindgen(getter, js_name = "withheldCode")]
     pub fn withheld_code(&self) -> String {
         self.inner.withheld_event.content.withheld_code().as_str().to_owned()
