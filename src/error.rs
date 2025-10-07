@@ -41,35 +41,57 @@ pub struct MegolmDecryptionError {
     /// detailed description
     #[wasm_bindgen(readonly)]
     pub description: JsString,
-    /// Withheld code if any. Only for `UnknownMessageIndex` error code
-    #[wasm_bindgen(readonly)]
-    pub maybe_withheld: Option<JsString>,
+
+    /// The withheld code, if any.
+    withheld_code: Option<WithheldCode>,
 }
 
+#[wasm_bindgen]
 impl MegolmDecryptionError {
     /// Creates generic error with description
     pub fn unable_to_decrypt(desc: String) -> Self {
         Self {
             code: DecryptionErrorCode::UnableToDecrypt,
             description: desc.into(),
-            maybe_withheld: None,
+            withheld_code: None,
         }
+    }
+
+    /// Textual description of the withheld code, if any.
+    ///
+    /// Example: "The sender has disabled encrypting to unverified devices."
+    ///
+    /// `undefined` if we have not received a withheld code for the megolm
+    /// session.
+    #[wasm_bindgen(getter)]
+    pub fn maybe_withheld(&self) -> Option<String> {
+        self.withheld_code.as_ref().map(|code| code.to_string())
+    }
+
+    /// The withheld code, if any.
+    ///
+    /// Example: "m.unverified"
+    ///
+    /// `undefined` if we have not received a withheld code for the megolm
+    /// session.
+    #[wasm_bindgen(getter, js_name = "withheldCode")]
+    pub fn withheld_code(&self) -> Option<String> {
+        self.withheld_code.as_ref().map(|code| code.as_str().to_owned())
     }
 }
 
 impl From<MegolmError> for MegolmDecryptionError {
     fn from(value: MegolmError) -> Self {
         let decryption_error = |code: DecryptionErrorCode,
-                                maybe_withheld: Option<&WithheldCode>|
+                                withheld_code: Option<WithheldCode>|
          -> MegolmDecryptionError {
             let description = value.to_string().into();
-            let maybe_withheld = maybe_withheld.map(|code| code.to_string().to_owned().into());
-            MegolmDecryptionError { code, description, maybe_withheld }
+            MegolmDecryptionError { code, description, withheld_code }
         };
 
         match &value {
             MegolmError::MissingRoomKey(withheld_code) => {
-                decryption_error(DecryptionErrorCode::MissingRoomKey, withheld_code.as_ref())
+                decryption_error(DecryptionErrorCode::MissingRoomKey, withheld_code.clone())
             }
             MegolmError::Decryption(vodozemac::megolm::DecryptionError::UnknownMessageIndex(
                 ..,
