@@ -56,7 +56,7 @@ jobs:
         run: yarn test
 
       - name: Publish to npmjs
-        run npm publish --provenance --ignore-scripts
+        run: npm publish --provenance --ignore-scripts
 
   github-release:
     name: Create the Github release
