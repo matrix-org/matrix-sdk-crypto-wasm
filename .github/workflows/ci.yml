@@ -39,10 +39,7 @@ jobs:
           (cd xtask && cargo fmt -- --check)
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
-
-      - name: Install yarn
-        run: npm install --global yarn
+        uses: actions/setup-node@v5
 
       - name: Install dependencies
         run: yarn install
@@ -76,16 +73,13 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
-        # Keep this in sync with:
-        # .github/workflows/latest-matrix-sdk-crypto.yml
-        # .github/workflows/release.yml
+      # Keep this in sync with:
+      # .github/workflows/latest-matrix-sdk-crypto.yml
+      # .github/workflows/release.yml
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
-          node-version: 20.0
-
-      - name: Install yarn
-        run: npm install --global yarn
+          node-version: 24.0
 
       - name: Install dependencies
         run: yarn install
