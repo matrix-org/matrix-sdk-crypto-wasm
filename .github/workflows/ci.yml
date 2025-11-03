@@ -39,10 +39,7 @@ jobs:
           (cd xtask && cargo fmt -- --check)
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
-
-      - name: Install yarn
-        run: npm install --global yarn
+        uses: actions/setup-node@v5
 
       - name: Install dependencies
         run: yarn install
@@ -83,9 +80,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 24.0
-
-      - name: Install yarn
-        run: npm install --global yarn
 
       - name: Install dependencies
         run: yarn install
