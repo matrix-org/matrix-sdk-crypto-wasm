@@ -55,13 +55,13 @@ jobs:
         run: |
            cargo xtask unstable-rust-sdk
 
+      # Keep this in sync with:
+      # .github/workflows/ci.yml
+      # .github/workflows/release.yml
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
-          # Keep this in sync with:
-          # .github/workflows/ci.yml
-          # .github/workflows/release.yml
-          node-version: 20.0
+          node-version: 24.0
 
       - name: Install yarn
         run: npm install --global yarn

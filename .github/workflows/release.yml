@@ -22,6 +22,10 @@ jobs:
     name: Publish 🕸 [m]-crypto-wasm
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write # Allow requesting an OIDC JWT, which is required to publish to npm
+      contents: read
+
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
@@ -31,13 +35,13 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
 
-        # Keep this in sync with:
-        # .github/workflows/ci.yml
-        # .github/workflows/latest-matrix-sdk-crypto.yml
+      # Keep this in sync with:
+      # .github/workflows/ci.yml
+      # .github/workflows/latest-matrix-sdk-crypto.yml
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
-          node-version: 20.0
+          node-version: 24.0
 
       - name: Install yarn
         run: npm install --global yarn
@@ -45,12 +49,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Publish the WebAssembly + JavaScript binding (imply building + testing)
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          package: package.json
-          access: public
-          token: ${{ secrets.NPM_TOKEN }}
+      - name: Build
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Publish to npmjs
+        run npm publish --provenance --ignore-scripts
 
   github-release:
     name: Create the Github release
