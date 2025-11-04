@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Add new property `MegolmDecryptionError.withheldCode`, which returns a withheld
+    code such as `m.unverified` if we received a withheld notification for the
+    session associated with the UTD event.
+    ([#269](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/269/files))
+
 # matrix-sdk-crypto-wasm v15.3.0
 
 -   Add support for experimental encrypted state events, introduce

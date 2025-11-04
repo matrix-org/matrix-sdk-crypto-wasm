@@ -899,6 +899,61 @@ describe(OlmMachine.name, () => {
         expect(withheld[0].withheldCode).toEqual("m.unverified");
     });
 
+    test("decrypting a message from a withheld session throws MegolmDecryptionError with correct withheld code", async () => {
+        const m = await machine();
+
+        // Simulate receiving a withheld event for a session
+        const withheldEvent = {
+            sender: "@alice:example.com",
+            type: "m.room_key.withheld",
+            content: {
+                algorithm: "m.megolm.v1.aes-sha2",
+                code: "m.unverified",
+                reason: "Device not verified",
+                room_id: room.toString(),
+                sender_key: m.identityKeys.curve25519.toBase64(),
+                session_id: "SESSION_ID_WITHHELD",
+            },
+        };
+        await m.receiveSyncChanges(
+            JSON.stringify([withheldEvent]),
+            new DeviceLists(),
+            new Map<string, number>(),
+            undefined,
+        );
+
+        // Now try to decrypt a message from that session
+        const encryptedEvent = {
+            type: "m.room.encrypted",
+            event_id: "$xxxxx:example.org",
+            origin_server_ts: Date.now(),
+            sender: user.toString(),
+            content: {
+                algorithm: "m.megolm.v1.aes-sha2",
+                ciphertext:
+                    "AwgAEpABhetEzzZzyYrxtEVUtlJnZtJcURBlQUQJ9irVeklCTs06LwgTMQj61PMUS4VyYOX+PD67+hhU40/8olOww+Ud0m2afjMjC3wFX+4fFfSkoWPVHEmRVucfcdSF1RSB4EmKPIP4eo1X6x8kCIMewBvxl2sI9j4VNvDvAN7M3zkLJfFLOFHbBviI4FN7hSFHFeM739ZgiwxEs3hIkUXEiAfrobzaMEM/zY7SDrTdyffZndgJo7CZOVhoV6vuaOhmAy4X2t4UnbuVJGJjKfV57NAhp8W+9oT7ugwO",
+                sender_key: m.identityKeys.curve25519.toBase64(),
+                session_id: "SESSION_ID_WITHHELD",
+            },
+            unsigned: {
+                age: 1234,
+            },
+        };
+
+        try {
+            const decryptionSettings = new DecryptionSettings(TrustRequirement.Untrusted);
+            await m.decryptRoomEvent(JSON.stringify(encryptedEvent), room, decryptionSettings);
+            fail("Expected MegolmDecryptionError to be thrown");
+        } catch (err) {
+            expect(err).toBeInstanceOf(MegolmDecryptionError);
+            expect((err as MegolmDecryptionError).code).toStrictEqual(DecryptionErrorCode.MissingRoomKey);
+            expect((err as MegolmDecryptionError).maybe_withheld).toEqual(
+                "The sender has disabled encrypting to unverified devices.",
+            );
+            expect((err as MegolmDecryptionError).withheldCode).toEqual("m.unverified");
+        }
+    });
+
     test("can export room keys", async () => {
         let m = await machine();
         await m.shareRoomKey(room, [new UserId("@bob:example.org")], new EncryptionSettings());
