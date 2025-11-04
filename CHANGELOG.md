@@ -5,6 +5,28 @@
     session associated with the UTD event.
     ([#269](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/269/files))
 
+-   Update matrix-rust-sdk to `781df5526d88a5417652156528b637d256038855`, which includes:
+
+    Features:
+
+    -   When constructing a key bundle for history sharing, if we had received a key bundle ourselves, in which one or more sessions was marked as "history not shared", pass that on to the new user.
+        ([#5820](https://github.com/matrix-org/matrix-rust-sdk/pull/5820)
+    -   Use new withheld code in key bundles for sessions not marked as
+        `shared_history`.
+        ([#5807](https://github.com/matrix-org/matrix-rust-sdk/pull/5807)
+    -   Improve feedback support for shared history when downloading room key
+        bundles.
+        ([#5737](https://github.com/matrix-org/matrix-rust-sdk/pull/5737))
+
+    Bugfixes:
+
+    -   Fix a bug which caused encrypted to-device messages from unknown devices to be ignored.
+        ([#5763](https://github.com/matrix-org/matrix-rust-sdk/pull/5763))
+    -   Fix a bug which caused history shared on invite to be ignored when "exclude insecure devices" was enabled.
+        ([#5763](https://github.com/matrix-org/matrix-rust-sdk/pull/5763))
+    -   Fix a bug introduced in 0.14.0 which meant that the serialization of the value returned by `OtherUserIdentity::verification_request_content` did not include a `msgtype` field.
+        ([#5642](https://github.com/matrix-org/matrix-rust-sdk/pull/5642))
+
 # matrix-sdk-crypto-wasm v15.3.0
 
 -   Add support for experimental encrypted state events, introduce
