@@ -1,14 +1,18 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v16.0.0
+
 -   Add new property `MegolmDecryptionError.withheldCode`, which returns a withheld
     code such as `m.unverified` if we received a withheld notification for the
     session associated with the UTD event.
     ([#269](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/269/files))
 
--   Update matrix-rust-sdk to `781df5526d88a5417652156528b637d256038855`, which includes:
+-   Update matrix-rust-sdk to `0.16.0`, which includes:
 
     Features:
 
+    -   When we receive an inbound Megolm session from two different sources, merge the two copies together to get the best of both.
+        ([#5865](https://github.com/matrix-org/matrix-rust-sdk/pull/5865)
     -   When constructing a key bundle for history sharing, if we had received a key bundle ourselves, in which one or more sessions was marked as "history not shared", pass that on to the new user.
         ([#5820](https://github.com/matrix-org/matrix-rust-sdk/pull/5820)
     -   Use new withheld code in key bundles for sessions not marked as
