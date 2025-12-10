@@ -521,9 +521,19 @@ impl OlmMachine {
         let me = self.inner.clone();
 
         Ok(future_to_promise(async move {
-            Ok(serde_json::to_string(
-                &me.encrypt_room_event_raw(&room_id, event_type.as_ref(), &content).await?,
-            )?)
+            let encryption_result =
+                me.encrypt_room_event_raw(&room_id, event_type.as_ref(), &content).await?;
+
+            // Note: encryption_result contains EncryptionInfo that we discard here, but
+            // might conceivably be of interest to our callers in future.
+            //
+            // See https://github.com/matrix-org/matrix-rust-sdk/pull/5936 for the change that
+            // added this info.
+            //
+            // For now, we just return the event content, which preserves the same interface
+            // we had before.
+
+            Ok(serde_json::to_string(&encryption_result.content)?)
         }))
     }
 
