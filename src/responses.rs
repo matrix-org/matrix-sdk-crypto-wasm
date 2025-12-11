@@ -244,6 +244,18 @@ pub struct EncryptionInfo {
     #[wasm_bindgen(getter_with_clone, js_name = "senderDevice")]
     pub sender_device: Option<identifiers::DeviceId>,
 
+    /// The ID of the user who sent us the keys with which we decrypted this
+    /// event as part of an MSC4268 key bundle, if present. Only applicable for
+    /// room events.
+    #[wasm_bindgen(getter_with_clone)]
+    pub forwarder: Option<identifiers::UserId>,
+
+    /// The device ID of the user who sent us the keys with which we decrypted
+    /// this event as part of an MSC4268 key bundle, if present. Only applicable
+    /// for room events.
+    #[wasm_bindgen(getter_with_clone, js_name = "forwarderDevice")]
+    pub forwarder_device: Option<identifiers::DeviceId>,
+
     /// The base64-encoded public Curve25519 key of the device that created the
     /// megolm decryption key originally.
     #[wasm_bindgen(getter_with_clone, js_name = "senderCurve25519Key")]
@@ -299,6 +311,8 @@ impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for
                         .get(&ruma::DeviceKeyAlgorithm::Ed25519)
                         .cloned()
                         .into(),
+                    forwarder: value.forwarder.clone().map(Into::into),
+                    forwarder_device: value.forwarder_device.clone().map(Into::into),
                     verification_state: value.verification_state.clone(),
                 })
             }
