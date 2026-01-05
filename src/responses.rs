@@ -213,6 +213,25 @@ impl DecryptedRoomEvent {
     pub fn shield_state(&self, strict: bool) -> encryption::ShieldState {
         self.encryption_info.shield_state(strict)
     }
+
+    /// If the keys for this message were shared-on-invite as part of an
+    /// [MSC4268] key bundle, the ID of the user who sent us the bundle.
+    ///
+    /// [MSC4268]: https://github.com/matrix-org/matrix-spec-proposals/pull/4268
+    #[wasm_bindgen(getter, js_name = "forwarder")]
+    pub fn forwarder(&self) -> Option<identifiers::UserId> {
+        self.encryption_info.forwarder.clone()
+    }
+
+    /// If the keys for this message were shared-on-invite as part of an
+    /// [MSC4268] key bundle, the ID of the device from which this bundle
+    /// was sent.
+    ///
+    /// [MSC4268]: https://github.com/matrix-org/matrix-spec-proposals/pull/4268
+    #[wasm_bindgen(getter, js_name = "forwarderDevice")]
+    pub fn forwarder_device(&self) -> Option<identifiers::DeviceId> {
+        self.encryption_info.forwarder_device.clone()
+    }
 }
 
 impl TryFrom<matrix_sdk_common::deserialized_responses::DecryptedRoomEvent> for DecryptedRoomEvent {

@@ -139,9 +139,8 @@ describe("encrypted history sharing/decrypting", () => {
             expect(decryptedEvent.content.body).toEqual("Hi!");
 
             // ... and be able to look up who forwarded them the decryption key.
-            const encryptionInfo = await receiverMachine.getRoomEventEncryptionInfo(encryptedEvent, room);
-            expect(encryptionInfo.forwarder?.toString()).toEqual("@alice:example.org");
-            expect(encryptionInfo.forwarderDevice?.toString()).toEqual("A");
+            expect(decryptedData.forwarder?.toString()).toEqual("@alice:example.org");
+            expect(decryptedData.forwarderDevice?.toString()).toEqual("A");
         });
     });
 });
