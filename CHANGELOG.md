@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Expose information about the forwarder for events that were decrypted using a
+    key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
+    key bundle.
+    ([#270](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
+
 # matrix-sdk-crypto-wasm v16.0.0
 
 -   Add new property `MegolmDecryptionError.withheldCode`, which returns a withheld
