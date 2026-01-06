@@ -4,8 +4,24 @@
     key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundle.
     ([#270](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
--   Update matrix-rust-sdk to `cd9f433` to get access to forwarder information.
-    ([#5945](https://github.com/matrix-org/matrix-rust-sdk/pull/5945))
+-   Update matrix-rust-sdk to `cd9f433`, which includes:
+
+    -   Add field `forwarder` of type `ForwarderInfo` to `EncryptionInfo`, which
+        exposes information about the forwarder of the keys with which an event was
+        encrypted if they were shared as part of an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
+        room key bundle.
+        ([#5945](https://github.com/matrix-org/matrix-rust-sdk/pull/5945)).
+    -   Added a new field `forwarder` to `InboundGroupSession` of type `ForwarderData`,
+        which stores information about the forwarder of a session shared in a room key
+        bundle under [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268).
+        ([#5980])(https://github.com/matrix-org/matrix-rust-sdk/pull/5980)
+    -   The `OutboundGroupSession` and `OlmMachine` now return the `EncryptionInfo` used
+        when encrypting raw events.
+        ([#5936](https://github.com/matrix-org/matrix-rust-sdk/pull/5936))
+    -   Ensure that encrypted tests are run with a `StoreCipher`. This happened to reveal
+        tests which fail in an encrypted `EventCacheStore`, which required fixing queries
+        for all events in a room.
+        ([#5933](https://github.com/matrix-org/matrix-rust-sdk/pull/5933))
 
 # matrix-sdk-crypto-wasm v16.0.0
 
