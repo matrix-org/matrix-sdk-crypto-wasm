@@ -464,6 +464,7 @@ fn libolm_pickled_megolm_session_to_rust_pickled_session(
         sender_key,
         signing_key: sender_signing_keys,
         sender_data: Default::default(),
+        forwarder_data: None,
         room_id: libolm_session
             .room_id
             .clone()
