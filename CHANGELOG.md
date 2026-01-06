@@ -14,14 +14,11 @@
     -   Added a new field `forwarder` to `InboundGroupSession` of type `ForwarderData`,
         which stores information about the forwarder of a session shared in a room key
         bundle under [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268).
-        ([#5980])(https://github.com/matrix-org/matrix-rust-sdk/pull/5980)
+        ([#5980](https://github.com/matrix-org/matrix-rust-sdk/pull/5980)
     -   The `OutboundGroupSession` and `OlmMachine` now return the `EncryptionInfo` used
         when encrypting raw events.
         ([#5936](https://github.com/matrix-org/matrix-rust-sdk/pull/5936))
-    -   Ensure that encrypted tests are run with a `StoreCipher`. This happened to reveal
-        tests which fail in an encrypted `EventCacheStore`, which required fixing queries
-        for all events in a room.
-        ([#5933](https://github.com/matrix-org/matrix-rust-sdk/pull/5933))
+        **Note:** The WASM bindings are not affected by this change.
 
 # matrix-sdk-crypto-wasm v16.0.0
 
