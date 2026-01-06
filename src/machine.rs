@@ -1261,7 +1261,7 @@ impl OlmMachine {
         Ok(future_to_promise(async move {
             let result: RoomKeyImportResult = me
                 .store()
-                .import_room_keys(keys, Some(&backup_version), None, |progress, total_valid| {
+                .import_room_keys(keys, Some(&backup_version), |progress, total_valid| {
                     if let Some(callback) = &progress_listener {
                         callback
                             .call3(

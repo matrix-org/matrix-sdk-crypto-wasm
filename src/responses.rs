@@ -330,8 +330,8 @@ impl TryFrom<Arc<matrix_sdk_common::deserialized_responses::EncryptionInfo>> for
                         .get(&ruma::DeviceKeyAlgorithm::Ed25519)
                         .cloned()
                         .into(),
-                    forwarder: value.forwarder.clone().map(Into::into),
-                    forwarder_device: value.forwarder_device.clone().map(Into::into),
+                    forwarder: value.forwarder.as_ref().map(|info| info.user_id.clone().into()),
+                    forwarder_device: value.forwarder.as_ref().map(|info| info.device_id.clone().into()),
                     verification_state: value.verification_state.clone(),
                 })
             }

@@ -4,6 +4,8 @@
     key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundle.
     ([#270](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
+-   Update matrix-rust-sdk to `cd9f433` to get access to forwarder information.
+    ([#5945](https://github.com/matrix-org/matrix-rust-sdk/pull/5945))
 
 # matrix-sdk-crypto-wasm v16.0.0
 
