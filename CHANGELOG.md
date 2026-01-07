@@ -10,7 +10,7 @@
 
     -   **BREAKING**: `ShieldStateCode` no longer includes
         `SentInClear`. `VerificationState::to_shield_state_{lax,strict}` never
-        returned that code, ans so having it in the enum was somewhat misleading.
+        returned that code, and so including it in the enum was somewhat misleading.
         ([#5959](https://github.com/matrix-org/matrix-rust-sdk/pull/5959))
     -   Add field `forwarder` of type `ForwarderInfo` to `EncryptionInfo`, which
         exposes information about the forwarder of the keys with which an event was
