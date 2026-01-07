@@ -3,7 +3,7 @@
 -   Expose information about the forwarder for events that were decrypted using a
     key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundle.
-    ([#270](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
+    ([#284](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
 -   Update matrix-rust-sdk to `97110ed`, which includes:
 
     -   **BREAKING**: `ShieldStateCode` no longer includes
