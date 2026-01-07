@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v17.0.0
+
 -   Expose information about the forwarder for events that were decrypted using a
     key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundle.
