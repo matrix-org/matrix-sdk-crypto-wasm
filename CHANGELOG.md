@@ -4,8 +4,12 @@
     key from an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundle.
     ([#270](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/284/changes))
--   Update matrix-rust-sdk to `cd9f433`, which includes:
+-   Update matrix-rust-sdk to `97110ed`, which includes:
 
+    -   **BREAKING**: `ShieldStateCode` no longer includes
+        `SentInClear`. `VerificationState::to_shield_state_{lax,strict}` never
+        returned that code, ans so having it in the enum was somewhat misleading.
+        ([#5959](https://github.com/matrix-org/matrix-rust-sdk/pull/5959))
     -   Add field `forwarder` of type `ForwarderInfo` to `EncryptionInfo`, which
         exposes information about the forwarder of the keys with which an event was
         encrypted if they were shared as part of an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
