@@ -75,7 +75,7 @@ describe("Versions", () => {
 
 jest.setTimeout(15000);
 
-const EXPECTED_DB_VERSION = 102;
+const EXPECTED_DB_VERSION = 103;
 
 describe(OlmMachine.name, () => {
     test("can be instantiated with the async initializer", async () => {
