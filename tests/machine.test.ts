@@ -1452,6 +1452,13 @@ describe(OlmMachine.name, () => {
             expect(progressListener).toHaveBeenCalledTimes(1);
             expect(progressListener).toHaveBeenCalledWith(0, 2, 1);
         });
+
+        test("can check and set if all room keys have been downloaded", async () => {
+            const m = await machine();
+            await expect(m.hasDownloadedAllRoomKeys(room)).resolves.toBe(false);
+            await m.setHasDownloadedAllRoomKeys(room);
+            await expect(m.hasDownloadedAllRoomKeys(room)).resolves.toBe(true);
+        });
     });
 
     describe("Request missing secrets", () => {
