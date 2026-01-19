@@ -1434,6 +1434,44 @@ impl OlmMachine {
         })
     }
 
+    /// Get whether we have previously downloaded all message keys for a
+    /// particular room from the key backup. Typically called in advance of
+    /// building a room key bundle.
+    #[wasm_bindgen(
+        js_name = "hasDownloadedAllRoomKeys",
+        unchecked_return_type = "Promise<boolean>"
+    )]
+    pub fn has_downloaded_all_room_keys(&self, room_id: &identifiers::RoomId) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+
+        future_to_promise(
+            async move { Ok(me.store().has_downloaded_all_room_keys(&room_id).await?) },
+        )
+    }
+
+    /// Record that we have downloaded all message keys for the given room.
+    #[wasm_bindgen(
+        js_name = "setHasDownloadedAllRoomKeys",
+        unchecked_return_type = "Promise<void>"
+    )]
+    pub fn set_has_downloaded_all_room_keys(&self, room_id: &identifiers::RoomId) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+
+        future_to_promise(async move {
+            me.store()
+                .save_changes(Changes {
+                    room_key_backups_fully_downloaded: HashSet::from_iter([room_id]),
+                    ..Default::default()
+                })
+                .await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
     /// Get the number of backed up room keys and the total number of room keys.
     /// Returns a {@link RoomKeyCounts}.
     #[wasm_bindgen(js_name = "roomKeyCounts")]
@@ -1899,43 +1937,6 @@ impl OlmMachine {
                 .await?
                 .map(types::StoredRoomKeyBundleData::from);
             Ok(result)
-        })
-    }
-
-    /// Get whether we have previously downloaded all room keys for a particular
-    /// from the key backup in advance of building a room key bundle.
-    #[wasm_bindgen(
-        js_name = "hasDownloadedAllRoomKeys",
-        unchecked_return_type = "Promise<boolean>"
-    )]
-    pub fn has_downloaded_all_room_keys(&self, room_id: &identifiers::RoomId) -> Promise {
-        let _guard = dispatcher::set_default(&self.tracing_subscriber);
-        let me = self.inner.clone();
-        let room_id = room_id.inner.clone();
-
-        future_to_promise(
-            async move { Ok(me.store().has_downloaded_all_room_keys(&room_id).await?) },
-        )
-    }
-
-    /// Mark the given room as having previously downloaded all room keys.
-    #[wasm_bindgen(
-        js_name = "setHasDownloadedAllRoomKeys",
-        unchecked_return_type = "Promise<void>"
-    )]
-    pub fn set_has_downloaded_all_room_keys(&self, room_id: &identifiers::RoomId) -> Promise {
-        let _guard = dispatcher::set_default(&self.tracing_subscriber);
-        let me = self.inner.clone();
-        let room_id = room_id.inner.clone();
-
-        future_to_promise(async move {
-            me.store()
-                .save_changes(Changes {
-                    room_key_backups_fully_downloaded: HashSet::from_iter([room_id]),
-                    ..Default::default()
-                })
-                .await?;
-            Ok(JsValue::UNDEFINED)
         })
     }
 
