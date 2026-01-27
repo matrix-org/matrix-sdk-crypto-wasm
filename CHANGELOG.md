@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v17.1.0
+
 -   Expose two new methods, `has_downloaded_all_room_keys` and `set_has_downloaded_all_room_keys`
     which allow clients to record whether they have downloaded all room keys from key backup for
     a particular room in advance of building an [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
