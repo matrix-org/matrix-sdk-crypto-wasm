@@ -1,5 +1,20 @@
 # UNRELEASED
 
+-   Add support for [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388) in the QrCodeData class.
+    ([#290](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/290))
+-   Update matrix-rust-sdk to `40c6c330`, which includes:
+
+    -   Add MSC4388 support to the QrcodeData struct.
+        ([#6089](https://github.com/matrix-org/matrix-rust-sdk/pull/6089))
+    -   [**BREAKING**] The QrcodeData struct has been reworked in preparation to
+        support MSC4388. The fields of the QrcodeData struct are not anymore publicly
+        accessible. The `mode_data()` method has been renamed to `intent_data()` and
+        returns an MSC-specific struct now. The `rendezvous_url()` method has been
+        removed.
+        ([#6081](https://github.com/matrix-org/matrix-rust-sdk/pull/6081))
+    -   Add MSC4388 support to the QrcodeData struct.
+        ([#6089](https://github.com/matrix-org/matrix-rust-sdk/pull/6089))
+
 # matrix-sdk-crypto-wasm v17.1.0
 
 -   Expose two new methods, `has_downloaded_all_room_keys` and `set_has_downloaded_all_room_keys`
