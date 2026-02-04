@@ -64,9 +64,9 @@ futures-util = "0.3.27"
 getrandom = { version = "0.3.0", features = ["wasm_js"] }
 http = "1.1.0"
 js-sys = "0.3.49"
-matrix-sdk-common = { features = ["js",  "experimental-encrypted-state-events"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "3924463c6d92fd592e38c02a099ead8cc309b96f" }
-matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "3924463c6d92fd592e38c02a099ead8cc309b96f" }
-matrix-sdk-qrcode = { optional = true, git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "3924463c6d92fd592e38c02a099ead8cc309b96f" }
+matrix-sdk-common = { features = ["js",  "experimental-encrypted-state-events"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
+matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
+matrix-sdk-qrcode = { optional = true, git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
 serde = "1.0.91"
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.6.5"
@@ -86,14 +86,9 @@ vergen-gitcl = { version = "1.0.0", features = ["build"] }
 default-features = false
 features = ["js", "automatic-room-key-forwarding", "experimental-encrypted-state-events"]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "3924463c6d92fd592e38c02a099ead8cc309b96f"
+rev = "40c6c330"
 
 [lints.rust]
 # Workaround for https://github.com/rustwasm/wasm-bindgen/issues/4283, while we work up the courage to upgrade
 # wasm-bindgen
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test_coverage)'] }
-
-# Fix for introduction of `[patch.crates-io]` block in https://github.com/matrix-org/matrix-rust-sdk/pull/5722
-# This block is not respected transitively, so we must copy it here.
-[patch.crates-io]
-indexed_db_futures = { git = "https://github.com/matrix-org/rust-indexed-db", rev = "201caac274e38756c6e523ba7cf84ffb625b7c48" }
