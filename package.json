@@ -1,7 +1,7 @@
 {
     "name": "@matrix-org/matrix-sdk-crypto-wasm",
     "version": "17.1.0",
-    "homepage": "https://github.com/matrix-org/matrix-rust-sdk-wasm",
+    "homepage": "https://github.com/matrix-org/matrix-sdk-crypto-wasm",
     "description": "WebAssembly bindings of the matrix-sdk-crypto encryption library",
     "license": "Apache-2.0",
     "collaborators": [
