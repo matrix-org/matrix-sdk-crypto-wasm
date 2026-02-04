@@ -31,10 +31,103 @@ impl From<qr_login::QrCodeIntent> for QrCodeIntent {
     }
 }
 
+/// Intent and MSC-specific data class for the QR code login support.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct QrCodeIntentData {
+    /// The MSC4108-specific intent data.
+    ///
+    /// This will not be `null` only if the {@link QrCodeData} contains data as
+    /// specified in the QR code format of MSC4108. Otherwise it will contain
+    /// MSC4388-specific intent data.
+    #[wasm_bindgen(getter_with_clone)]
+    pub msc_4108: Option<Msc4108IntentData>,
+
+    /// The MSC4833-specific intent data.
+    ///
+    /// This will not be `null` only if the {@link QrCodeData} contains data as
+    /// specified in the QR code format of MSC4388. Otherwise it will contain
+    /// MSC4108-specific intent data.
+    #[wasm_bindgen(getter_with_clone)]
+    pub msc_4388: Option<Msc4388IntentData>,
+}
+
+impl From<qr_login::QrCodeIntentData<'_>> for QrCodeIntentData {
+    fn from(value: qr_login::QrCodeIntentData) -> Self {
+        match value {
+            qr_login::QrCodeIntentData::Msc4108 { data, rendezvous_url } => {
+                let server_name = match data {
+                    qr_login::Msc4108IntentData::Login => None,
+                    qr_login::Msc4108IntentData::Reciprocate { server_name } => {
+                        Some(server_name.to_owned())
+                    }
+                };
+
+                Self {
+                    msc_4108: Some(Msc4108IntentData {
+                        rendezvous_url: rendezvous_url.to_string(),
+                        server_name,
+                    }),
+                    msc_4388: None,
+                }
+            }
+            qr_login::QrCodeIntentData::Msc4388 { rendezvous_id, base_url } => Self {
+                msc_4108: None,
+                msc_4388: Some(Msc4388IntentData {
+                    rendezvous_id: rendezvous_id.to_owned(),
+                    base_url: base_url.to_string(),
+                }),
+            },
+        }
+    }
+}
+
+/// Intent-specific data in the case the QR code adheres to
+/// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4108 MSC4108} of the QR code
+/// data format.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct Msc4108IntentData {
+    /// Get the URL of the rendezvous server which will be used to exchange
+    /// messages between the two devices.
+    #[wasm_bindgen(getter_with_clone)]
+    pub rendezvous_url: String,
+
+    /// Get the server name of the homeserver which the new device will be
+    /// logged in to.
+    ///
+    /// This will be only available if the existing device has generated the QR
+    /// code and the new device is the one scanning the QR code.
+    #[wasm_bindgen(getter_with_clone)]
+    pub server_name: Option<String>,
+}
+
+/// Intent-specific data in the case the QR code adheres to
+/// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the QR code
+/// data format.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct Msc4388IntentData {
+    /// The ID of the rendezvous session, can be used to exchange messages with
+    /// the other device.
+    #[wasm_bindgen(getter_with_clone)]
+    pub rendezvous_id: String,
+
+    /// The base URL of the homeserver that the device generating the QR is
+    /// using.
+    #[wasm_bindgen(getter_with_clone)]
+    pub base_url: String,
+}
+
 /// Data for the QR code login mechanism.
 ///
 /// The {@link QrCodeData} can be serialized and encoded as a QR code or it can
 /// be decoded from a QR code.
+///
+/// This type supports both the format originally speicied in
+/// {link https://github.com/matrix-org/matrix-spec-proposals/pull/4108 MSC4108} as well as the
+/// updated format found in
+/// {link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388}.
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct QrCodeData {
@@ -110,9 +203,8 @@ impl QrCodeData {
     /// Get the Curve25519 public key embedded in the {@link QrCodeData}.
     ///
     /// This Curve25519 public key should be used to establish an
-    /// [ECIES](https://en.wikipedia.org/wiki/Integrated_Encryption_Scheme)
-    /// (Elliptic Curve Integrated Encryption Scheme) channel with the other
-    /// device.
+    /// [HPKE](https://www.rfc-editor.org/rfc/rfc9180.html)
+    /// (Hybrid Public Key Encryption) channel with the other device.
     #[wasm_bindgen(getter, js_name = "publicKey")]
     pub fn public_key(&self) -> Curve25519PublicKey {
         self.inner.public_key().into()
@@ -152,5 +244,10 @@ impl QrCodeData {
     #[wasm_bindgen(getter)]
     pub fn mode(&self) -> QrCodeIntent {
         self.inner.intent().into()
+    }
+
+    /// Get the intent-specific data embedded in the {@link QrCodeData}.
+    pub fn intent_data(&self) -> QrCodeIntentData {
+        self.inner.intent_data().into()
     }
 }
