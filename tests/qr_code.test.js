@@ -33,4 +33,28 @@ describe(QrCodeData.name, () => {
         const encoded = data.toBase64();
         expect(base64Data).toStrictEqual(encoded);
     });
+
+    test("can construct a new MSC4388 QrCodeData class", () => {
+        const base64Data =
+            "SU9fRUxFTUVOVF9NU0M0Mzg4AwG0yzZ1QVpQ1jlnoxWX3d5jrWRFfELxjS2gN7pz9y+3PAAaMDFIWDlLMDBRMUg2S1BENDdFRzRHMVQzWEcAJGh0dHBzOi8vc3luYXBzZS1vaWRjLmxhYi5lbGVtZW50LmRldg";
+
+        const publicKey = new Curve25519PublicKey("tMs2dUFaUNY5Z6MVl93eY61kRXxC8Y0toDe6c/cvtzw");
+        const rendezvousId = "01HX9K00Q1H6KPD47EG4G1T3XG";
+        const baseUrl = "https://synapse-oidc.lab.element.dev/";
+
+        const data = QrCodeData.newMsc4388(publicKey, rendezvousId, baseUrl, QrCodeIntent.Reciprocate);
+
+        expect(data.publicKey.toBase64()).toStrictEqual("tMs2dUFaUNY5Z6MVl93eY61kRXxC8Y0toDe6c/cvtzw");
+        expect(data.mode).toStrictEqual(QrCodeIntent.Reciprocate);
+
+        const intentData = data.intentData;
+        const mscData = intentData.msc4388;
+
+        expect(mscData).toBeDefined();
+        expect(mscData.rendezvousId).toStrictEqual(rendezvousId);
+        expect(mscData.baseUrl).toStrictEqual(baseUrl);
+
+        const encoded = data.toBase64();
+        expect(base64Data).toStrictEqual(encoded);
+    });
 });
