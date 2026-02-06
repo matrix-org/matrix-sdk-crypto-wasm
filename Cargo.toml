@@ -64,9 +64,9 @@ futures-util = "0.3.27"
 getrandom = { version = "0.3.0", features = ["wasm_js"] }
 http = "1.1.0"
 js-sys = "0.3.49"
-matrix-sdk-common = { features = ["js",  "experimental-encrypted-state-events"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
-matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
-matrix-sdk-qrcode = { optional = true, git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "40c6c330" }
+matrix-sdk-common = { features = ["js",  "experimental-encrypted-state-events"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0ec3db59" }
+matrix-sdk-indexeddb = { default-features = false, features = ["e2e-encryption"], git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0ec3db59" }
+matrix-sdk-qrcode = { optional = true, git = "https://github.com/matrix-org/matrix-rust-sdk", rev = "0ec3db59" }
 serde = "1.0.91"
 serde_json = "1.0.91"
 serde-wasm-bindgen = "0.6.5"
@@ -86,7 +86,7 @@ vergen-gitcl = { version = "1.0.0", features = ["build"] }
 default-features = false
 features = ["js", "automatic-room-key-forwarding", "experimental-encrypted-state-events"]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
-rev = "40c6c330"
+rev = "0ec3db59"
 
 [lints.rust]
 # Workaround for https://github.com/rustwasm/wasm-bindgen/issues/4283, while we work up the courage to upgrade
