@@ -1,8 +1,8 @@
 # UNRELEASED
 
 -   Add support for [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388) in the QrCodeData class.
-    ([#290](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/290))
--   Update matrix-rust-sdk to `40c6c330`, which includes:
+    ([#290](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/290)) ([#292](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/292))
+-   Update matrix-rust-sdk to `0ec3db59`, which includes:
 
     -   Add MSC4388 support to the QrcodeData struct.
         ([#6089](https://github.com/matrix-org/matrix-rust-sdk/pull/6089))

@@ -31,6 +31,15 @@ impl From<qr_login::QrCodeIntent> for QrCodeIntent {
     }
 }
 
+impl Into<qr_login::QrCodeIntent> for QrCodeIntent {
+    fn into(self) -> qr_login::QrCodeIntent {
+        match self {
+            QrCodeIntent::Login => qr_login::QrCodeIntent::Login,
+            QrCodeIntent::Reciprocate => qr_login::QrCodeIntent::Reciprocate,
+        }
+    }
+}
+
 /// Intent and MSC-specific data class for the QR code login support.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -162,6 +171,27 @@ impl QrCodeData {
         };
 
         let inner = qr_login::QrCodeData::new_msc4108(public_key, rendezvous_url, intent_data);
+
+        Ok(QrCodeData { inner })
+    }
+
+    /// Create new {@link QrCodeData} from a given public key, a rendezvous ID
+    /// and, a base homeserver URL.
+    ///
+    /// This creates a QR code which conforms to
+    /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the data
+    /// format for QR login.
+    pub fn new_msc4388(
+        public_key: Curve25519PublicKey,
+        rendezvous_id: String,
+        base_url: &str,
+        intent: QrCodeIntent,
+    ) -> Result<QrCodeData, JsError> {
+        let public_key = public_key.inner;
+        let intent = intent.into();
+        let base_url = Url::parse(base_url)?;
+
+        let inner = qr_login::QrCodeData::new_msc4388(public_key, rendezvous_id, base_url, intent);
 
         Ok(QrCodeData { inner })
     }
