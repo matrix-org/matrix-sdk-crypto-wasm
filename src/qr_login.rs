@@ -49,7 +49,7 @@ pub struct QrCodeIntentData {
     /// This will not be `null` only if the {@link QrCodeData} contains data as
     /// specified in the QR code format of MSC4108. Otherwise it will contain
     /// MSC4388-specific intent data.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "msc4108")]
     pub msc_4108: Option<Msc4108IntentData>,
 
     /// The MSC4833-specific intent data.
@@ -57,7 +57,7 @@ pub struct QrCodeIntentData {
     /// This will not be `null` only if the {@link QrCodeData} contains data as
     /// specified in the QR code format of MSC4388. Otherwise it will contain
     /// MSC4108-specific intent data.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "msc4388")]
     pub msc_4388: Option<Msc4388IntentData>,
 }
 
@@ -99,7 +99,7 @@ impl From<qr_login::QrCodeIntentData<'_>> for QrCodeIntentData {
 pub struct Msc4108IntentData {
     /// Get the URL of the rendezvous server which will be used to exchange
     /// messages between the two devices.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "rendezvousUrl")]
     pub rendezvous_url: String,
 
     /// Get the server name of the homeserver which the new device will be
@@ -107,7 +107,7 @@ pub struct Msc4108IntentData {
     ///
     /// This will be only available if the existing device has generated the QR
     /// code and the new device is the one scanning the QR code.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "serverName")]
     pub server_name: Option<String>,
 }
 
@@ -119,12 +119,12 @@ pub struct Msc4108IntentData {
 pub struct Msc4388IntentData {
     /// The ID of the rendezvous session, can be used to exchange messages with
     /// the other device.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "rendezvousId")]
     pub rendezvous_id: String,
 
     /// The base URL of the homeserver that the device generating the QR is
     /// using.
-    #[wasm_bindgen(getter_with_clone)]
+    #[wasm_bindgen(getter_with_clone, js_name = "baseUrl")]
     pub base_url: String,
 }
 
@@ -181,6 +181,7 @@ impl QrCodeData {
     /// This creates a QR code which conforms to
     /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the data
     /// format for QR login.
+    #[wasm_bindgen(js_name = "newMsc4388")]
     pub fn new_msc4388(
         public_key: Curve25519PublicKey,
         rendezvous_id: String,
@@ -277,6 +278,7 @@ impl QrCodeData {
     }
 
     /// Get the intent-specific data embedded in the {@link QrCodeData}.
+    #[wasm_bindgen(getter, js_name = "intentData")]
     pub fn intent_data(&self) -> QrCodeIntentData {
         self.inner.intent_data().into()
     }
