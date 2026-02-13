@@ -1,5 +1,11 @@
 # UNRELEASED
 
+-   Add support for [MSC4385](https://github.com/matrix-org/matrix-spec-proposals/pull/4385).
+    ([#295](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/295))
+    -   Add a `push_secret_to_verified_devices` method to push secrets
+    -   Add methods `register_receive_pushed_secret_callback`,
+        `get_pushed_secrets_from_inbox`, and `delete_pushed_secrets_from_inbox`
+        to handle receiving pushed secrets.
 -   Add support for [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388) in the QrCodeData class.
     ([#290](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/290)) ([#292](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/292))
 -   Update matrix-rust-sdk to `0ec3db59`, which includes:
