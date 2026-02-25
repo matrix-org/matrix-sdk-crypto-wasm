@@ -2,8 +2,15 @@
 
 -   Add support for [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388) in the `QrCodeData` class. `QrCodeMode` has been renamed to `QrCodeIntent`, but the old name is retained for backwards compatibility for now.
     ([#290](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/290)), ([#292](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/292)), ([#300](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/300))
--   Update matrix-rust-sdk to `0ec3db59`, which includes:
+-   Update matrix-rust-sdk to `fadfd98be`, which includes:
 
+    -   Add `Store::{store,clear}_room_pending_key_bundle`,
+        `CryptoStore::get_pending_key_bundle_details_for_room` and
+        `CryptoStore::get_all_rooms_pending_key_bundle`, which can be used by
+        applications to track whether they are expecting an
+        [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268) key
+        bundle.
+        ([#6199](https://github.com/matrix-org/matrix-rust-sdk/pull/6199)), ([#6233](https://github.com/matrix-org/matrix-rust-sdk/pull/6233))
     -   Add MSC4388 support to the QrcodeData struct.
         ([#6089](https://github.com/matrix-org/matrix-rust-sdk/pull/6089))
     -   [**BREAKING**] The QrcodeData struct has been reworked in preparation to
