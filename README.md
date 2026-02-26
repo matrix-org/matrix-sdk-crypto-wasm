@@ -46,14 +46,14 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
         //
         // The following will use an in-memory store. It is recommended to use
         // indexedDB where that is available.
-        // See https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/classes/OlmMachine.html#initialize
+        // See https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/OlmMachine.html#initialize
         const olmMachine = await OlmMachine.initialize(new UserId(userId), new DeviceId(deviceId));
 
         return olmMachine;
     }
     ```
 
-    See the [API documentation](https://matrix-org.github.io/matrix-rust-sdk-crypto-wasm/) for more information.
+    See the [API documentation](https://matrix-org.github.io/matrix-sdk-crypto-wasm/) for more information.
 
 3. Build your project.
 
