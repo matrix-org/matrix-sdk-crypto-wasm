@@ -24,7 +24,10 @@ use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
     olm::{BackedUpRoomKey, ExportedRoomKey},
     store::types::{Changes, DeviceChanges, IdentityChanges},
-    types::{events::room_key_bundle::RoomKeyBundleContent, RoomKeyBackupInfo},
+    types::{
+        events::{room_key_bundle::RoomKeyBundleContent, secret_push::SecretPushContent},
+        RoomKeyBackupInfo,
+    },
     CryptoStoreError, EncryptionSyncChanges, GossippedSecret, MediaEncryptionInfo,
 };
 use serde::{ser::SerializeSeq, Serialize, Serializer};
@@ -1747,6 +1750,110 @@ impl OlmMachine {
         })
     }
 
+    /// Register a callback which will be called whenever a pushed secret
+    /// (`io.element.msc4385.secret.push`) is received.
+    ///
+    /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
+    /// to_device message from a one of the user's own verified devices.
+    ///
+    /// See https://matrix-org.github.io/matrix-rust-sdk/matrix_sdk_crypto/store/struct.Store.html#method.pushed_secrets_stream for more information.
+    ///
+    /// `callback` should be a function that takes 2 arguments: the secret name
+    /// (string) and value (string).
+    ///
+    /// **Note**: if the secret is valid and handled on the JavaScript side, the
+    /// pushed secret inbox should be cleared by calling
+    /// `delete_pushed_secrets_from_inbox`.
+    #[wasm_bindgen(js_name = "registerReceivePushedSecretCallback")]
+    pub fn register_receive_pushed_secret_callback(&self, callback: Function) {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let stream = self.inner.store().pushed_secrets_stream();
+        // fire up a promise chain which will call `callback` on each result from the
+        // stream
+        spawn_local(
+            async move {
+                // Pin the stream to ensure it can be safely moved across threads
+                pin_mut!(stream);
+                while let Some(secret) = stream.next().await {
+                    send_pushed_secret_to_callback(&callback, &secret).await;
+                }
+            }
+            .with_current_subscriber(),
+        );
+    }
+
+    /// Get all the secrets with the given secret_name we have currently
+    /// stored.
+    /// The only secret this will currently return is the
+    /// `m.megolm_backup.v1` secret.
+    ///
+    /// Usually you would just register a callback with
+    /// [`register_receive_secret_callback`], but if the client is shut down
+    /// before handling them, this method can be used to retrieve them.
+    /// This method should therefore be called at client startup to retrieve any
+    /// secrets received during the previous session.
+    ///
+    /// The secrets are guaranteed to have been received over a 1-to-1 encrypted
+    /// to_device message from one of the user's own verified devices.
+    ///
+    /// Returns a `Promise` for a `Set` of `String` corresponding to the secret
+    /// values.
+    ///
+    /// If the secret is valid and handled, the secret inbox should be cleared
+    /// by calling `delete_secrets_from_inbox`.
+    #[wasm_bindgen(js_name = "getPushedSecretsFromInbox")]
+    pub fn get_pushed_secrets_from_inbox(&self, secret_name: String) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let set = Set::new(&JsValue::UNDEFINED);
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            let name = SecretName::from(secret_name);
+            for secret in me.store().get_pushed_secrets_from_inbox(&name).await? {
+                set.add(&JsValue::from_str(&secret.secret));
+            }
+            Ok(set)
+        })
+    }
+
+    /// Delete all secrets with the given secret name from the inbox.
+    ///
+    /// Should be called after handling the secrets with
+    /// `get_secrets_from_inbox`.
+    ///
+    /// # Arguments
+    ///
+    /// * `secret_name` - The name of the secret to delete.
+    #[wasm_bindgen(js_name = "deletePushedSecretsFromInbox")]
+    pub fn delete_pushed_secrets_from_inbox(&self, secret_name: String) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            let name = SecretName::from(secret_name);
+            me.store().delete_pushed_secrets_from_inbox(&name).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
+    /// Push a secret to all of our other verified devices
+    ///
+    /// This function assumes that we already have Olm sessions with the other
+    /// devices.  This can be done by calling {@link
+    /// OlmMachine.getMissingSessions}.
+    ///
+    /// # Arguments
+    ///
+    /// * `secret_name` - The name of the secret to push.
+    #[wasm_bindgen(js_name = "pushSecretToVerifiedDevices")]
+    pub fn push_secret_to_verified_devices(&self, name: String) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            me.push_secret_to_verified_devices(SecretName::from(name)).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
     /// Get the stored room settings, such as the encryption algorithm or
     /// whether to encrypt only for trusted devices.
     ///
@@ -2058,6 +2165,21 @@ async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedS
         &JsValue::NULL,
         &secret.secret_name.as_str().into(),
         &secret.event.content.secret.to_owned().into(),
+    ))
+    .await
+    {
+        Ok(_) => (),
+        Err(e) => {
+            warn!("Error calling receive secret callback: {:?}", e);
+        }
+    }
+}
+
+async fn send_pushed_secret_to_callback(callback: &Function, secret: &SecretPushContent) {
+    match promise_result_to_future(callback.call2(
+        &JsValue::NULL,
+        &secret.name.as_str().into(),
+        &secret.secret.to_owned().into(),
     ))
     .await
     {
