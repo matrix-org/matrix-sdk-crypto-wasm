@@ -1983,6 +1983,107 @@ impl OlmMachine {
         }))
     }
 
+    /// See if we have recently accepted an invitation to the given room.
+    ///
+    /// If we have accepted an invite to a room without finding an
+    /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4268|MSC4268}
+    /// key bundle, we should accept a key bundle once one arrives.
+    ///
+    /// The data returned here is populated by the application, via {@link
+    /// storeRoomPendingKeyBundle}.
+    ///
+    /// @experimental
+    #[wasm_bindgen(
+        js_name = "getPendingKeyBundleDetailsForRoom",
+        unchecked_return_type = "Promise<RoomPendingKeyBundleDetails | undefined>"
+    )]
+    pub fn get_pending_key_bundle_details_for_room(
+        &self,
+        room_id: &identifiers::RoomId,
+    ) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+
+        future_to_promise(async move {
+            Ok(me
+                .store()
+                .get_pending_key_bundle_details_for_room(&room_id)
+                .await?
+                .map(types::RoomPendingKeyBundleDetails::from))
+        })
+    }
+
+    /// Get a list of all rooms where we are waiting for a key bundle.
+    ///
+    /// @see getPendingKeyBundleDetailsForRoom
+    ///
+    /// @experimental
+    #[wasm_bindgen(
+        js_name = "getAllRoomsPendingKeyBundles",
+        unchecked_return_type = "Promise<Array<RoomPendingKeyBundleDetails>>"
+    )]
+    pub fn get_all_rooms_pending_key_bundles(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+
+        future_to_promise(async move {
+            Ok(me
+                .store()
+                .get_all_rooms_pending_key_bundles()
+                .await?
+                .into_iter()
+                .map(types::RoomPendingKeyBundleDetails::from)
+                .map(JsValue::from)
+                .collect::<Array>())
+        })
+    }
+
+    /// Store the fact that we have accepted an invitation to the given room, so
+    /// should accept a key bundle if one arrives soon.
+    ///
+    /// This should be called whenever we join a room following an invite, but
+    /// it has no effect other than that the room will be returned by a future
+    /// call to {@link getPendingKeyBundleDetailsForRoom}.
+    ///
+    /// @experimental
+    #[wasm_bindgen(js_name = "storeRoomPendingKeyBundle", unchecked_return_type = "Promise<void>")]
+    pub fn store_room_pending_key_bundle(
+        &self,
+        room_id: &identifiers::RoomId,
+        inviter: &identifiers::UserId,
+    ) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+        let inviter_id = inviter.inner.clone();
+
+        future_to_promise(async move {
+            me.store().store_room_pending_key_bundle(&room_id, &inviter_id).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
+    /// Store the fact that we are no longer waiting for a key bundle in the
+    /// given room.
+    ///
+    /// The counterpart to {@link storeRoomPendingKeyBundle}. Should be called
+    /// when, for example, we leave a room, or have successfully imported a
+    /// bundle.
+    ///
+    /// @experimental
+    #[wasm_bindgen(js_name = "clearRoomPendingKeyBundle", unchecked_return_type = "Promise<void>")]
+    pub fn clear_room_pending_key_bundle(&self, room_id: &identifiers::RoomId) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let room_id = room_id.inner.clone();
+
+        future_to_promise(async move {
+            me.store().clear_room_pending_key_bundle(&room_id).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
     /// Shut down the `OlmMachine`.
     ///
     /// The `OlmMachine` cannot be used after this method has been called.
