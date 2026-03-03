@@ -37,7 +37,9 @@
  * [1]: https://www.typescriptlang.org/docs/handbook/modules/reference.html#file-extension-substitution
  * [2]: https://www.typescriptlang.org/docs/handbook/modules/reference.html#extensionless-relative-paths
  */
+
 export * from "./pkg/matrix_sdk_crypto_wasm.js";
+export * from "./index_extras.js";
 
 /**
  * Load the WebAssembly module in the background, if it has not already been loaded.
