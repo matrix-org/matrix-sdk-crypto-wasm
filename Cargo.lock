@@ -1283,7 +1283,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "as_variant",
  "async-trait",
@@ -1309,7 +1309,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "eyeball-im",
  "futures-core",
@@ -1332,7 +1332,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "aes",
  "aquamarine",
@@ -1400,7 +1400,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "async-trait",
  "base64",
@@ -1431,7 +1431,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1443,7 +1443,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.16.0"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=a2f77c79b#a2f77c79bca3b495902e48507c242afbc201bc56"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk?rev=8472b55#8472b5504efd34074acab2cd9fcbbca5c5ec5d3e"
 dependencies = [
  "base64",
  "blake3",
@@ -1942,7 +1942,7 @@ dependencies = [
 [[package]]
 name = "ruma"
 version = "0.14.1"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "assign",
  "js_int",
@@ -1957,7 +1957,7 @@ dependencies = [
 [[package]]
 name = "ruma-client-api"
 version = "0.22.1"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "as_variant",
  "assign",
@@ -1980,7 +1980,7 @@ dependencies = [
 [[package]]
 name = "ruma-common"
 version = "0.17.1"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "as_variant",
  "base64",
@@ -2013,7 +2013,7 @@ dependencies = [
 [[package]]
 name = "ruma-events"
 version = "0.32.1"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -2037,7 +2037,7 @@ dependencies = [
 [[package]]
 name = "ruma-html"
 version = "0.6.0"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "as_variant",
  "html5ever",
@@ -2048,7 +2048,7 @@ dependencies = [
 [[package]]
 name = "ruma-identifiers-validation"
 version = "0.12.0"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "js_int",
  "thiserror",
@@ -2057,7 +2057,7 @@ dependencies = [
 [[package]]
 name = "ruma-macros"
 version = "0.17.1"
-source = "git+https://github.com/ruma/ruma?rev=4a0ae80fbf42d1b759e108d7315537d13583c144#4a0ae80fbf42d1b759e108d7315537d13583c144"
+source = "git+https://github.com/ruma/ruma?rev=84330744788e24137ee0fe0289ac2cdd40a28dd7#84330744788e24137ee0fe0289ac2cdd40a28dd7"
 dependencies = [
  "as_variant",
  "cfg-if",
