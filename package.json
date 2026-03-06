@@ -72,15 +72,16 @@
     "engines": {
         "node": ">= 18"
     },
+    "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017",
     "scripts": {
-        "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:types",
+        "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm lint:types",
         "lint:eslint": "eslint --max-warnings 0 tests",
         "lint:prettier": "prettier --check .",
         "lint:types": "tsc --noEmit",
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
-        "test": "jest --verbose && yarn run wasm-pack test --node",
+        "test": "jest --verbose && pnpm wasm-pack test --node",
         "doc": "typedoc --treatWarningsAsErrors --tsconfig .",
-        "prepack": "npm run build && npm run test"
+        "prepack": "pnpm build && pnpm run test"
     }
 }

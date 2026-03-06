@@ -42,13 +42,13 @@ jobs:
         uses: actions/setup-node@v5
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
 
       - name: Run eslint
-        run: yarn lint:eslint
+        run: pnpm lint:eslint
 
       - name: Run prettier
-        run: yarn lint:prettier
+        run: pnpm lint:prettier
 
   test:
     name: test
@@ -82,19 +82,19 @@ jobs:
           node-version: 24.0
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
 
       - name: Build the WebAssembly + JavaScript binding
-        run: yarn build
+        run: pnpm build
 
       - name: Check typescript types
-        run: yarn lint:types
+        run: pnpm lint:types
 
       - name: Test the JavaScript bindings
-        run: yarn test
+        run: pnpm test
 
       - name: Build the documentation
-        run: yarn doc
+        run: pnpm doc
 
       # Upload the docs as a build artifiact, so they can be used in the
       # deployment step below, or a subsequent workflow which uploads to netlify.

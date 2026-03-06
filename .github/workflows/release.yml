@@ -44,13 +44,13 @@ jobs:
           node-version: 24.0
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test
 
       - name: Publish to npmjs
         run: npm publish --provenance --ignore-scripts

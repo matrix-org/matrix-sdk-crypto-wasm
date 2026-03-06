@@ -7,7 +7,7 @@ name: Build against latest matrix-sdk-crypto
 # It does this by effectively doing:
 #
 #     cargo update matrix-sdk-crypto
-#     yarn build
+#     pnpm build
 #
 # If the build fails, this action:
 #
@@ -64,13 +64,13 @@ jobs:
           node-version: 24.0
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
 
       - name: Build the WebAssembly + JavaScript binding
-        run: yarn build
+        run: pnpm build
 
       - name: Test the JavaScript binding
-        run: yarn test
+        run: pnpm test
 
       - name: Open an issue on failure
         if: failure()
