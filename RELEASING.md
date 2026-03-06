@@ -33,7 +33,7 @@ patch version.
 2. Replace the "UNRELEASED" heading in `CHANGELOG.md` with the new version
    number, start a new (empty) "UNRELEASED" section, and `git add` ready for
    commit on the next step.
-3. Run `yarn version`. It will ask you the version number, then update
+3. Run `pnpm version`. It will ask you the version number, then update
    `package.json`, commit, and create a tag.
 4. Push the branch, but not yet the tag.
 5. Create a PR to approve the changes. Reviewers should mostly check that the

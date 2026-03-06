@@ -22,7 +22,7 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
     or:
 
     ```
-    yarn add @matrix-org/matrix-sdk-crypto-wasm
+    pnpm add @matrix-org/matrix-sdk-crypto-wasm
     ```
 
 2. Import the library into your project and initialise it.
@@ -79,17 +79,17 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
 These WebAssembly bindings are written in [Rust]. To build them, you
 need to install the Rust compiler, see [the Install Rust
 Page](https://www.rust-lang.org/tools/install). Then, the workflow is
-pretty classical by using [yarn](https://yarnpkg.com/), see [the Downloading and installing
+pretty classical by using [pnpm](https://pnpm.io), see [the Downloading and installing
 Node.js and npm
-Page](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) and [installing yarn](https://classic.yarnpkg.com/lang/en/docs/install).
+Page](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) and [installing pnpm](https://pnpm.io/installation).
 
-Once the Rust compiler, Node.js and yarn are installed, you can run the
+Once the Rust compiler, Node.js and pnpm are installed, you can run the
 following commands:
 
 ```sh
-$ yarn install
-$ yarn build  # or 'yarn build:dev' to make an unoptimised build
-$ yarn test
+$ pnpm install
+$ pnpm build  # or 'pnpm build:dev' to make an unoptimised build
+$ pnpm test
 ```
 
 The compiled output should be generated in the `pkg/` directory.
@@ -117,7 +117,7 @@ To generate the documentation locally, please run the following
 command:
 
 ```sh
-$ yarn doc
+$ pnpm doc
 ```
 
 The documentation is generated in the `./docs` directory.

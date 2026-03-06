@@ -28,29 +28,33 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
         with:
           targets: wasm32-unknown-unknown
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
 
       # Keep this in sync with:
       # .github/workflows/ci.yml
       # .github/workflows/latest-matrix-sdk-crypto.yml
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24.0
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test
 
       - name: Publish to npmjs
         run: npm publish --provenance --ignore-scripts
@@ -63,6 +67,6 @@ jobs:
 
     steps:
       - name: Create the Github release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           draft: true
