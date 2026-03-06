@@ -55,6 +55,9 @@ jobs:
         run: |
            cargo xtask unstable-rust-sdk
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       # Keep this in sync with:
       # .github/workflows/ci.yml
       # .github/workflows/release.yml

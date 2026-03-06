@@ -38,6 +38,9 @@ jobs:
           cargo fmt -- --check
           (cd xtask && cargo fmt -- --check)
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
@@ -62,8 +65,8 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout the rep6
-        uses: actions/checkout@v3
+      - name: Checkout the repo
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -74,6 +77,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       # Keep this in sync with:
       # .github/workflows/latest-matrix-sdk-crypto.yml
