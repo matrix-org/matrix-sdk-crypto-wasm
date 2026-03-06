@@ -4,7 +4,9 @@
         "lib": ["ES2022", "DOM"],
         "allowJs": true,
         // Allow .ts file extensions in `import`, otherwise Jest can't find `helper.ts`.
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        // Required by `allowImportingTsExtensions`.
+        "noEmit": true
     },
     "typedocOptions": {
         "entryPoints": ["index.d.ts"],
