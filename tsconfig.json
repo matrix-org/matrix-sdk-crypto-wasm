@@ -1,7 +1,7 @@
 {
     "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
-        "lib": ["DOM"],
+        "lib": ["ES2022", "DOM"],
         "allowJs": true,
         // Allow .ts file extensions in `import`, otherwise Jest can't find `helper.ts`.
         "allowImportingTsExtensions": true

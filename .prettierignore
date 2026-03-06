@@ -3,3 +3,4 @@
 /pkg
 /target
 /xtask/target
+pnpm-lock.yaml
