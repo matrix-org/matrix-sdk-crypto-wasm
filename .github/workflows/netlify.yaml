@@ -22,13 +22,13 @@ jobs:
         permissions:
             actions: read
             deployments: write
-            
+
         # Tell github to share the right secrets
         environment: PR Documentation Preview
 
         steps:
             - name: 📥 Download artifact
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   run-id: ${{ github.event.workflow_run.id }}
@@ -56,4 +56,3 @@ jobs:
 
                   desc: Documentation preview
                   deployment_env: PR Documentation Preview
-

@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -39,7 +39,9 @@ jobs:
           (cd xtask && cargo fmt -- --check)
 
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
+        with:
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -60,7 +62,7 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout the repo
+      - name: Checkout the rep6
         uses: actions/checkout@v3
 
       - name: Install Rust
@@ -77,9 +79,10 @@ jobs:
       # .github/workflows/latest-matrix-sdk-crypto.yml
       # .github/workflows/release.yml
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 24.0
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -99,7 +102,7 @@ jobs:
       # Upload the docs as a build artifiact, so they can be used in the
       # deployment step below, or a subsequent workflow which uploads to netlify.
       - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           name: docs
           path: './docs/'

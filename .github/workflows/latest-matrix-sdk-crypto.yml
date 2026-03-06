@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -59,9 +59,10 @@ jobs:
       # .github/workflows/ci.yml
       # .github/workflows/release.yml
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 24.0
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -96,7 +97,7 @@ jobs:
 
       - name: Ping matrix room on failure
         if: failure()
-        uses: fjogeleit/http-request-action@v1
+        uses: fjogeleit/http-request-action@v2
         with:
           url: ${{ secrets.CRYPTO_HOOK_URL }}
           method: 'POST'
