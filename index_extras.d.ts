@@ -14,11 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/* This file exists to support `index.d.ts`. It adds some backwards-compatibility exports for renamed types.
- *
- * Ideally we'd do this inline in `index.d.ts`, but that seems to confuse `typedoc` (it ends up suppressing the
- * documentation for the proper type).
- */
-
 /** @deprecated Exported for backwards-compatibility only. Use {@link QrCodeIntent} instead. */
 export { QrCodeIntent as QrCodeMode } from "./pkg/matrix_sdk_crypto_wasm.js";

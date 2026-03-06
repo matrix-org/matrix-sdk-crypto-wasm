@@ -143,6 +143,43 @@ describe("encrypted history sharing/decrypting", () => {
             expect(decryptedData.forwarderDevice?.toString()).toEqual("A");
         });
     });
+
+    describe("pendingKeyBundleDetailsForRoom", () => {
+        test("Supports setting and querying pending key bundle details", async () => {
+            // Not pending details initially
+            expect(await senderMachine.getPendingKeyBundleDetailsForRoom(room)).not.toBeDefined();
+            expect(await senderMachine.getAllRoomsPendingKeyBundles()).toEqual([]);
+
+            // Store a room
+            const before = Date.now();
+            await senderMachine.storeRoomPendingKeyBundle(room, otherUser);
+            const after = Date.now();
+
+            // Details should now be available
+            const details = await senderMachine.getPendingKeyBundleDetailsForRoom(room);
+            expect(details).toBeDefined();
+            expect(details!.roomId.toString()).toEqual(room.toString());
+            expect(details!.inviterId.toString()).toEqual(otherUser.toString());
+            expect(details!.inviteAcceptedAtMillis).toBeGreaterThanOrEqual(before);
+            expect(details!.inviteAcceptedAtMillis).toBeLessThanOrEqual(after);
+
+            const allDetails = await senderMachine.getAllRoomsPendingKeyBundles();
+            expect(allDetails).toHaveLength(1);
+            expect(allDetails[0].roomId.toString()).toEqual(room.toString());
+            expect(allDetails[0].inviterId.toString()).toEqual(otherUser.toString());
+            expect(allDetails[0].inviteAcceptedAtMillis).toEqual(details!.inviteAcceptedAtMillis);
+
+            // A random room should still have no details
+            expect(
+                await senderMachine.getPendingKeyBundleDetailsForRoom(new RoomId("!other:localhost")),
+            ).not.toBeDefined();
+
+            // Clearing the details should work too
+            await senderMachine.clearRoomPendingKeyBundle(room);
+            expect(await senderMachine.getPendingKeyBundleDetailsForRoom(room)).not.toBeDefined();
+            expect(await senderMachine.getAllRoomsPendingKeyBundles()).toEqual([]);
+        });
+    });
 });
 
 /** Make a to-device request for sharing a room key bundle from senderMachine to receiverMachine. */

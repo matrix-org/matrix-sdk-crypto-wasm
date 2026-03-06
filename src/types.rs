@@ -641,3 +641,39 @@ impl From<matrix_sdk_crypto::store::types::StoredRoomKeyBundleData> for StoredRo
         Self { inner: value }
     }
 }
+
+/// Information on a room which is waiting for a key bundle to arrive.
+#[wasm_bindgen]
+#[derive(Debug, Clone)]
+pub struct RoomPendingKeyBundleDetails {
+    pub(crate) inner: matrix_sdk_crypto::store::types::RoomPendingKeyBundleDetails,
+}
+
+#[wasm_bindgen]
+impl RoomPendingKeyBundleDetails {
+    /// The room that is waiting for a key bundle.
+    #[wasm_bindgen(getter, js_name = "roomId")]
+    pub fn room_id(&self) -> RoomId {
+        self.inner.room_id.clone().into()
+    }
+
+    /// The ID of the user that invited us
+    #[wasm_bindgen(getter, js_name = "inviterId")]
+    pub fn inviter_id(&self) -> UserId {
+        self.inner.inviter.clone().into()
+    }
+
+    /// The time that the invite was accepted.
+    #[wasm_bindgen(getter, js_name = "inviteAcceptedAtMillis")]
+    pub fn invite_accepted_at_millis(&self) -> f64 {
+        self.inner.invite_accepted_at.0.into()
+    }
+}
+
+impl From<matrix_sdk_crypto::store::types::RoomPendingKeyBundleDetails>
+    for RoomPendingKeyBundleDetails
+{
+    fn from(value: matrix_sdk_crypto::store::types::RoomPendingKeyBundleDetails) -> Self {
+        Self { inner: value }
+    }
+}
