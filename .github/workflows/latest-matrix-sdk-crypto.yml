@@ -39,15 +39,15 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
         with:
           targets: wasm32-unknown-unknown
 
       - name: Load cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
@@ -56,13 +56,13 @@ jobs:
            cargo xtask unstable-rust-sdk
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
 
       # Keep this in sync with:
       # .github/workflows/ci.yml
       # .github/workflows/release.yml
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24.0
           cache: "pnpm"
@@ -91,7 +91,7 @@ jobs:
 
       - name: Comment on the issue
         if: failure()
-        uses: thollander/actions-comment-pull-request@v3
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         with:
           message: |
             Building matrix-rust-sdk-crypto-wasm against the latest matrix-sdk Rust is failing.
@@ -100,7 +100,7 @@ jobs:
 
       - name: Ping matrix room on failure
         if: failure()
-        uses: fjogeleit/http-request-action@v2
+        uses: fjogeleit/http-request-action@551353b829c3646756b2ec2b3694f819d7957495 # v2.0.0
         with:
           url: ${{ secrets.CRYPTO_HOOK_URL }}
           method: 'POST'
