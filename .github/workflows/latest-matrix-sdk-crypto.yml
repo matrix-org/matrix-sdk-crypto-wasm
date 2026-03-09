@@ -89,8 +89,10 @@ jobs:
           filename: .github/latest_matrix_sdk_failed_issue_template.md
         id: create-issue
 
-      - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
+      - run: 'echo Created/updated ${STEPS_CREATE_ISSUE_OUTPUTS_URL}'
         if: failure()
+        env:
+          STEPS_CREATE_ISSUE_OUTPUTS_URL: ${{ steps.create-issue.outputs.url }}
 
       - name: Comment on the issue
         if: failure()
