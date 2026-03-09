@@ -1,0 +1,4 @@
+rules:
+  dangerous-triggers:
+    ignore:
+      - netlify.yaml:11 # Workflow is explicitly separate to prevent exfiltration of netlify token
