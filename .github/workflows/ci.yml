@@ -1,5 +1,7 @@
 name: CI
 
+permissions: {}
+
 on:
   workflow_dispatch:
   push:
@@ -23,6 +25,8 @@ jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout the repo
