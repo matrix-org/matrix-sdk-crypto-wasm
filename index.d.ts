@@ -51,23 +51,6 @@ export declare function initAsync(url?: URL | string): Promise<void>;
 // The auto-generated typescript definitions are a good start, but could do with tightening up in a lot of areas.
 // The following is a manually-curated set of typescript definitions.
 declare module "./pkg/matrix_sdk_crypto_wasm.js" {
-    /** The types returned by {@link OlmMachine.outgoingRequests}. */
-    type OutgoingRequest =
-        | KeysUploadRequest
-        | KeysQueryRequest
-        | KeysClaimRequest
-        | ToDeviceRequest
-        | SignatureUploadRequest
-        | RoomMessageRequest
-        | KeysBackupRequest;
-
-    /** The types returned by {@link OlmMachine.receiveSyncChanges}. */
-    type ProcessedToDeviceEvent =
-        | DecryptedToDeviceEvent
-        | PlainTextToDeviceEvent
-        | InvalidToDeviceEvent
-        | UTDToDeviceEvent;
-
     interface OlmMachine {
         trackedUsers(): Promise<Set<UserId>>;
         updateTrackedUsers(users: UserId[]): Promise<void>;

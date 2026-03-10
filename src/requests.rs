@@ -29,6 +29,20 @@ use wasm_bindgen::prelude::*;
 
 /** Outgoing Requests * */
 
+/// Union of types returnable by [`OlmMachine::outgoing_requests`].
+#[wasm_bindgen(typescript_custom_section)]
+const JS_OUTGOING_REQUEST_TYPE: &str = r#"
+/** The types returned by {@link OlmMachine.outgoingRequests}. */
+type OutgoingRequest =
+    | KeysUploadRequest
+    | KeysQueryRequest
+    | KeysClaimRequest
+    | ToDeviceRequest
+    | SignatureUploadRequest
+    | RoomMessageRequest
+    | KeysBackupRequest;
+"#;
+
 /// A subset of outgoing requests used for verification.
 #[wasm_bindgen(typescript_custom_section)]
 const JS_OUTGOING_VERIFICATION_REQUEST: &str = r#"
