@@ -126,7 +126,6 @@ impl StoreHandle {
     pub fn open_with_key(
         store_name: String,
         mut store_key: Vec<u8>,
-        logger: Option<JsLogger>,
         #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
@@ -327,6 +326,7 @@ impl SecretsBundle {
     }
 
     /// Serialize the [`SecretsBundle`] to a JSON object.
+    #[wasm_bindgen(unchecked_return_type = "unknown")]
     pub fn to_json(&self) -> Result<JsValue, JsError> {
         Ok(serde_wasm_bindgen::to_value(&self.inner)?)
     }

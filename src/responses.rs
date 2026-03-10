@@ -200,7 +200,11 @@ impl DecryptedRoomEvent {
     /// be using it.
     ///
     /// @see https://github.com/matrix-org/matrix-spec/issues/1089
-    #[wasm_bindgen(getter, js_name = "forwardingCurve25519KeyChain")]
+    #[wasm_bindgen(
+        getter,
+        js_name = "forwardingCurve25519KeyChain",
+        unchecked_return_type = "string[]"
+    )]
     pub fn forwarding_curve25519_key_chain(&self) -> Array {
         Array::new()
     }
