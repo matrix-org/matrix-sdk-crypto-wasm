@@ -8,7 +8,7 @@
 
 name: Deploy documentation PR preview
 
-on:
+on: # zizmor: ignore[dangerous-triggers] - see above.
     workflow_run:
         workflows: ["CI"]
         types:
