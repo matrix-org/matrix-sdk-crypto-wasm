@@ -39,7 +39,7 @@ export async function addMachineToMachine(machineToAdd: OlmMachine, machine: Olm
     const toDeviceEvents = JSON.stringify([]);
     const changedDevices = new DeviceLists();
     const oneTimeKeyCounts = new Map();
-    const unusedFallbackKeys = new Set();
+    const unusedFallbackKeys = new Set<string>();
 
     const receiveSyncChanges = await machineToAdd.receiveSyncChanges(
         toDeviceEvents,

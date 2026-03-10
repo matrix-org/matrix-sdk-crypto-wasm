@@ -311,7 +311,7 @@ describe(OlmMachine.name, () => {
         const toDeviceEvents = JSON.stringify([]);
         const changedDevices = new DeviceLists();
         const oneTimeKeyCounts = new Map();
-        const unusedFallbackKeys = new Set();
+        const unusedFallbackKeys = new Set<string>();
 
         const receiveSyncChanges = await m.receiveSyncChanges(
             toDeviceEvents,
@@ -342,7 +342,7 @@ describe(OlmMachine.name, () => {
         const toDeviceEvents = JSON.stringify([]);
         const changedDevices = new DeviceLists();
         const oneTimeKeyCounts = new Map();
-        const unusedFallbackKeys = new Set();
+        const unusedFallbackKeys = new Set<string>();
 
         const receiveSyncChanges = await m.receiveSyncChanges(
             toDeviceEvents,
@@ -398,7 +398,7 @@ describe(OlmMachine.name, () => {
             const toDeviceEvents = JSON.stringify([]);
             const changedDevices = new DeviceLists();
             const oneTimeKeyCounts = new Map();
-            const unusedFallbackKeys = new Set();
+            const unusedFallbackKeys = new Set<string>();
 
             const receiveSyncChanges = await m.receiveSyncChanges(
                 toDeviceEvents,
@@ -773,16 +773,20 @@ describe(OlmMachine.name, () => {
 
             const s = signature?.get("ed25519:foobar");
 
+            if (!(s instanceof MaybeSignature)) {
+                return fail("Expected MaybeSignature instance, but received an unexpected type.");
+            }
+
             expect(s).toBeInstanceOf(MaybeSignature);
 
             expect(s.isValid()).toStrictEqual(true);
             expect(s.isInvalid()).toStrictEqual(false);
             expect(s.invalidSignatureSource).toBeUndefined();
 
-            base64 = s.signature.toBase64();
+            base64 = s.signature!.toBase64();
 
             expect(base64).toMatch(/^[A-Za-z0-9\+/]+$/);
-            expect(s.signature.ed25519.toBase64()).toStrictEqual(base64);
+            expect(s.signature!.ed25519!.toBase64()).toStrictEqual(base64);
         }
 
         // `getSignature`
@@ -808,6 +812,9 @@ describe(OlmMachine.name, () => {
         let _ = m.bootstrapCrossSigning(true);
 
         const identity = await m.getIdentity(user);
+        if (!(identity instanceof OwnUserIdentity)) {
+            return fail("Expected OwnUserIdentity instance, but received an unexpected type.");
+        }
 
         expect(identity.isVerified()).toStrictEqual(true);
         expect(identity.wasPreviouslyVerified()).toStrictEqual(true);
@@ -852,7 +859,9 @@ describe(OlmMachine.name, () => {
         const m = await machine();
         let _ = m.bootstrapCrossSigning(true);
         const identity = await m.getIdentity(user);
-        expect(identity).toBeInstanceOf(OwnUserIdentity);
+        if (!(identity instanceof OwnUserIdentity)) {
+            return fail("Expected OwnUserIdentity instance, but received an unexpected type.");
+        }
 
         const callback = jest.fn().mockImplementation(() => Promise.resolve(undefined));
         m.registerUserIdentityUpdatedCallback(callback);
@@ -1191,13 +1200,16 @@ describe(OlmMachine.name, () => {
             const identity = await m.getIdentity(new UserId("@example:morpheus.localhost"));
 
             expect(identity).toBeInstanceOf(OtherUserIdentity);
+            if (!(identity instanceof OtherUserIdentity)) {
+                return fail("Expected OtherUserIdentity instance, but received an unexpected type.");
+            }
             expect(identity.isVerified()).toStrictEqual(false);
             expect(identity.wasPreviouslyVerified()).toStrictEqual(false);
             expect(identity.hasVerificationViolation()).toStrictEqual(false);
             expect(identity.identityNeedsUserApproval()).toStrictEqual(false);
 
             const eventId = new EventId("$Rqnc-F-dvnEYJTyHq_iKxU2bZ1CI92-kuZq3a5lr5Zg");
-            const verificationRequest = await identity.requestVerification(room, eventId);
+            const verificationRequest = identity.requestVerification(room, eventId);
             expect(verificationRequest).toBeInstanceOf(VerificationRequest);
 
             await m.receiveVerificationEvent(
@@ -1218,11 +1230,14 @@ describe(OlmMachine.name, () => {
                 room,
             );
 
-            expect(verificationRequest.roomId.toString()).toStrictEqual(room.toString());
+            expect(verificationRequest.roomId!.toString()).toStrictEqual(room.toString());
 
-            const [sas, outgoingVerificationRequest] = await verificationRequest.startSas();
+            const [sas, outgoingVerificationRequest] = (await verificationRequest.startSas())!;
 
             expect(outgoingVerificationRequest).toBeInstanceOf(RoomMessageRequest);
+            if (!(outgoingVerificationRequest instanceof RoomMessageRequest)) {
+                return fail("Expected RoomMessageRequest instance, but received an unexpected type.");
+            }
             expect(outgoingVerificationRequest.id).toBeDefined();
             expect(outgoingVerificationRequest.room_id).toStrictEqual(room.toString());
             expect(outgoingVerificationRequest.txn_id).toBeDefined();
@@ -1245,21 +1260,25 @@ describe(OlmMachine.name, () => {
 
             const outgoingCancellationRequest = sas.cancelWithCode("org.matrix.custom");
 
-            const cancellationBody = JSON.parse(outgoingCancellationRequest.body);
+            const cancellationBody = JSON.parse(outgoingCancellationRequest!.body);
+
             expect(cancellationBody.code).toEqual("org.matrix.custom");
 
             let cancelInfo = verificationRequest.cancelInfo;
             expect(cancelInfo).toBeTruthy();
-            expect(cancelInfo.cancelCode()).toEqual("org.matrix.custom");
-            expect(cancelInfo.cancelledbyUs()).toBe(true);
+            expect(cancelInfo!.cancelCode()).toEqual("org.matrix.custom");
+            expect(cancelInfo!.cancelledbyUs()).toBe(true);
         });
 
         test("can handle a cancelled in-room verification", async () => {
             let _ = m.bootstrapCrossSigning(true);
             const identity = await m.getIdentity(new UserId("@example:morpheus.localhost"));
+            if (!(identity instanceof OtherUserIdentity)) {
+                return fail("Expected OtherUserIdentity instance, but received an unexpected type.");
+            }
 
             const eventId = new EventId("$qnc-F-dvnEYJTyHq_iKxU2bZ1CI92-kuZq3a5lr5ZRg");
-            const verificationRequest = await identity.requestVerification(room, eventId);
+            const verificationRequest = identity!.requestVerification(room, eventId);
 
             await m.receiveVerificationEvent(
                 JSON.stringify({
@@ -1281,8 +1300,8 @@ describe(OlmMachine.name, () => {
 
             let cancelInfo = verificationRequest.cancelInfo;
             expect(cancelInfo).toBeTruthy();
-            expect(cancelInfo.cancelCode()).toEqual("m.user");
-            expect(cancelInfo.cancelledbyUs()).toBe(false);
+            expect(cancelInfo!.cancelCode()).toEqual("m.user");
+            expect(cancelInfo!.cancelledbyUs()).toBe(false);
         });
     });
 
@@ -1532,7 +1551,7 @@ describe(OlmMachine.name, () => {
             const toDeviceEvents = JSON.stringify([]);
             const changedDevices = new DeviceLists();
             const oneTimeKeyCounts = new Map();
-            const unusedFallbackKeys = new Set();
+            const unusedFallbackKeys = new Set<string>();
 
             await secondMachine.receiveSyncChanges(
                 toDeviceEvents,
