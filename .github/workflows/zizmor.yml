@@ -1,4 +1,4 @@
-name: Analysle workflows with zizmor
+name: Analyse workflows with zizmor
 
 on:
   push:
