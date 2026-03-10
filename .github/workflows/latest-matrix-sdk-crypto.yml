@@ -36,15 +36,19 @@ jobs:
   test-against-latest-matrix-sdk-crypto:
     name: test-against-latest-matrix-sdk-crypto
     runs-on: ubuntu-latest
+    environment: latest-matrix-sdk-crypto
 
     steps:
       - name: Checkout the repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
-        with:
-          targets: wasm32-unknown-unknown
+        run: |
+          rustup install stable
+          rustup default stable
+          rustup target add wasm32-unknown-unknown
 
       - name: Load cache
         uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
@@ -86,8 +90,10 @@ jobs:
           filename: .github/latest_matrix_sdk_failed_issue_template.md
         id: create-issue
 
-      - run: 'echo Created/updated ${{ steps.create-issue.outputs.url }}'
+      - run: 'echo Created/updated ${STEPS_CREATE_ISSUE_OUTPUTS_URL}'
         if: failure()
+        env:
+          STEPS_CREATE_ISSUE_OUTPUTS_URL: ${{ steps.create-issue.outputs.url }}
 
       - name: Comment on the issue
         if: failure()

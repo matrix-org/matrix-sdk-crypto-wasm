@@ -1,5 +1,7 @@
 name: CI
 
+permissions: {}
+
 on:
   workflow_dispatch:
   push:
@@ -23,15 +25,20 @@ jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout the repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@0f1b44df7e9cbb178d781a242338dfa5e243ad7f # nightly
-        with:
-          components: rustfmt
+        run: |
+          rustup install nightly
+          rustup default nightly
+          rustup component add rustfmt
 
       - name: Check formatting
         run: |
@@ -67,11 +74,14 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7 # stable
-        with:
-          targets: wasm32-unknown-unknown
+        run: |
+          rustup install stable
+          rustup default stable
+          rustup target add wasm32-unknown-unknown
 
       - name: Load cache
         uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2

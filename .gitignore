@@ -2,3 +2,6 @@
 /node_modules
 /target
 /package-lock.json
+
+# macOS finder desktop services store file
+.DS_Store

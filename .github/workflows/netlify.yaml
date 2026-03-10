@@ -3,11 +3,12 @@
 # We keep this in a separate workflow to the main build, because it
 # requires access to the Netlify secret. By having it run on `workflow_run`, we
 # will only use the workflow definition file on the default branch, so we can
-# ensure that the secret can't be exfiltrated.
+# ensure that the secret can't be exfiltrated. This makes `zizmor` unhappy, but
+# that's a necessary evil.
 
 name: Deploy documentation PR preview
 
-on:
+on: # zizmor: ignore[dangerous-triggers] - see above.
     workflow_run:
         workflows: ["CI"]
         types:
