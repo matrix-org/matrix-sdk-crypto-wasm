@@ -36,6 +36,7 @@ jobs:
   test-against-latest-matrix-sdk-crypto:
     name: test-against-latest-matrix-sdk-crypto
     runs-on: ubuntu-latest
+    environment: latest-matrix-sdk-crypto
 
     steps:
       - name: Checkout the repo
