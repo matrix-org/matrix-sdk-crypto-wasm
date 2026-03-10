@@ -82,16 +82,12 @@ jobs:
 
       - name: Open an issue on failure
         if: failure()
-        run: |
-          ISSUE_URL=$(gh issue create \
-            --title "Build failure: matrix-sdk-crypto update" \
-            --body-file .github/latest_matrix_sdk_failed_issue_template.md \
-            --label "bug" \
-            --repo ${{ github.repository }} \
-            --json url | jq -r '.url')
-          echo "url=$ISSUE_URL" >> $GITHUB_OUTPUT
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          update_existing: true
+          filename: .github/latest_matrix_sdk_failed_issue_template.md
         id: create-issue
 
       - run: 'echo Created/updated ${STEPS_CREATE_ISSUE_OUTPUTS_URL}'
