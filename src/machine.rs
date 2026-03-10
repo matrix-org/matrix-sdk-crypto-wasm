@@ -108,7 +108,7 @@ impl OlmMachine {
         device_id: &identifiers::DeviceId,
         store_name: Option<String>,
         store_passphrase: Option<String>,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -141,7 +141,7 @@ impl OlmMachine {
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_handle: &StoreHandle,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());

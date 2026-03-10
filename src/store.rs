@@ -55,7 +55,7 @@ impl StoreHandle {
     pub fn open_for_js(
         store_name: Option<String>,
         store_passphrase: Option<String>,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
         future_to_promise(async move {
@@ -127,6 +127,7 @@ impl StoreHandle {
         store_name: String,
         mut store_key: Vec<u8>,
         logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
         future_to_promise(async move {
@@ -331,7 +332,9 @@ impl SecretsBundle {
     }
 
     /// Deserialize the [`SecretsBundle`] from a JSON object.
-    pub fn from_json(json: JsValue) -> Result<SecretsBundle, JsError> {
+    pub fn from_json(
+        #[wasm_bindgen(unchecked_param_type = "unknown")] json: JsValue,
+    ) -> Result<SecretsBundle, JsError> {
         let bundle = serde_wasm_bindgen::from_value(json)?;
 
         Ok(Self { inner: bundle })

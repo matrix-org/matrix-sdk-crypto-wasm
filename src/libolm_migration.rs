@@ -126,7 +126,7 @@ impl Migration {
         data: &BaseMigrationData,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
         let store_handle = store_handle.clone();
@@ -260,7 +260,7 @@ impl Migration {
         sessions: Vec<PickledSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
 
@@ -421,7 +421,7 @@ impl Migration {
         sessions: Vec<PickledInboundGroupSession>,
         pickle_key: Uint8Array,
         store_handle: &StoreHandle,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&logger_to_dispatcher(logger));
         let pickle_key = pickle_key.to_vec();
