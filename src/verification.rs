@@ -216,8 +216,9 @@ impl Sas {
     /// Accept the SAS verification.
     ///
     /// This does nothing (and returns `undefined`) if the verification was
-    /// already accepted, otherwise it returns an `OutgoingRequest`
+    /// already accepted, otherwise it returns an `OutgoingVerificationRequest`
     /// that needs to be sent out.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn accept(&self) -> Result<JsValue, JsError> {
         self.inner
             .accept()
@@ -235,7 +236,8 @@ impl Sas {
     /// Does nothing if we’re not in a state where we can confirm the
     /// short auth string.
     ///
-    /// Returns a `Promise` for an array of `OutgoingRequest`s.
+    /// Returns a `Promise` for an array of `OutgoingVerificationRequest`s.
+    #[wasm_bindgen(unchecked_return_type = "Promise<OutgoingVerificationRequest[]>")]
     pub fn confirm(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -248,7 +250,7 @@ impl Sas {
                 .collect::<Result<Array, _>>()?;
 
             // if a signature upload request was returned, push it onto the end of the array
-            // of OutgoingRequests we just built.
+            // of OutgoingVerificationRequests we just built.
             if let Some(sig_rq) = signature_upload_request {
                 outgoing_verification_requests
                     .push(&requests::SignatureUploadRequest::try_from(&sig_rq)?.into());
@@ -260,8 +262,9 @@ impl Sas {
 
     /// Cancel the verification.
     ///
-    /// Returns either an `OutgoingRequest` which should be sent out, or
-    /// `undefined` if the verification is already cancelled.
+    /// Returns either an `OutgoingVerificationRequest` which should be sent
+    /// out, or `undefined` if the verification is already cancelled.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn cancel(&self) -> Result<JsValue, JsError> {
         self.inner
             .cancel()
@@ -276,9 +279,12 @@ impl Sas {
     ///
     /// This cancels the verification with given code (e.g. `m.user`).
     ///
-    /// Returns either an `OutgoingRequest` which should be sent out, or
-    /// `undefined` if the verification is already cancelled.
-    #[wasm_bindgen(js_name = "cancelWithCode")]
+    /// Returns either an `OutgoingVerificationRequest` which should be sent
+    /// out, or `undefined` if the verification is already cancelled.
+    #[wasm_bindgen(
+        js_name = "cancelWithCode",
+        unchecked_return_type = "OutgoingVerificationRequest | undefined"
+    )]
     pub fn cancel_with_code(&self, code: &str) -> Result<JsValue, JsError> {
         self.inner
             .cancel_with_code(code.into())
@@ -349,7 +355,10 @@ impl Sas {
     ///
     /// The `callback` is called with no parameters.
     #[wasm_bindgen(js_name = "registerChangesCallback")]
-    pub fn register_changes_callback(&self, callback: Function) {
+    pub fn register_changes_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "() => Promise<void>")] callback: Function,
+    ) {
         let stream = self.inner.changes();
 
         // fire up a promise chain which will call `callback` on each result from the
@@ -502,6 +511,7 @@ impl Qr {
     ///
     /// This will return some OutgoingContent if the object is in the
     /// correct state to start the verification flow, otherwise None.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn reciprocate(&self) -> Result<JsValue, JsError> {
         self.inner
             .reciprocate()
@@ -514,9 +524,12 @@ impl Qr {
 
     /// Confirm that the other side has scanned our QR code.
     ///
-    /// Returns either an `OutgoingRequest` which should be sent out, or
-    /// `undefined` if the verification is already confirmed.
-    #[wasm_bindgen(js_name = "confirmScanning")]
+    /// Returns either an `OutgoingVerificationRequest` which should be sent
+    /// out, or `undefined` if the verification is already confirmed.
+    #[wasm_bindgen(
+        js_name = "confirmScanning",
+        unchecked_return_type = "OutgoingVerificationRequest | undefined"
+    )]
     pub fn confirm_scanning(&self) -> Result<JsValue, JsError> {
         self.inner
             .confirm_scanning()
@@ -529,8 +542,9 @@ impl Qr {
 
     /// Cancel the verification flow.
     ///
-    /// Returns either an `OutgoingRequest` which should be sent out, or
-    /// `undefined` if the verification is already cancelled.
+    /// Returns either an `OutgoingVerificationRequest` which should be sent
+    /// out, or `undefined` if the verification is already cancelled.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn cancel(&self) -> Result<JsValue, JsError> {
         self.inner
             .cancel()
@@ -545,9 +559,12 @@ impl Qr {
     ///
     /// This cancels the verification with given code (e.g. `m.user`).
     ///
-    /// Returns either an `OutgoingRequest` which should be sent out, or
-    /// `undefined` if the verification is already cancelled.
-    #[wasm_bindgen(js_name = "cancelWithCode")]
+    /// Returns either an `OutgoingVerificationRequest` which should be sent
+    /// out, or `undefined` if the verification is already cancelled.
+    #[wasm_bindgen(
+        js_name = "cancelWithCode",
+        unchecked_return_type = "OutgoingVerificationRequest | undefined"
+    )]
     pub fn cancel_with_code(&self, code: &str) -> Result<JsValue, JsError> {
         self.inner
             .cancel_with_code(code.into())
@@ -563,7 +580,10 @@ impl Qr {
     ///
     /// The `callback` is called with no parameters.
     #[wasm_bindgen(js_name = "registerChangesCallback")]
-    pub fn register_changes_callback(&self, callback: Function) {
+    pub fn register_changes_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "() => Promise<void>")] callback: Function,
+    ) {
         let stream = self.inner.changes();
 
         // fire up a promise chain which will call `callback` on each result from the
@@ -772,7 +792,9 @@ impl VerificationRequest {
         own_user_id: &UserId,
         own_device_id: &DeviceId,
         other_user_id: &UserId,
-        methods: Option<Vec<VerificationMethod>>,
+        #[wasm_bindgen(unchecked_optional_param_type = "VerificationMethod[]")] methods: Option<
+            Vec<VerificationMethod>,
+        >,
     ) -> Result<String, JsError> {
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
@@ -854,7 +876,11 @@ impl VerificationRequest {
     ///
     /// `undefined` if we do not yet know the supported methods; otherwise, an
     /// array of `VerificationMethod`s.
-    #[wasm_bindgen(getter, js_name = "theirSupportedMethods")]
+    #[wasm_bindgen(
+        getter,
+        js_name = "theirSupportedMethods",
+        unchecked_return_type = "VerificationMethod[] | undefined"
+    )]
     pub fn their_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .their_supported_methods()
@@ -866,7 +892,11 @@ impl VerificationRequest {
     ///
     /// Will be present only we requested the verification or if we’re
     /// in the ready state.
-    #[wasm_bindgen(getter, js_name = "ourSupportedMethods")]
+    #[wasm_bindgen(
+        getter,
+        js_name = "ourSupportedMethods",
+        unchecked_return_type = "VerificationMethod[] | undefined"
+    )]
     pub fn our_supported_methods(&self) -> Result<Option<Vec<VerificationMethod>>, JsError> {
         self.inner
             .our_supported_methods()
@@ -912,7 +942,7 @@ impl VerificationRequest {
     /// object.
     ///
     /// Returns: a `Sas`, a `Qr`, or `undefined`.
-    #[wasm_bindgen(js_name = "getVerification")]
+    #[wasm_bindgen(js_name = "getVerification", unchecked_return_type = "Sas | Qr | undefined")]
     pub fn get_verification(&self) -> JsValue {
         let result: Option<JsValue> =
             if let VerificationRequestState::Transitioned { verification, .. } = self.inner.state()
@@ -929,7 +959,10 @@ impl VerificationRequest {
     ///
     /// The `callback` is called with no parameters.
     #[wasm_bindgen(js_name = "registerChangesCallback")]
-    pub fn register_changes_callback(&self, callback: Function) {
+    pub fn register_changes_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "() => Promise<void>")] callback: Function,
+    ) {
         let stream = self.inner.changes();
 
         // fire up a promise chain which will call `callback` on each result from the
@@ -954,10 +987,15 @@ impl VerificationRequest {
     ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
-    #[wasm_bindgen(js_name = "acceptWithMethods")]
+    #[wasm_bindgen(
+        js_name = "acceptWithMethods",
+        unchecked_return_type = "OutgoingVerificationRequest | undefined"
+    )]
     pub fn accept_with_methods(
         &self,
-        methods: Vec<VerificationMethod>,
+        #[wasm_bindgen(unchecked_param_type = "VerificationMethod[]")] methods: Vec<
+            VerificationMethod,
+        >,
     ) -> Result<JsValue, JsError> {
         let methods = methods.iter().map(Into::into).collect();
 
@@ -984,6 +1022,7 @@ impl VerificationRequest {
     ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn accept(&self) -> Result<JsValue, JsError> {
         self.inner
             .accept()
@@ -998,6 +1037,7 @@ impl VerificationRequest {
     ///
     /// It returns either a `ToDeviceRequest`, a `RoomMessageRequest`
     /// or `undefined`.
+    #[wasm_bindgen(unchecked_return_type = "OutgoingVerificationRequest | undefined")]
     pub fn cancel(&self) -> Result<JsValue, JsError> {
         self.inner
             .cancel()
@@ -1010,8 +1050,11 @@ impl VerificationRequest {
 
     /// Transition from this verification request into a SAS verification flow.
     ///
-    /// Returns `Promise<[Sas, RoomMessageRequest|ToDeviceRequest] | undefined>`
-    #[wasm_bindgen(js_name = "startSas")]
+    /// Returns `Promise<[Sas, OutgoingVerificationRequest] | undefined>`
+    #[wasm_bindgen(
+        js_name = "startSas",
+        unchecked_return_type = "Promise<[Sas, OutgoingVerificationRequest] | undefined>"
+    )]
     pub fn start_sas(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -1044,7 +1087,7 @@ impl VerificationRequest {
     ///
     /// Returns a `Qr` or `undefined`.
     #[cfg(feature = "qrcode")]
-    #[wasm_bindgen(js_name = "generateQrCode")]
+    #[wasm_bindgen(js_name = "generateQrCode", unchecked_return_type = "Promise<Qr | undefined>")]
     pub fn generate_qr_code(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -1058,7 +1101,7 @@ impl VerificationRequest {
     /// Start a QR code verification by providing a scanned QR code
     /// for this verification flow.
     #[cfg(feature = "qrcode")]
-    #[wasm_bindgen(js_name = "scanQrCode")]
+    #[wasm_bindgen(js_name = "scanQrCode", unchecked_return_type = "Promise<Qr>")]
     pub fn scan_qr_code(&self, data: &QrCodeScan) -> Promise {
         let me = self.inner.clone();
         let qr_verification_data = data.inner.clone();

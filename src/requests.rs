@@ -29,6 +29,14 @@ use wasm_bindgen::prelude::*;
 
 /** Outgoing Requests * */
 
+/// A subset of outgoing requests used for verification.
+#[wasm_bindgen(typescript_custom_section)]
+const JS_OUTGOING_VERIFICATION_REQUEST: &str = r#"
+type OutgoingVerificationRequest =
+    | ToDeviceRequest
+    | RoomMessageRequest;
+"#;
+
 /// Data for a request to the `/keys/upload` API endpoint
 /// ([specification]).
 ///
