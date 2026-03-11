@@ -34,7 +34,7 @@ patch version.
    number, start a new (empty) "UNRELEASED" section, and commit your changes
    ready for the next step, as pnpm will require a clean working tree.
 3. Run `pnpm version <version> -m "v%s"`, where `<version>` is your desired new version.
-   You can use `major/minor/patch` as a shorthand. This will automatically update
+   You can use `major`/`minor`/`patch` as a shorthand. This will automatically update
    `package.json`, commit, then create a tag.
 4. Push the branch, but not yet the tag.
 5. Create a PR to approve the changes. Reviewers should mostly check that the
