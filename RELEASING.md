@@ -31,10 +31,11 @@ patch version.
 
 1. Create a new branch, named `release-v<version>`.
 2. Replace the "UNRELEASED" heading in `CHANGELOG.md` with the new version
-   number, start a new (empty) "UNRELEASED" section, and `git add` ready for
-   commit on the next step.
-3. Run `pnpm version`. It will ask you the version number, then update
-   `package.json`, commit, and create a tag.
+   number, start a new (empty) "UNRELEASED" section, and commit your changes
+   ready for the next step, as pnpm will require a clean working tree.
+3. Run `pnpm version <version> -m "v%s"`, where `<version>` is your desired new version.
+   You can use `major`/`minor`/`patch` as a shorthand. This will automatically update
+   `package.json`, commit, then create a tag.
 4. Push the branch, but not yet the tag.
 5. Create a PR to approve the changes. Reviewers should mostly check that the
    changelog is coherent.
