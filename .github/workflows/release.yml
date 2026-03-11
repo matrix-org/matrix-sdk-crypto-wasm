@@ -76,3 +76,5 @@ jobs:
     steps:
       - name: Create the Github release
         run: gh release create "$GITHUB_REF_NAME" --draft
+        env:
+            GH_TOKEN: ${{ github.token }}
