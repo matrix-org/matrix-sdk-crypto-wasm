@@ -1,5 +1,14 @@
 # UNRELEASED
 
+-   **BREAKING:** Refine type declarations to improve developer experience
+    and ensure stronger type safety.
+    ([#305](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/305))
+
+    -   Adds explicit type definitions to methods that previously lacked them, and refines cases where methods return a union of types to make them more precise.
+    -   Deprecates all outdated types previously exposed in `index.d.ts`, which were no longer accurate or reliable.
+
+    These changes are not _strictly_ breaking - they do not affect the underlying Rust bindings - but the compile-time interface has been modified, which necessitates the addition of extra checks to ensure type correctness holds.
+
 -   Add support for storing and querying the rooms that are awaiting
     [MSC4268](https://github.com/matrix-org/matrix-spec-proposals/pull/4268)
     key bundles.
