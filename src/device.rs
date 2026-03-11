@@ -25,10 +25,15 @@ impl Device {
     /// Request an interactive verification with this device.
     ///
     /// Returns a 2-element array `[VerificationRequest, ToDeviceRequest]`.
-    #[wasm_bindgen(js_name = "requestVerification")]
+    #[wasm_bindgen(
+        js_name = "requestVerification",
+        unchecked_return_type = "[VerificationRequest, ToDeviceRequest]"
+    )]
     pub fn request_verification(
         &self,
-        methods: Option<Vec<verification::VerificationMethod>>,
+        #[wasm_bindgen(unchecked_optional_param_type = "VerificationMethod[]")] methods: Option<
+            Vec<verification::VerificationMethod>,
+        >,
     ) -> Result<Array, JsError> {
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
@@ -113,7 +118,7 @@ impl Device {
     ///
     /// `trust_state` represents the new trust state that should be
     /// set for the device.
-    #[wasm_bindgen(js_name = "setLocalTrust")]
+    #[wasm_bindgen(js_name = "setLocalTrust", unchecked_return_type = "Promise<null>")]
     pub fn set_local_trust(&self, local_state: LocalTrust) -> Promise {
         let me = self.inner.clone();
 
@@ -164,7 +169,7 @@ impl Device {
     }
 
     /// Get a map containing all the device keys.
-    #[wasm_bindgen(getter)]
+    #[wasm_bindgen(getter, unchecked_return_type = "Map<DeviceKeyId, DeviceKey>")]
     pub fn keys(&self) -> Map {
         let map = Map::new();
 
@@ -181,7 +186,7 @@ impl Device {
     /// Get the list of algorithms this device supports.
     ///
     /// Returns `Array<EncryptionAlgorithm>`.
-    #[wasm_bindgen(getter)]
+    #[wasm_bindgen(getter, unchecked_return_type = "EncryptionAlgorithm[]")]
     pub fn algorithms(&self) -> Array {
         self.inner
             .algorithms()
@@ -234,6 +239,7 @@ impl Device {
     /// Works only if the device is owned by the current user.
     ///
     /// Returns a signature upload request that needs to be sent out.
+    #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
     pub fn verify(&self) -> Promise {
         let device = self.inner.clone();
 
@@ -319,11 +325,13 @@ impl UserDevices {
     }
 
     /// Array over all the device IDs of the user devices.
+    #[wasm_bindgen(unchecked_return_type = "DeviceId[]")]
     pub fn keys(&self) -> Array {
         self.inner.keys().map(ToOwned::to_owned).map(DeviceId::from).map(JsValue::from).collect()
     }
 
     /// Iterator over all the devices of the user devices.
+    #[wasm_bindgen(unchecked_return_type = "Device[]")]
     pub fn devices(&self) -> Array {
         self.inner.devices().map(Device::from).map(JsValue::from).collect()
     }

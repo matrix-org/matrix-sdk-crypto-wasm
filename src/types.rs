@@ -63,6 +63,7 @@ impl Signatures {
     }
 
     /// Get the map of signatures that belong to the given user.
+    #[wasm_bindgen(unchecked_return_type = "Map<string, MaybeSignature> | undefined")]
     pub fn get(&self, signer: &UserId) -> Option<Map> {
         let map = Map::new();
 
@@ -266,6 +267,7 @@ impl RoomKeyImportResult {
     /// A Map from room id to a Map of the sender key to a Set of session ids.
     ///
     /// Typescript type: `Map<string, Map<string, Set<string>>`.
+    #[wasm_bindgen(unchecked_return_type = "Map<string, Map<string, Set<string>>>")]
     pub fn keys(&self) -> Map {
         let key_map = Map::new();
 

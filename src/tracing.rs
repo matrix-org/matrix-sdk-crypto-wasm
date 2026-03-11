@@ -11,6 +11,16 @@ use tracing::{dispatcher, Dispatch, Level};
 use tracing_subscriber::{filter::LevelFilter, prelude::*, reload};
 use wasm_bindgen::prelude::*;
 
+/// The TypeScript type for [`JsLogger`].
+#[wasm_bindgen(typescript_custom_section)]
+const JS_LOGGER_TYPE: &str = r#"
+interface JsLogger {
+    debug(data: any): void;
+    info(data: any): void;
+    warn(data: any): void;
+    error(data: any): void;
+}"#;
+
 /// Logger level.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]

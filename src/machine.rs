@@ -41,11 +41,12 @@ use crate::{
     device, encryption,
     error::MegolmDecryptionError,
     future::{future_to_promise, future_to_promise_with_custom_error},
-    identifiers, identities, olm, requests,
-    requests::{outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest},
+    identifiers, identities, olm,
+    requests::{
+        self, outgoing_request_to_js_value, CrossSigningBootstrapRequests, ToDeviceRequest,
+    },
     responses::{self, response_from_string, UnsupportedAlgorithmError},
-    store,
-    store::{RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
+    store::{self, RoomKeyInfo, RoomKeyWithheldInfo, StoreHandle},
     sync_events,
     tracing::{logger_to_dispatcher, JsLogger},
     types::{
@@ -54,6 +55,16 @@ use crate::{
     },
     verification, vodozemac,
 };
+
+#[wasm_bindgen(typescript_custom_section)]
+const PROCESSED_TO_DEVICE_EVENTS_TYPE: &str = r#"
+/** The types returned by {@link OlmMachine.receiveSyncChanges}. */
+type ProcessedToDeviceEvent =
+    | DecryptedToDeviceEvent
+    | PlainTextToDeviceEvent
+    | InvalidToDeviceEvent
+    | UTDToDeviceEvent;
+"#;
 
 /// State machine implementation of the Olm/Megolm encryption protocol
 /// used for Matrix end to end encryption.
@@ -106,9 +117,9 @@ impl OlmMachine {
     pub fn initialize(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
-        store_name: Option<String>,
-        store_passphrase: Option<String>,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "string")] store_name: Option<String>,
+        #[wasm_bindgen(unchecked_optional_param_type = "string")] store_passphrase: Option<String>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -141,7 +152,7 @@ impl OlmMachine {
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_handle: &StoreHandle,
-        logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -203,7 +214,11 @@ impl OlmMachine {
     }
 
     /// Get the display name of our own device.
-    #[wasm_bindgen(getter, js_name = "displayName")]
+    #[wasm_bindgen(
+        getter,
+        js_name = "displayName",
+        unchecked_return_type = "Promise<string | undefined>"
+    )]
     pub fn display_name(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -249,7 +264,7 @@ impl OlmMachine {
     /// [`update_tracked_users`](#method.update_tracked_users) method.
     ///
     /// Returns a `Set<UserId>`.
-    #[wasm_bindgen(js_name = "trackedUsers")]
+    #[wasm_bindgen(js_name = "trackedUsers", unchecked_return_type = "Promise<Set<UserId>>")]
     pub fn tracked_users(&self) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let set = Set::new(&JsValue::UNDEFINED);
@@ -283,7 +298,7 @@ impl OlmMachine {
     ///
     /// Items inside `users` will be invalidated by this method. Be careful not
     /// to use the `UserId`s after this method has been called.
-    #[wasm_bindgen(js_name = "updateTrackedUsers")]
+    #[wasm_bindgen(js_name = "updateTrackedUsers", unchecked_return_type = "Promise<void>")]
     pub fn update_tracked_users(&self, users: Vec<identifiers::UserId>) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
@@ -342,13 +357,19 @@ impl OlmMachine {
     ///   * {@link PlainTextToDeviceEvent}
     ///   * {@link UTDToDeviceEvent}
     ///   * {@link InvalidToDeviceEvent}
-    #[wasm_bindgen(js_name = "receiveSyncChanges")]
+    #[wasm_bindgen(
+        js_name = "receiveSyncChanges",
+        unchecked_return_type = "Promise<ProcessedToDeviceEvent[]>"
+    )]
     pub fn receive_sync_changes(
         &self,
         to_device_events: &str,
         changed_devices: &sync_events::DeviceLists,
-        one_time_keys_counts: &Map,
-        unused_fallback_keys: Option<Set>,
+        #[wasm_bindgen(unchecked_param_type = "Map<string, number>")] one_time_keys_counts: &Map,
+        #[wasm_bindgen(unchecked_optional_param_type = "Set<string>")] unused_fallback_keys: Option<
+            Set,
+        >,
+        #[wasm_bindgen(unchecked_optional_param_type = "DecryptionSettings")]
         decryption_settings: Option<encryption::DecryptionSettings>,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
@@ -426,7 +447,10 @@ impl OlmMachine {
     /// Those requests need to be sent out to the server and the
     /// responses need to be passed back to the state machine
     /// using {@link OlmMachine.markRequestAsSent}.
-    #[wasm_bindgen(js_name = "outgoingRequests")]
+    #[wasm_bindgen(
+        js_name = "outgoingRequests",
+        unchecked_return_type = "Promise<OutgoingRequest[]>"
+    )]
     pub fn outgoing_requests(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -454,7 +478,7 @@ impl OlmMachine {
     /// * `response_type` represents the type of the request that was sent out.
     /// * `response` represents the response that was received from the server
     ///   after the outgoing request was sent out.
-    #[wasm_bindgen(js_name = "markRequestAsSent")]
+    #[wasm_bindgen(js_name = "markRequestAsSent", unchecked_return_type = "Promise<true>")]
     pub fn mark_request_as_sent(
         &self,
         request_id: &str,
@@ -508,7 +532,7 @@ impl OlmMachine {
     ///
     /// Panics if a group session for the given room wasn't shared
     /// beforehand.
-    #[wasm_bindgen(js_name = "encryptRoomEvent")]
+    #[wasm_bindgen(js_name = "encryptRoomEvent", unchecked_return_type = "Promise<string>")]
     pub fn encrypt_room_event(
         &self,
         room_id: &identifiers::RoomId,
@@ -564,7 +588,7 @@ impl OlmMachine {
     /// # Panics
     ///
     /// Panics if a group session for the given room was not previously shared.
-    #[wasm_bindgen(js_name = "encryptStateEvent")]
+    #[wasm_bindgen(js_name = "encryptStateEvent", unchecked_return_type = "Promise<string>")]
     pub fn encrypt_state_event(
         &self,
         room_id: &identifiers::RoomId,
@@ -601,7 +625,10 @@ impl OlmMachine {
     ///
     /// A `Promise` which resolves to a {@link DecryptedRoomEvent} instance, or
     /// rejects with a {@link MegolmDecryptionError} instance.
-    #[wasm_bindgen(js_name = "decryptRoomEvent")]
+    #[wasm_bindgen(
+        js_name = "decryptRoomEvent",
+        unchecked_return_type = "Promise<DecryptedRoomEvent>"
+    )]
     pub fn decrypt_room_event(
         &self,
         event: &str,
@@ -652,7 +679,10 @@ impl OlmMachine {
     /// # Returns
     ///
     /// {@link EncryptionInfo}
-    #[wasm_bindgen(js_name = "getRoomEventEncryptionInfo")]
+    #[wasm_bindgen(
+        js_name = "getRoomEventEncryptionInfo",
+        unchecked_return_type = "Promise<EncryptionInfo>"
+    )]
     pub fn get_room_event_encryption_info(
         &self,
         event: &str,
@@ -674,7 +704,10 @@ impl OlmMachine {
     ///
     /// This can be used to check which private cross signing keys we
     /// have stored locally.
-    #[wasm_bindgen(js_name = "crossSigningStatus")]
+    #[wasm_bindgen(
+        js_name = "crossSigningStatus",
+        unchecked_return_type = "Promise<CrossSigningStatus>"
+    )]
     pub fn cross_signing_status(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -738,9 +771,12 @@ impl OlmMachine {
     /// The export will contain the seeds for the ed25519 keys as
     /// unpadded base64 encoded strings.
     ///
-    /// Returns `null` if we don’t have any private cross signing keys;
+    /// Returns `undefined` if we don’t have any private cross signing keys;
     /// otherwise returns a `CrossSigningKeyExport`.
-    #[wasm_bindgen(js_name = "exportCrossSigningKeys")]
+    #[wasm_bindgen(
+        js_name = "exportCrossSigningKeys",
+        unchecked_return_type = "Promise<CrossSigningKeyExport | undefined>"
+    )]
     pub fn export_cross_signing_keys(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -754,7 +790,10 @@ impl OlmMachine {
     /// The keys should be provided as unpadded-base64-encoded strings.
     ///
     /// Returns a `CrossSigningStatus`.
-    #[wasm_bindgen(js_name = "importCrossSigningKeys")]
+    #[wasm_bindgen(
+        js_name = "importCrossSigningKeys",
+        unchecked_return_type = "Promise<CrossSigningStatus>"
+    )]
     pub fn import_cross_signing_keys(
         &self,
         master_key: Option<String>,
@@ -794,7 +833,10 @@ impl OlmMachine {
     ///   enables you to reuse the same request.
     ///
     /// Returns a {@link CrossSigningBootstrapRequests}.
-    #[wasm_bindgen(js_name = "bootstrapCrossSigning")]
+    #[wasm_bindgen(
+        js_name = "bootstrapCrossSigning",
+        unchecked_return_type = "Promise<CrossSigningBootstrapRequests>"
+    )]
     pub fn bootstrap_cross_signing(&self, reset: bool) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -809,7 +851,10 @@ impl OlmMachine {
     ///
     /// Returns a promise for an {@link OwnUserIdentity}, a
     /// {@link OtherUserIdentity}, or `undefined`.
-    #[wasm_bindgen(js_name = "getIdentity")]
+    #[wasm_bindgen(
+        js_name = "getIdentity",
+        unchecked_return_type = "Promise<OwnUserIdentity | OtherUserIdentity | undefined>"
+    )]
     pub fn get_identity(&self, user_id: &identifiers::UserId) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -827,6 +872,7 @@ impl OlmMachine {
 
     /// Sign the given message using our device key and if available
     /// cross-signing master key.
+    #[wasm_bindgen(unchecked_return_type = "Promise<Signatures>")]
     pub fn sign(&self, message: String) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -841,7 +887,7 @@ impl OlmMachine {
     ///
     /// Returns true if a session was invalidated, false if there was
     /// no session to invalidate.
-    #[wasm_bindgen(js_name = "invalidateGroupSession")]
+    #[wasm_bindgen(js_name = "invalidateGroupSession", unchecked_return_type = "Promise<boolean>")]
     pub fn invalidate_group_session(&self, room_id: &identifiers::RoomId) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let room_id = room_id.inner.clone();
@@ -863,7 +909,7 @@ impl OlmMachine {
     ///
     /// Items inside `users` will be invalidated by this method. Be careful not
     /// to use the `UserId`s after this method has been called.
-    #[wasm_bindgen(js_name = "shareRoomKey")]
+    #[wasm_bindgen(js_name = "shareRoomKey", unchecked_return_type = "Promise<ToDeviceRequest[]>")]
     pub fn share_room_key(
         &self,
         room_id: &identifiers::RoomId,
@@ -947,7 +993,10 @@ impl OlmMachine {
     ///
     /// Items inside `users` will be invalidated by this method. Be careful not
     /// to use the `UserId`s after this method has been called.
-    #[wasm_bindgen(js_name = "getMissingSessions")]
+    #[wasm_bindgen(
+        js_name = "getMissingSessions",
+        unchecked_return_type = "Promise<KeysClaimRequest | null>"
+    )]
     pub fn get_missing_sessions(&self, users: Vec<identifiers::UserId>) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let users = users.iter().map(|user| user.inner.clone()).collect::<Vec<_>>();
@@ -984,7 +1033,7 @@ impl OlmMachine {
     /// ### Returns
     ///
     /// A {@link UserDevices} object.
-    #[wasm_bindgen(js_name = "getUserDevices")]
+    #[wasm_bindgen(js_name = "getUserDevices", unchecked_return_type = "Promise<UserDevices>")]
     pub fn get_user_devices(
         &self,
         user_id: &identifiers::UserId,
@@ -1019,7 +1068,7 @@ impl OlmMachine {
     /// ### Returns
     ///
     /// If the device is known, a {@link Device}. Otherwise, `undefined`.
-    #[wasm_bindgen(js_name = "getDevice")]
+    #[wasm_bindgen(js_name = "getDevice", unchecked_return_type = "Promise<Device | undefined>")]
     pub fn get_device(
         &self,
         user_id: &identifiers::UserId,
@@ -1045,7 +1094,7 @@ impl OlmMachine {
     ///
     /// It returns a “`Verification` object”, which is either a `Sas`
     /// or `Qr` object.
-    #[wasm_bindgen(js_name = "getVerification")]
+    #[wasm_bindgen(js_name = "getVerification", unchecked_return_type = "Sas | Qr | undefined")]
     pub fn get_verification(
         &self,
         user_id: &identifiers::UserId,
@@ -1072,7 +1121,10 @@ impl OlmMachine {
     }
 
     /// Get all the verification requests of a given user.
-    #[wasm_bindgen(js_name = "getVerificationRequests")]
+    #[wasm_bindgen(
+        js_name = "getVerificationRequests",
+        unchecked_return_type = "VerificationRequest[]"
+    )]
     pub fn get_verification_requests(&self, user_id: &identifiers::UserId) -> Array {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner
@@ -1087,7 +1139,7 @@ impl OlmMachine {
     ///
     /// This method can be used to pass verification events that are happening
     /// in rooms to the `OlmMachine`. The event should be in the decrypted form.
-    #[wasm_bindgen(js_name = "receiveVerificationEvent")]
+    #[wasm_bindgen(js_name = "receiveVerificationEvent", unchecked_return_type = "Promise<void>")]
     pub fn receive_verification_event(
         &self,
         event: &str,
@@ -1114,8 +1166,12 @@ impl OlmMachine {
     ///
     /// Returns a Promise containing a Result containing a String which is a
     /// JSON-encoded array of ExportedRoomKey objects.
-    #[wasm_bindgen(js_name = "exportRoomKeys")]
-    pub fn export_room_keys(&self, predicate: Function) -> Promise {
+    #[wasm_bindgen(js_name = "exportRoomKeys", unchecked_return_type = "Promise<string>")]
+    pub fn export_room_keys(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "(session: InboundGroupSession) => boolean")]
+        predicate: Function,
+    ) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
@@ -1150,10 +1206,11 @@ impl OlmMachine {
     ///    the sender key to a list of session ids).
     ///
     /// @deprecated Use `importExportedRoomKeys` or `importBackedUpRoomKeys`.
-    #[wasm_bindgen(js_name = "importRoomKeys")]
+    #[wasm_bindgen(js_name = "importRoomKeys", unchecked_return_type = "Promise<string>")]
     pub fn import_room_keys(
         &self,
         exported_room_keys: &str,
+        #[wasm_bindgen(unchecked_param_type = "(imported: bigint, total: bigint) => void")]
         progress_listener: Function,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
@@ -1183,10 +1240,14 @@ impl OlmMachine {
     /// `progress` and `total`, and returns nothing.
     ///
     /// Returns a {@link RoomKeyImportResult}.
-    #[wasm_bindgen(js_name = "importExportedRoomKeys")]
+    #[wasm_bindgen(
+        js_name = "importExportedRoomKeys",
+        unchecked_return_type = "Promise<RoomKeyImportResult>"
+    )]
     pub fn import_exported_room_keys(
         &self,
         exported_room_keys: &str,
+        #[wasm_bindgen(unchecked_param_type = "(progress: bigint, total: bigint) => void")]
         progress_listener: Function,
     ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
@@ -1220,10 +1281,17 @@ impl OlmMachine {
     /// # Returns
     ///
     /// A {@link RoomKeyImportResult}.
-    #[wasm_bindgen(js_name = "importBackedUpRoomKeys")]
+    #[wasm_bindgen(
+        js_name = "importBackedUpRoomKeys",
+        unchecked_return_type = "Promise<RoomKeyImportResult>"
+    )]
     pub fn import_backed_up_room_keys(
         &self,
+        #[wasm_bindgen(unchecked_param_type = "Map<RoomId, Map<string, any>>")]
         backed_up_room_keys: &Map,
+        #[wasm_bindgen(
+            unchecked_param_type = "(progress: bigint, total: bigint, failures: bigint) => void | undefined"
+        )]
         progress_listener: Option<Function>,
         backup_version: String,
     ) -> Result<Promise, JsValue> {
@@ -1288,7 +1356,7 @@ impl OlmMachine {
     /// key.
     ///
     /// Returns `Promise<void>`.
-    #[wasm_bindgen(js_name = "saveBackupDecryptionKey")]
+    #[wasm_bindgen(js_name = "saveBackupDecryptionKey", unchecked_return_type = "Promise<void>")]
     pub fn save_backup_decryption_key(
         &self,
         decryption_key: &BackupDecryptionKey,
@@ -1306,7 +1374,7 @@ impl OlmMachine {
 
     /// Get the backup keys we have saved in our store.
     /// Returns a `Promise` for {@link BackupKeys}.
-    #[wasm_bindgen(js_name = "getBackupKeys")]
+    #[wasm_bindgen(js_name = "getBackupKeys", unchecked_return_type = "Promise<BackupKeys>")]
     pub fn get_backup_keys(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1337,10 +1405,13 @@ impl OlmMachine {
     /// ```
     ///
     /// Returns a {@link SignatureVerification} object.
-    #[wasm_bindgen(js_name = "verifyBackup")]
+    #[wasm_bindgen(
+        js_name = "verifyBackup",
+        unchecked_return_type = "Promise<SignatureVerification>"
+    )]
     pub fn verify_backup(&self, backup_info: JsValue) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
-        let backup_info: RoomKeyBackupInfo = serde_wasm_bindgen::from_value(backup_info)?;
+        let backup_info: RoomKeyBackupInfo = serde_wasm_bindgen::from_value(backup_info.into())?;
 
         let me = self.inner.clone();
 
@@ -1359,7 +1430,7 @@ impl OlmMachine {
     /// The {@link verifyBackup} method can be used to do so.
     ///
     /// Returns `Promise<void>`.
-    #[wasm_bindgen(js_name = "enableBackupV1")]
+    #[wasm_bindgen(js_name = "enableBackupV1", unchecked_return_type = "Promise<void>")]
     pub fn enable_backup_v1(
         &self,
         public_key_base_64: String,
@@ -1382,8 +1453,8 @@ impl OlmMachine {
     /// This returns true if we have an active `BackupKey` and backup version
     /// registered with the state machine.
     ///
-    /// Returns `Promise<bool>`.
-    #[wasm_bindgen(js_name = "isBackupEnabled")]
+    /// Returns `Promise<boolean>`.
+    #[wasm_bindgen(js_name = "isBackupEnabled", unchecked_return_type = "Promise<boolean>")]
     pub fn is_backup_enabled(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1400,7 +1471,7 @@ impl OlmMachine {
     /// reset the backup state of each room key we have.
     ///
     /// Returns `Promise<void>`.
-    #[wasm_bindgen(js_name = "disableBackup")]
+    #[wasm_bindgen(js_name = "disableBackup", unchecked_return_type = "Promise<void>")]
     pub fn disable_backup(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1415,7 +1486,10 @@ impl OlmMachine {
     /// out to backup the room keys.
     ///
     /// Returns an optional {@link KeysBackupRequest}.
-    #[wasm_bindgen(js_name = "backupRoomKeys")]
+    #[wasm_bindgen(
+        js_name = "backupRoomKeys",
+        unchecked_return_type = "Promise<KeysBackupRequest | undefined>"
+    )]
     pub fn backup_room_keys(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1474,7 +1548,7 @@ impl OlmMachine {
 
     /// Get the number of backed up room keys and the total number of room keys.
     /// Returns a {@link RoomKeyCounts}.
-    #[wasm_bindgen(js_name = "roomKeyCounts")]
+    #[wasm_bindgen(js_name = "roomKeyCounts", unchecked_return_type = "Promise<RoomKeyCounts>")]
     pub fn room_key_counts(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1527,7 +1601,11 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of {@link RoomKeyInfo}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerRoomKeyUpdatedCallback")]
-    pub fn register_room_key_updated_callback(&self, callback: Function) {
+    pub fn register_room_key_updated_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "(info: RoomKeyInfo[]) => Promise<void>")]
+        callback: Function,
+    ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().room_keys_received_stream();
 
@@ -1553,7 +1631,12 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of {@link RoomKeyWithheldInfo}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerRoomKeysWithheldCallback")]
-    pub fn register_room_keys_withheld_callback(&self, callback: Function) {
+    pub fn register_room_keys_withheld_callback(
+        &self,
+
+        #[wasm_bindgen(unchecked_param_type = "(info: RoomKeyWithheldInfo[]) => Promise<void>")]
+        callback: Function,
+    ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().room_keys_withheld_received_stream();
 
@@ -1579,7 +1662,10 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (a {@link
     /// UserId}) and returns a Promise.
     #[wasm_bindgen(js_name = "registerUserIdentityUpdatedCallback")]
-    pub fn register_user_identity_updated_callback(&self, callback: Function) {
+    pub fn register_user_identity_updated_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "(id: UserId) => Promise<void>")] callback: Function,
+    ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().identities_stream_raw();
 
@@ -1603,7 +1689,11 @@ impl OlmMachine {
     /// `callback` should be a function that takes a single argument (an array
     /// of user IDs as strings) and returns a Promise.
     #[wasm_bindgen(js_name = "registerDevicesUpdatedCallback")]
-    pub fn register_devices_updated_callback(&self, callback: Function) {
+    pub fn register_devices_updated_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "(userIds: string[]) => Promise<void>")]
+        callback: Function,
+    ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().identities_stream_raw();
 
@@ -1652,7 +1742,11 @@ impl OlmMachine {
     /// secret inbox should be cleared by calling
     /// `delete_secrets_from_inbox`.
     #[wasm_bindgen(js_name = "registerReceiveSecretCallback")]
-    pub fn register_receive_secret_callback(&self, callback: Function) {
+    pub fn register_receive_secret_callback(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "(name: string, value: string) => Promise<void>")]
+        callback: Function,
+    ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().secrets_stream();
         // fire up a promise chain which will call `callback` on each result from the
@@ -1688,7 +1782,7 @@ impl OlmMachine {
     ///
     /// If the secret is valid and handled, the secret inbox should be cleared
     /// by calling `delete_secrets_from_inbox`.
-    #[wasm_bindgen(js_name = "getSecretsFromInbox")]
+    #[wasm_bindgen(js_name = "getSecretsFromInbox", unchecked_return_type = "Promise<Set<string>>")]
     pub fn get_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let set = Set::new(&JsValue::UNDEFINED);
@@ -1711,7 +1805,7 @@ impl OlmMachine {
     /// # Arguments
     ///
     /// * `secret_name` - The name of the secret to delete.
-    #[wasm_bindgen(js_name = "deleteSecretsFromInbox")]
+    #[wasm_bindgen(js_name = "deleteSecretsFromInbox", unchecked_return_type = "Promise<void>")]
     pub fn delete_secrets_from_inbox(&self, secret_name: String) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
@@ -1737,7 +1831,10 @@ impl OlmMachine {
     ///
     /// A `Promise` for a `bool` result, which will be true if  secrets were
     /// missing, and a request was generated.
-    #[wasm_bindgen(js_name = "requestMissingSecretsIfNeeded")]
+    #[wasm_bindgen(
+        js_name = "requestMissingSecretsIfNeeded",
+        unchecked_return_type = "Promise<boolean>"
+    )]
     pub fn request_missing_secrets_if_needed(&self) -> Promise {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();

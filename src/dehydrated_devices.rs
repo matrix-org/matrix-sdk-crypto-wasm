@@ -136,7 +136,6 @@ impl From<dehydrated_devices::RehydratedDevice> for RehydratedDevice {
 
 #[wasm_bindgen]
 impl RehydratedDevice {
-    #[wasm_bindgen(js_name = "receiveEvents")]
     /// Receive the to-device events that sent to the dehydrated device
     ///
     /// The rehydrated device will decrypt the events and pass the room keys
@@ -152,6 +151,7 @@ impl RehydratedDevice {
     ///
     /// Returns an array of `RoomKeyInfo`, indicating the room keys that were
     /// received.
+    #[wasm_bindgen(js_name = "receiveEvents", unchecked_return_type = "Promise<RoomKeyInfo[]>")]
     pub async fn receive_events(
         &self,
         to_device_events: &str,

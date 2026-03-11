@@ -51,6 +51,7 @@ impl OwnUserIdentity {
     /// device.
     ///
     /// Returns a signature upload request that needs to be sent out.
+    #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
     pub fn verify(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -60,10 +61,15 @@ impl OwnUserIdentity {
     }
 
     /// Send a verification request to our other devices.
-    #[wasm_bindgen(js_name = "requestVerification")]
+    #[wasm_bindgen(
+        js_name = "requestVerification",
+        unchecked_return_type = "Promise<[VerificationRequest, OutgoingVerificationRequest]>"
+    )]
     pub fn request_verification(
         &self,
-        methods: Option<Vec<verification::VerificationMethod>>,
+        #[wasm_bindgen(unchecked_optional_param_type = "VerificationMethod[]")] methods: Option<
+            Vec<verification::VerificationMethod>,
+        >,
     ) -> Result<Promise, JsError> {
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
         let me = self.inner.clone();
@@ -88,7 +94,7 @@ impl OwnUserIdentity {
 
     /// Does our user identity trust our own device, i.e. have we signed our own
     /// device keys with our self-signing key?
-    #[wasm_bindgen(js_name = "trustsOurOwnDevice")]
+    #[wasm_bindgen(js_name = "trustsOurOwnDevice", unchecked_return_type = "Promise<boolean>")]
     pub fn trusts_our_own_device(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -130,7 +136,7 @@ impl OwnUserIdentity {
     /// If an identity was previously verified and is not any longer, it will be
     /// reported to the user. In order to remove this notice users have to
     /// verify again or to withdraw the verification requirement.
-    #[wasm_bindgen(js_name = "withdrawVerification")]
+    #[wasm_bindgen(js_name = "withdrawVerification", unchecked_return_type = "Promise<void>")]
     pub fn withdraw_verification(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -188,6 +194,7 @@ impl OtherUserIdentity {
     ///
     /// Returns a request that needs to be sent out for the user to be marked as
     /// verified.
+    #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
     pub fn verify(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -203,7 +210,9 @@ impl OtherUserIdentity {
         &self,
         room_id: &identifiers::RoomId,
         request_event_id: &identifiers::EventId,
-        methods: Option<Vec<verification::VerificationMethod>>,
+        #[wasm_bindgen(unchecked_optional_param_type = "VerificationMethod[]")] methods: Option<
+            Vec<verification::VerificationMethod>,
+        >,
     ) -> Result<VerificationRequest, JsError> {
         let me = self.inner.clone();
         let room_id = room_id.inner.clone();
@@ -223,7 +232,9 @@ impl OtherUserIdentity {
     #[wasm_bindgen(js_name = "verificationRequestContent")]
     pub fn verification_request_content(
         &self,
-        methods: Option<Vec<verification::VerificationMethod>>,
+        #[wasm_bindgen(unchecked_optional_param_type = "VerificationMethod[]")] methods: Option<
+            Vec<verification::VerificationMethod>,
+        >,
     ) -> Result<String, JsError> {
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
@@ -246,7 +257,7 @@ impl OtherUserIdentity {
     }
 
     /// Pin the current identity (public part of the master signing key).
-    #[wasm_bindgen(js_name = "pinCurrentMasterKey")]
+    #[wasm_bindgen(js_name = "pinCurrentMasterKey", unchecked_return_type = "Promise<void>")]
     pub fn pin_current_master_key(&self) -> Promise {
         let me = self.inner.clone();
 
@@ -286,7 +297,7 @@ impl OtherUserIdentity {
     /// If an identity was previously verified and is not anymore it will be
     /// reported to the user. In order to remove this notice users have to
     /// verify again or to withdraw the verification requirement.
-    #[wasm_bindgen(js_name = "withdrawVerification")]
+    #[wasm_bindgen(js_name = "withdrawVerification", unchecked_return_type = "Promise<void>")]
     pub fn withdraw_verification(&self) -> Promise {
         let me = self.inner.clone();
 
