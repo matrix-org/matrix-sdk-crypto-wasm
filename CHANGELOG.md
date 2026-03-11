@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.0.0
+
 -   **BREAKING:** Refine type declarations to improve developer experience
     and ensure stronger type safety.
     ([#305](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/305))
