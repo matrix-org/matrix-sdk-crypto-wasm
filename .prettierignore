@@ -4,3 +4,4 @@
 /target
 /xtask/target
 pnpm-lock.yaml
+pnpm-workspace.yaml
