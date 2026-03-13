@@ -184,7 +184,7 @@ impl CheckCode {
     /// The number should be displayed with a leading 0 in case the first digit
     /// is a 0.
     pub fn to_digit(&self) -> u8 {
-        self.inner.to_digit()
+        self.inner.to_digit(ecies::DigitMode::AllowLeadingZero)
     }
 }
 
