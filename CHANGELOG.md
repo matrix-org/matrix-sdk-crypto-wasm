@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Expose the vodozemac HPKE support, which replaces the ECIES module. It
+    can be used to establish the secure channel required for QR code login
+    described in [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388).
+    [#310](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/310)
+
 # matrix-sdk-crypto-wasm v18.8.0
 
 -   Update matrix-rust-sdk to `6bcb11f`
