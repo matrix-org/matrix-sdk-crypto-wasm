@@ -153,11 +153,12 @@ impl HpkeSenderChannel {
         initial_message: &str,
         aad: &str,
     ) -> Result<HpkeSenderCreationResult, JsError> {
-        let hpke::SenderCreationResult { channel, message } = self
-            .inner
-            .take()
-            .ok_or_else(used_up_error)?
-            .establish_channel(their_public_key.inner, &initial_message.as_bytes(), aad.as_bytes());
+        let hpke::SenderCreationResult { channel, message } =
+            self.inner.take().ok_or_else(used_up_error)?.establish_channel(
+                their_public_key.inner,
+                &initial_message.as_bytes(),
+                aad.as_bytes(),
+            )?;
 
         Ok(HpkeSenderCreationResult { message: message.encode(), channel: channel.into() })
     }
