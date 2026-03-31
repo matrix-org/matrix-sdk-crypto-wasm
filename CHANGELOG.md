@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `950fcd2`. Adapts to the changed interface of
+    EncryptedFile from Ruma, but does not change the interface of this crate.
+    [#312](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/312)
+
 # matrix-sdk-crypto-wasm v18.0.0
 
 -   **BREAKING:** Refine type declarations to improve developer experience
