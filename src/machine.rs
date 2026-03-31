@@ -13,10 +13,7 @@ use futures_util::{pin_mut, Stream, StreamExt};
 use js_sys::{Array, Function, JsString, Map, Promise, Set};
 use matrix_sdk_common::ruma::{
     self,
-    events::{
-        room::{EncryptedFile, EncryptedFileInit},
-        secret::request::SecretName,
-    },
+    events::{room::EncryptedFile, secret::request::SecretName},
     serde::Raw,
     OneTimeKeyAlgorithm, OwnedDeviceId, OwnedTransactionId, OwnedUserId, UInt,
 };
@@ -1970,13 +1967,11 @@ impl OlmMachine {
 
         let bundle_data = RoomKeyBundleContent {
             room_id: room.inner.clone(),
-            file: EncryptedFile::from(EncryptedFileInit {
+            file: EncryptedFile::new(
                 url,
-                key: media_encryption_info.key,
-                iv: media_encryption_info.iv,
-                hashes: media_encryption_info.hashes,
-                v: media_encryption_info.version,
-            }),
+                media_encryption_info.encryption_info,
+                media_encryption_info.hashes,
+            ),
         };
 
         Ok(future_to_promise(async move {
