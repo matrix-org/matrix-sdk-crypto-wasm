@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   **BREAKING** Update matrix-rust-sdk to `676c81c`.
+    The `BackupDecryptionKey::create_random_key` function now unconditionally
+    returns a `BackupDecryptionKey`, instead of a `Result`.
+    [314](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/314)
+
 -   Update matrix-rust-sdk to `950fcd2`. Adapts to the changed interface of
     EncryptedFile from Ruma, but does not change the interface of this crate.
     [#312](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/312)
