@@ -37,8 +37,8 @@ pub struct DehydratedDeviceKey {
 impl DehydratedDeviceKey {
     /// Generates a new random dehydrated device key.
     #[wasm_bindgen(js_name = "createRandomKey")]
-    pub fn create_random_key() -> Result<DehydratedDeviceKey, JsError> {
-        Ok(DehydratedDeviceKey { inner: InnerDehydratedDeviceKey::new()? })
+    pub fn create_random_key() -> DehydratedDeviceKey {
+        DehydratedDeviceKey { inner: InnerDehydratedDeviceKey::new() }
     }
 
     /// Generates a dehydrated device key from a given array.

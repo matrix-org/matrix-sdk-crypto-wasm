@@ -42,10 +42,7 @@ impl BackupDecryptionKey {
     /// Create a new random [`BackupDecryptionKey`].
     #[wasm_bindgen(js_name = "createRandomKey")]
     pub fn create_random_key() -> BackupDecryptionKey {
-        BackupDecryptionKey {
-            inner: store::types::BackupDecryptionKey::new()
-                .expect("Can't gather enough randomness to create a recovery key"),
-        }
+        BackupDecryptionKey { inner: store::types::BackupDecryptionKey::new() }
     }
 
     /// Try to create a [`BackupDecryptionKey`] from a base 64 encoded string.
