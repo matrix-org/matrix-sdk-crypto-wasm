@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `1f3dea7`.  Adds support for receiving
+    [MSC4385](https://github.com/matrix-org/matrix-spec-proposals/pull/4385)
+    pushed secrets.
+
 -   **BREAKING** Update matrix-rust-sdk to `676c81c`.
     The `BackupDecryptionKey::create_random_key` function now unconditionally
     returns a `BackupDecryptionKey`, instead of a `Result`.

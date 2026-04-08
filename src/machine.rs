@@ -20,9 +20,9 @@ use matrix_sdk_common::ruma::{
 use matrix_sdk_crypto::{
     backups::MegolmV1BackupKey,
     olm::{BackedUpRoomKey, ExportedRoomKey},
-    store::types::{Changes, DeviceChanges, IdentityChanges},
+    store::types::{Changes, DeviceChanges, IdentityChanges, SecretsInboxItem},
     types::{events::room_key_bundle::RoomKeyBundleContent, RoomKeyBackupInfo},
-    CryptoStoreError, EncryptionSyncChanges, GossippedSecret, MediaEncryptionInfo,
+    CryptoStoreError, EncryptionSyncChanges, MediaEncryptionInfo,
 };
 use serde::{ser::SerializeSeq, Serialize, Serializer};
 use serde_json::json;
@@ -1787,8 +1787,8 @@ impl OlmMachine {
 
         future_to_promise(async move {
             let name = SecretName::from(secret_name);
-            for gossip in me.store().get_secrets_from_inbox(&name).await? {
-                set.add(&JsValue::from_str(&gossip.event.content.secret));
+            for secret in me.store().get_secrets_from_inbox(&name).await? {
+                set.add(&JsValue::from_str(&secret));
             }
             Ok(set)
         })
@@ -2246,11 +2246,11 @@ fn copy_stream_to_callback<Item, MappedTypeIterator, MappedType>(
 
 // helper for register_secret_receive_callback: passes the secret name and value
 // into the javascript function
-async fn send_secret_gossip_to_callback(callback: &Function, secret: &GossippedSecret) {
+async fn send_secret_gossip_to_callback(callback: &Function, secret: &SecretsInboxItem) {
     match promise_result_to_future(callback.call2(
         &JsValue::NULL,
         &secret.secret_name.as_str().into(),
-        &secret.event.content.secret.to_owned().into(),
+        &secret.secret.as_str().into(),
     ))
     .await
     {
