@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v19.0.0
+
 -   Add `OlmMachine::push_secret_to_verified_devices` to support
     [MSC4385](https://github.com/matrix-org/matrix-spec-proposals/pull/4385)
     pushing secrets to verified devices.
