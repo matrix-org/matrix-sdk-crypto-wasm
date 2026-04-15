@@ -1841,6 +1841,25 @@ impl OlmMachine {
         })
     }
 
+    /// Push a secret to all of our other verified devices
+    ///
+    /// This function assumes that we already have Olm sessions with the other
+    /// devices.  This can be done by calling {@link
+    /// OlmMachine.getMissingSessions}.
+    ///
+    /// # Arguments
+    ///
+    /// * `secret_name` - The name of the secret to push.
+    #[wasm_bindgen(js_name = "pushSecretToVerifiedDevices")]
+    pub fn push_secret_to_verified_devices(&self, name: String) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        future_to_promise(async move {
+            me.push_secret_to_verified_devices(SecretName::from(name)).await?;
+            Ok(JsValue::UNDEFINED)
+        })
+    }
+
     /// Get the stored room settings, such as the encryption algorithm or
     /// whether to encrypt only for trusted devices.
     ///
