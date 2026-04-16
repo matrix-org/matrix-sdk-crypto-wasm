@@ -1,8 +1,8 @@
 # UNRELEASED
 
-# matrix-sdk-crypto-wasm v19.0.0
+# matrix-sdk-crypto-wasm v18.1.0
 
--   Add `OlmMachine::push_secret_to_verified_devices` to support
+-   Add `OlmMachine.pushSecretToVerifiedDevices` to support
     [MSC4385](https://github.com/matrix-org/matrix-spec-proposals/pull/4385)
     pushing secrets to verified devices.
     [#295](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/295)
@@ -12,10 +12,10 @@
     pushed secrets.
     [#316](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/316)
 
--   **BREAKING** Update matrix-rust-sdk to `676c81c`.
-    The `BackupDecryptionKey::create_random_key` function now unconditionally
+-   Update matrix-rust-sdk to `676c81c`.
+    The `BackupDecryptionKey.createRandomKey` function now unconditionally
     returns a `BackupDecryptionKey`, instead of a `Result`.
-    [314](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/314)
+    [#314](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/314)
 
 -   Update matrix-rust-sdk to `950fcd2`. Adapts to the changed interface of
     EncryptedFile from Ruma, but does not change the interface of this crate.
