@@ -1,5 +1,7 @@
 # UNRELEASED
 
+-   Try to fix release script.
+
 # matrix-sdk-crypto-wasm v18.1.0
 
 -   Add `OlmMachine.pushSecretToVerifiedDevices` to support
