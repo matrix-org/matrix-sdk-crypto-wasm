@@ -1,6 +1,7 @@
 # UNRELEASED
 
 -   Try to fix release script.
+    [#318](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/318)
 
 # matrix-sdk-crypto-wasm v18.1.0
 
