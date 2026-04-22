@@ -1,5 +1,14 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `c7d44dd`:
+
+    -   Uses stable identifiers for MSC4268 (History Sharing)
+        [#6467](https://github.com/matrix-org/matrix-rust-sdk/pull/6467)
+    -   Uses stable identifiers for MSC4287 (m.key_backup)
+        [#6410](https://github.com/matrix-org/matrix-rust-sdk/pull/6410)
+
+    [#319](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/319)
+
 -   Try to fix release script.
     [#318](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/318)
 
