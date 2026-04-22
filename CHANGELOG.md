@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.2.0
+
 -   Update matrix-rust-sdk to `c7d44dd`:
 
     -   Uses stable identifiers for MSC4268 (History Sharing)
