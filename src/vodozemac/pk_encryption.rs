@@ -117,13 +117,13 @@ impl PkEncryption {
     }
 
     /// Encrypts a byte message and returns an encrypted {@link PkMessage}.
-    pub fn encrypt(&self, message: &[u8]) -> PkMessage {
-        PkMessage { inner: self.inner.encrypt(message) }
+    pub fn encrypt(&self, message: &[u8]) -> Result<PkMessage, JsError> {
+        Ok(PkMessage { inner: self.inner.encrypt(message)? })
     }
 
     /// Encrypts a string message and returns an encrypted {@link PkMessage}.
     #[wasm_bindgen(js_name = "encryptString")]
-    pub fn encrypt_string(&self, message: &str) -> PkMessage {
+    pub fn encrypt_string(&self, message: &str) -> Result<PkMessage, JsError> {
         self.encrypt(message.as_bytes())
     }
 }
