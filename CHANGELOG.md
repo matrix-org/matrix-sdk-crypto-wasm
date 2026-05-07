@@ -1,5 +1,10 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `777ce05`:
+
+    -   Update to vodozemac 0.10.0 making the `PkEncryption::encrypt` API fallible
+        [#6477](https://github.com/matrix-org/matrix-rust-sdk/pull/6477)
+
 # matrix-sdk-crypto-wasm v18.2.0
 
 -   Update matrix-rust-sdk to `c7d44dd`:
