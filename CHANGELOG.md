@@ -1,7 +1,10 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `777ce05`:
+-   Update matrix-rust-sdk to `0.17.0`:
 
+    -   Check the user ID in the `sender_device_keys` property of Olm-encrypted
+        to-device events to prevent sender spoofing by homeserver owners.
+        [#6553](https://github.com/matrix-org/matrix-rust-sdk/pull/6553)
     -   Update to vodozemac 0.10.0 making the `PkEncryption::encrypt` API fallible
         [#6477](https://github.com/matrix-org/matrix-rust-sdk/pull/6477)
 
