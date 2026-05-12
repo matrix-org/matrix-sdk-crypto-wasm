@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.3.0
+
 -   Update matrix-rust-sdk to `0.17.0`:
 
     -   Check the user ID in the `sender_device_keys` property of Olm-encrypted
