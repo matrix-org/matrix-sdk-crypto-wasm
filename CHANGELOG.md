@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.3.1
+
 -   Update matrix-rust-sdk to `0.18.0`:
     -   Upgrade Ruma to 0.16.0, fixing a deserialization issue for
         `m.key.verification.accept` events.
