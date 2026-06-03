@@ -14,6 +14,9 @@
     -   Check the user ID in the `sender_device_keys` property of Olm-encrypted
         to-device events to prevent sender spoofing by homeserver owners.
         [#6553](https://github.com/matrix-org/matrix-rust-sdk/pull/6553)
+
+        Resolves [GHSA-wfq4-36m3-9g42](https://github.com/matrix-org/matrix-rust-sdk/security/advisories/GHSA-wfq4-36m3-9g42) / [CVE-2026-45056](https://www.cve.org/CVERecord?id=CVE-2026-45056).
+
     -   Update to vodozemac 0.10.0 making the `PkEncryption::encrypt` API fallible
         [#6477](https://github.com/matrix-org/matrix-rust-sdk/pull/6477)
 
