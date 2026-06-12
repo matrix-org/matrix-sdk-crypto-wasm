@@ -1,5 +1,7 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `90db5fe3`.
+
 # matrix-sdk-crypto-wasm v18.3.1
 
 -   Update matrix-rust-sdk to `0.18.0`:
