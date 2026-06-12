@@ -22,7 +22,7 @@ use matrix_sdk_crypto::{
     olm::{BackedUpRoomKey, ExportedRoomKey},
     store::types::{Changes, DeviceChanges, IdentityChanges, SecretsInboxItem},
     types::{events::room_key_bundle::RoomKeyBundleContent, RoomKeyBackupInfo},
-    CryptoStoreError, EncryptionSyncChanges, MediaEncryptionInfo,
+    CryptoStoreError, EncryptionSyncChanges, MediaEncryptionInfo, OlmMachineBuilder,
 };
 use serde::{ser::SerializeSeq, Serialize, Serializer};
 use serde_json::json;
@@ -168,16 +168,12 @@ impl OlmMachine {
         store_handle: StoreHandle,
         tracing_subscriber: Dispatch,
     ) -> Result<OlmMachine, JsError> {
-        Ok(OlmMachine {
-            inner: matrix_sdk_crypto::OlmMachine::with_store(
-                user_id.as_ref(),
-                device_id.as_ref(),
-                store_handle,
-                None,
-            )
-            .await?,
-            tracing_subscriber,
-        })
+        let inner = OlmMachineBuilder::new(user_id.as_ref(), device_id.as_ref())
+            .with_crypto_store(store_handle)
+            .build()
+            .await?;
+
+        Ok(OlmMachine { inner, tracing_subscriber })
     }
 
     /// The unique user ID that owns this `OlmMachine` instance.
