@@ -22,6 +22,7 @@ use matrix_sdk_crypto::{
     olm::{BackedUpRoomKey, ExportedRoomKey},
     store::types::{Changes, DeviceChanges, IdentityChanges, SecretsInboxItem},
     types::{events::room_key_bundle::RoomKeyBundleContent, RoomKeyBackupInfo},
+    x509::RustRawX509Verifier,
     CryptoStoreError, EncryptionSyncChanges, MediaEncryptionInfo, OlmMachineBuilder,
 };
 use serde::{ser::SerializeSeq, Serialize, Serializer};
@@ -110,6 +111,12 @@ impl OlmMachine {
     ///
     /// * `logger` - Optional logger to use for all operations on this machine.
     ///   An instance of `JsLogger`.
+    ///
+    /// * `ca_certs_pem` - Optional PEM-formatted string that provides CA
+    ///   certificates. These will be used to check X.509 signatures on user
+    ///   identities. Any user identity that has a valid signature according to
+    ///   the supplied CAs will be considered verified, without any manual
+    ///   verification taking place. A PEM-formatted string.
     #[wasm_bindgen(unchecked_return_type = "Promise<OlmMachine>")]
     pub fn initialize(
         user_id: &identifiers::UserId,
@@ -117,6 +124,7 @@ impl OlmMachine {
         #[wasm_bindgen(unchecked_optional_param_type = "string")] store_name: Option<String>,
         #[wasm_bindgen(unchecked_optional_param_type = "string")] store_passphrase: Option<String>,
         #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "String")] ca_certs_pem: Option<String>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -125,7 +133,7 @@ impl OlmMachine {
         let device_id = device_id.inner.clone();
         future_to_promise(async {
             let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
-            Self::init_helper(user_id, device_id, store_handle, dispatch).await
+            Self::init_helper(user_id, device_id, store_handle, dispatch, ca_certs_pem).await
         })
     }
 
@@ -144,12 +152,19 @@ impl OlmMachine {
     ///
     /// * `logger` - Optional logger to use for all operations on this machine.
     ///   An instance of `JsLogger`.
+    ///
+    /// * `ca_certs_pem` - Optional PEM-formatted string that provides CA
+    ///   certificates. These will be used to check X.509 signatures on user
+    ///   identities. Any user identity that has a valid signature according to
+    ///   the supplied CAs will be considered verified, without any manual
+    ///   verification taking place. A PEM-formatted string.
     #[wasm_bindgen(js_name = "initFromStore", unchecked_return_type = "Promise<OlmMachine>")]
     pub fn init_from_store(
         user_id: &identifiers::UserId,
         device_id: &identifiers::DeviceId,
         store_handle: &StoreHandle,
         #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
+        #[wasm_bindgen(unchecked_optional_param_type = "String")] ca_certs_pem: Option<String>,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -158,7 +173,7 @@ impl OlmMachine {
         let device_id = device_id.inner.clone();
         let store_handle = store_handle.clone();
         future_to_promise(async move {
-            Self::init_helper(user_id, device_id, store_handle, dispatch).await
+            Self::init_helper(user_id, device_id, store_handle, dispatch, ca_certs_pem).await
         })
     }
 
@@ -167,12 +182,20 @@ impl OlmMachine {
         device_id: OwnedDeviceId,
         store_handle: StoreHandle,
         tracing_subscriber: Dispatch,
+        ca_certs_pem: Option<String>,
     ) -> Result<OlmMachine, JsError> {
-        let inner = OlmMachineBuilder::new(user_id.as_ref(), device_id.as_ref())
-            .with_crypto_store(store_handle)
-            .build()
-            .await?;
+        let builder = OlmMachineBuilder::new(user_id.as_ref(), device_id.as_ref())
+            .with_crypto_store(store_handle);
 
+        let builder = if let Some(ca_certs_pem) = ca_certs_pem {
+            builder.with_x509_verifier(Some(std::sync::Arc::new(
+                RustRawX509Verifier::new_from_pem_data(&ca_certs_pem)?,
+            )))
+        } else {
+            builder
+        };
+
+        let inner = builder.build().await?;
         Ok(OlmMachine { inner, tracing_subscriber })
     }
 
