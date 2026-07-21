@@ -85,7 +85,7 @@ vergen-gitcl = { version = "1.0.0", features = ["build"] }
 
 [dependencies.matrix-sdk-crypto]
 default-features = false
-features = ["js", "automatic-room-key-forwarding", "experimental-encrypted-state-events", "experimental-push-secrets"]
+features = ["js", "automatic-room-key-forwarding", "experimental-encrypted-state-events", "experimental-push-secrets", "experimental-x509-identity-verification", "rust-x509-verifier-impl"]
 git = "https://github.com/matrix-org/matrix-rust-sdk"
 
 [lints.rust]

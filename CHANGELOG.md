@@ -1,6 +1,9 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `90db5fe3`.
+-   Allow providing a CA cert to `OlmMachine.initFromStore` for verifying user
+    identities via X.509.
+    ([#6727](https://github.com/matrix-org/matrix-rust-sdk/pull/6727))
+-   Update matrix-rust-sdk to `fd95d90bf9f9`.
 
 # matrix-sdk-crypto-wasm v18.3.1
 
