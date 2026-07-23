@@ -1,16 +1,29 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.4.0
+
 -   Allow providing a CA cert to `OlmMachine.initFromStore` for verifying user
     identities via X.509.
-    ([#6727](https://github.com/matrix-org/matrix-rust-sdk/pull/6727))
--   Update matrix-rust-sdk to `fd95d90bf9f9`.
+    ([#333](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/333))
+
+-   Update matrix-rust-sdk to `fd95d90bf9f9`.:
+
+    -   Experimental X.509-based cross-signing identity verification
+        ([#6727](https://github.com/matrix-org/matrix-rust-sdk/pull/6727))
+
+    -   Upgrade Ruma to 0.16.0, fixing a deserialization issue for
+        `m.key.verification.accept` events.
+        ([#6628](https://github.com/matrix-org/matrix-rust-sdk/pull/6628))
+
+    -   Only keep the latest gossip request for each secret.
+        ([#6631](https://github.com/matrix-org/matrix-rust-sdk/pull/6631))
 
 # matrix-sdk-crypto-wasm v18.3.1
 
 -   Update matrix-rust-sdk to `0.18.0`:
     -   Upgrade Ruma to 0.16.0, fixing a deserialization issue for
         `m.key.verification.accept` events.
-        ([#6628](https://github.com/matrix-org/matrix-rust-sdk/pulls/6628))
+        ([#6628](https://github.com/matrix-org/matrix-rust-sdk/pull/6628))
 
 # matrix-sdk-crypto-wasm v18.3.0
 
