@@ -149,7 +149,7 @@ impl EstablishedEcies {
     }
 }
 
-/// A check code that can be used to confirm that two [`EstablishedEcies`]
+/// A check code that can be used to confirm that two {@link EstablishedEcies}
 /// objects share the same secret. This is supposed to be shared out-of-band to
 /// protect against active Man-in-the-middle (MITM) attacks.
 ///
@@ -173,8 +173,9 @@ pub struct CheckCode {
 impl CheckCode {
     /// Convert the check code to an array of two bytes.
     ///
-    /// The bytes can be converted to a more user-friendly representation. The
-    /// [`CheckCode::to_digit`] converts the bytes to a two-digit number.
+    /// The bytes can be converted to a more user-friendly representation.
+    /// {@link to_digit} and {@link toDigitNoLeadingZero} convert the bytes to a
+    /// two-digit number.
     pub fn as_bytes(&self) -> Vec<u8> {
         self.inner.as_bytes().to_vec()
     }
@@ -183,11 +184,21 @@ impl CheckCode {
     ///
     /// This corresponds to the way the digits were used in the initial version
     /// of {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4108 MSC4108}.
+    /// See {@link toDigitNoLeadingZero} for a more recent implementation.
     ///
     /// The number should be displayed with a leading 0 in case the first digit
     /// is a 0.
     pub fn to_digit(&self) -> u8 {
         self.inner.to_digit(ecies::DigitMode::AllowLeadingZero)
+    }
+
+    /// Convert the check code to two base-10 numbers, with no leading zero.
+    ///
+    /// This corresponds to the way the digits are defined in
+    /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388}.
+    #[wasm_bindgen(js_name = "toDigitNoLeadingZero")]
+    pub fn to_digit_no_leading_zero(&self) -> u8 {
+        self.inner.to_digit(ecies::DigitMode::NoLeadingZero)
     }
 }
 

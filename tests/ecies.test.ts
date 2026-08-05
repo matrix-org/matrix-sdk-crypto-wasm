@@ -25,6 +25,7 @@ describe(Ecies.name, () => {
 
         expect(alice_check.as_bytes()).toStrictEqual(bob_check.as_bytes());
         expect(alice_check.to_digit()).toStrictEqual(bob_check.to_digit());
+        expect(alice_check.toDigitNoLeadingZero()).toStrictEqual(bob_check.toDigitNoLeadingZero());
 
         const ciphertext = channel.encrypt("Other message");
         const second_plaintext = alice_established.decrypt(ciphertext);
