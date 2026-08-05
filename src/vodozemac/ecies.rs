@@ -179,12 +179,15 @@ impl CheckCode {
         self.inner.as_bytes().to_vec()
     }
 
-    /// Convert the check code to two base-10 numbers.
+    /// Convert the check code to two base-10 numbers, allowing a leading zero.
+    ///
+    /// This corresponds to the way the digits were used in the initial version
+    /// of {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4108 MSC4108}.
     ///
     /// The number should be displayed with a leading 0 in case the first digit
     /// is a 0.
     pub fn to_digit(&self) -> u8 {
-        self.inner.to_digit()
+        self.inner.to_digit(ecies::DigitMode::AllowLeadingZero)
     }
 }
 

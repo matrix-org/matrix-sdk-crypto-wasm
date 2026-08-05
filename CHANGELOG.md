@@ -1,12 +1,19 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `b629ba1e`:
+
+    -   The `OlmMachine::receive_sync_changes()` method now correctly treats a
+        missing one-time key count to mean that zero one-time keys exist on the
+        homeserver.
+        ([#6780](https://github.com/matrix-org/matrix-rust-sdk/pull/6780))
+
 # matrix-sdk-crypto-wasm v18.4.0
 
 -   Allow providing a CA cert to `OlmMachine.initFromStore` for verifying user
     identities via X.509.
     ([#333](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/333))
 
--   Update matrix-rust-sdk to `fd95d90bf9f9`.:
+-   Update matrix-rust-sdk to `fd95d90bf9f9`:
 
     -   Experimental X.509-based cross-signing identity verification
         ([#6727](https://github.com/matrix-org/matrix-rust-sdk/pull/6727))
