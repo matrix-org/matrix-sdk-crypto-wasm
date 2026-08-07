@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Add `CheckCode.toDigitNoLeadingZero` to expose the new method of
+    calculating ECIES check codes from Vodozemac.
+    ([#337](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/337))
+
 -   Update matrix-rust-sdk to `b629ba1e`:
 
     -   The `OlmMachine::receive_sync_changes()` method now correctly treats a
