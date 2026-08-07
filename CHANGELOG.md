@@ -2,6 +2,9 @@
 
 # matrix-sdk-crypto-wasm v18.5.0
 
+-   Add arm64 musl to prebuilt list.
+    ([#87](https://github.com/matrix-org/matrix-rust-sdk-crypto-nodejs/pull/87))
+
 -   Add `CheckCode.toDigitNoLeadingZero` to expose the new method of
     calculating ECIES check codes from Vodozemac.
     ([#337](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/337))
