@@ -1,10 +1,12 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.5.0
+
 -   Add `CheckCode.toDigitNoLeadingZero` to expose the new method of
     calculating ECIES check codes from Vodozemac.
     ([#337](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/337))
 
--   Update matrix-rust-sdk to `b629ba1e`:
+-   Update matrix-rust-sdk to `955837c467`:
 
     -   The `OlmMachine::receive_sync_changes()` method now correctly treats a
         missing one-time key count to mean that zero one-time keys exist on the
