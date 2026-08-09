@@ -1,5 +1,9 @@
 # UNRELEASED
 
+-   Fix `UserIdentity` methods to correctly set up the logging framework while
+    they are running.
+    ([#340](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/340))
+
 # matrix-sdk-crypto-wasm v18.5.0
 
 -   Add `CheckCode.toDigitNoLeadingZero` to expose the new method of

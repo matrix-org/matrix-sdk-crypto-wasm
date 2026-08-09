@@ -875,6 +875,7 @@ impl OlmMachine {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
         let user_id = user_id.inner.clone();
+        let tracing_subscriber = self.tracing_subscriber.clone();
 
         future_to_promise(async move {
             // wait for up to a second for any in-flight device list requests to complete.
@@ -882,7 +883,7 @@ impl OlmMachine {
             Ok(me
                 .get_identity(user_id.as_ref(), Some(Duration::from_secs(1)))
                 .await?
-                .map(identities::UserIdentity::from))
+                .map(|id| identities::UserIdentity::new(id, tracing_subscriber)))
         })
     }
 
