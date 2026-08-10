@@ -1,27 +1,42 @@
 //! User identities.
 
 use js_sys::{Array, Promise};
+use tracing::{dispatcher, Dispatch};
 use wasm_bindgen::prelude::*;
 
 use crate::{
     future::future_to_promise,
-    identifiers, impl_from_to_inner, requests,
+    identifiers, requests,
     verification::{self, VerificationRequest},
 };
 
 pub(crate) struct UserIdentity {
     inner: matrix_sdk_crypto::UserIdentity,
+
+    /// The tracing subscriber associated with the OlmMachine
+    tracing_subscriber: Dispatch,
 }
 
-impl_from_to_inner!(matrix_sdk_crypto::UserIdentity => UserIdentity);
+impl UserIdentity {
+    pub(crate) fn new(
+        inner: matrix_sdk_crypto::UserIdentity,
+        tracing_subscriber: Dispatch,
+    ) -> Self {
+        Self { inner, tracing_subscriber }
+    }
+}
 
 impl From<UserIdentity> for JsValue {
     fn from(user_identities: UserIdentity) -> Self {
         use matrix_sdk_crypto::UserIdentity::*;
 
         match user_identities.inner {
-            Own(own) => JsValue::from(OwnUserIdentity::from(own)),
-            Other(other) => JsValue::from(OtherUserIdentity::from(other)),
+            Own(own) => {
+                JsValue::from(OwnUserIdentity::new(own, user_identities.tracing_subscriber))
+            }
+            Other(other) => {
+                JsValue::from(OtherUserIdentity::new(other, user_identities.tracing_subscriber))
+            }
         }
     }
 }
@@ -33,15 +48,21 @@ impl From<UserIdentity> for JsValue {
 #[derive(Debug)]
 pub struct OwnUserIdentity {
     inner: matrix_sdk_crypto::OwnUserIdentity,
-}
 
-impl_from_to_inner!(matrix_sdk_crypto::OwnUserIdentity => OwnUserIdentity);
+    /// The tracing subscriber associated with the OlmMachine
+    tracing_subscriber: Dispatch,
+}
 
 #[wasm_bindgen]
 impl OwnUserIdentity {
+    fn new(inner: matrix_sdk_crypto::OwnUserIdentity, tracing_subscriber: Dispatch) -> Self {
+        Self { inner, tracing_subscriber }
+    }
+
     /// Is this user identity verified?
     #[wasm_bindgen(js_name = "isVerified")]
     pub fn is_verified(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.is_verified()
     }
 
@@ -53,6 +74,7 @@ impl OwnUserIdentity {
     /// Returns a signature upload request that needs to be sent out.
     #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
     pub fn verify(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -71,6 +93,7 @@ impl OwnUserIdentity {
             Vec<verification::VerificationMethod>,
         >,
     ) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
         let me = self.inner.clone();
 
@@ -96,6 +119,7 @@ impl OwnUserIdentity {
     /// device keys with our self-signing key?
     #[wasm_bindgen(js_name = "trustsOurOwnDevice", unchecked_return_type = "Promise<boolean>")]
     pub fn trusts_our_own_device(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move { Ok(me.trusts_our_own_device().await?) })
@@ -104,6 +128,7 @@ impl OwnUserIdentity {
     /// Get the master key of the identity.
     #[wasm_bindgen(getter, js_name = "masterKey")]
     pub fn master_key(&self) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let master_key = self.inner.master_key().as_ref();
         Ok(serde_json::to_string(master_key)?)
     }
@@ -111,6 +136,7 @@ impl OwnUserIdentity {
     /// Get the self-signing key of the identity.
     #[wasm_bindgen(getter, js_name = "selfSigningKey")]
     pub fn self_signing_key(&self) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let self_signing_key = self.inner.self_signing_key().as_ref();
         Ok(serde_json::to_string(self_signing_key)?)
     }
@@ -119,6 +145,7 @@ impl OwnUserIdentity {
     /// own user identity.
     #[wasm_bindgen(getter, js_name = "userSigningKey")]
     pub fn user_signing_key(&self) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let user_signing_key = self.inner.user_signing_key().as_ref();
         Ok(serde_json::to_string(user_signing_key)?)
     }
@@ -128,6 +155,7 @@ impl OwnUserIdentity {
     /// To reset this latch back to `false`, call {@link withdrawVerification}.
     #[wasm_bindgen(js_name = wasPreviouslyVerified)]
     pub fn was_previously_verified(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.was_previously_verified()
     }
 
@@ -138,6 +166,7 @@ impl OwnUserIdentity {
     /// verify again or to withdraw the verification requirement.
     #[wasm_bindgen(js_name = "withdrawVerification", unchecked_return_type = "Promise<void>")]
     pub fn withdraw_verification(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -156,6 +185,7 @@ impl OwnUserIdentity {
     ///   withdrawVerification}.
     #[wasm_bindgen(js_name = "hasVerificationViolation")]
     pub fn has_verification_violation(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.has_verification_violation()
     }
 }
@@ -172,15 +202,21 @@ impl OwnUserIdentity {
 #[derive(Debug)]
 pub struct OtherUserIdentity {
     inner: matrix_sdk_crypto::OtherUserIdentity,
-}
 
-impl_from_to_inner!(matrix_sdk_crypto::OtherUserIdentity => OtherUserIdentity);
+    /// The tracing subscriber associated with the OlmMachine
+    tracing_subscriber: Dispatch,
+}
 
 #[wasm_bindgen]
 impl OtherUserIdentity {
+    fn new(inner: matrix_sdk_crypto::OtherUserIdentity, tracing_subscriber: Dispatch) -> Self {
+        Self { inner, tracing_subscriber }
+    }
+
     /// Is this user identity verified?
     #[wasm_bindgen(js_name = "isVerified")]
     pub fn is_verified(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.is_verified()
     }
 
@@ -196,6 +232,7 @@ impl OtherUserIdentity {
     /// verified.
     #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
     pub fn verify(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -214,6 +251,7 @@ impl OtherUserIdentity {
             Vec<verification::VerificationMethod>,
         >,
     ) -> Result<VerificationRequest, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
         let room_id = room_id.inner.clone();
         let request_event_id = request_event_id.inner.clone();
@@ -236,6 +274,7 @@ impl OtherUserIdentity {
             Vec<verification::VerificationMethod>,
         >,
     ) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
         let methods = methods.map(|methods| methods.iter().map(Into::into).collect());
 
@@ -245,6 +284,7 @@ impl OtherUserIdentity {
     /// Get the master key of the identity.
     #[wasm_bindgen(getter, js_name = "masterKey")]
     pub fn master_key(&self) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let master_key = self.inner.master_key().as_ref();
         Ok(serde_json::to_string(master_key)?)
     }
@@ -252,6 +292,7 @@ impl OtherUserIdentity {
     /// Get the self-signing key of the identity.
     #[wasm_bindgen(getter, js_name = "selfSigningKey")]
     pub fn self_signing_key(&self) -> Result<String, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let self_signing_key = self.inner.self_signing_key().as_ref();
         Ok(serde_json::to_string(self_signing_key)?)
     }
@@ -259,6 +300,7 @@ impl OtherUserIdentity {
     /// Pin the current identity (public part of the master signing key).
     #[wasm_bindgen(js_name = "pinCurrentMasterKey", unchecked_return_type = "Promise<void>")]
     pub fn pin_current_master_key(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -280,6 +322,7 @@ impl OtherUserIdentity {
     /// - Updating the pin to the new identity with {@link pinCurrentMasterKey}.
     #[wasm_bindgen(js_name = "identityNeedsUserApproval")]
     pub fn identity_needs_user_approval(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.identity_needs_user_approval()
     }
 
@@ -289,6 +332,7 @@ impl OtherUserIdentity {
     /// To set this latch back to false, call {@link withdrawVerification}.
     #[wasm_bindgen(js_name = "wasPreviouslyVerified")]
     pub fn was_previously_verified(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.was_previously_verified()
     }
 
@@ -299,6 +343,7 @@ impl OtherUserIdentity {
     /// verify again or to withdraw the verification requirement.
     #[wasm_bindgen(js_name = "withdrawVerification", unchecked_return_type = "Promise<void>")]
     pub fn withdraw_verification(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let me = self.inner.clone();
 
         future_to_promise(async move {
@@ -317,6 +362,7 @@ impl OtherUserIdentity {
     ///   withdrawVerification}.
     #[wasm_bindgen(js_name = "hasVerificationViolation")]
     pub fn has_verification_violation(&self) -> bool {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
         self.inner.has_verification_violation()
     }
 }
