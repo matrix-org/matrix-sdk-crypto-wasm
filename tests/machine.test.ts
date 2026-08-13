@@ -253,6 +253,49 @@ eXmIj7ZEOIsufPdiYuKDp/aUdgUHmuCGyegfoCJze36SdFX5q6z8Aq5nKPtz+FM=
         storeHandle.free();
     });
 
+    test("can be instantiated with a JavaScript X.509 sign function", async () => {
+        expect(
+            await OlmMachine.initialize(
+                new UserId("@foo:bar.org"),
+                new DeviceId("baz"),
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                async (item: Uint8Array) => {
+                    return {
+                        signature_bytes: item,
+                        certificate_chain: "MY CHAIN",
+                        signature_scheme: "RsaPssSha512",
+                    };
+                },
+                () => 1000000,
+            ),
+        ).toBeInstanceOf(OlmMachine);
+    });
+
+    test("can be instantiated with a store and a JavaScript X.509 sign function", async () => {
+        let storeHandle = await StoreHandle.open("sn", "sp");
+        expect(
+            await OlmMachine.initFromStore(
+                new UserId("@foo:bar.org"),
+                new DeviceId("baz"),
+                storeHandle,
+                undefined,
+                undefined,
+                async (item: Uint8Array) => {
+                    return {
+                        signature_bytes: item,
+                        certificate_chain: "MY CHAIN",
+                        signature_scheme: "RsaPssSha512",
+                    };
+                },
+                () => 1000000,
+            ),
+        ).toBeInstanceOf(OlmMachine);
+        storeHandle.free();
+    });
+
     const user = new UserId("@alice:example.org");
     const device = new DeviceId("foobar");
     const room = new RoomId("!baz:matrix.org");

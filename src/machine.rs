@@ -6,6 +6,7 @@ use std::{
     iter,
     ops::Deref,
     pin::{pin, Pin},
+    sync::Arc,
     time::Duration,
 };
 
@@ -52,6 +53,7 @@ use crate::{
         SignatureVerification, StoredRoomKeyBundleData,
     },
     verification, vodozemac,
+    x509_signer::{wrap_x509_signer, X509SignFn, X509ValidityFn},
 };
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -117,6 +119,17 @@ impl OlmMachine {
     ///   identities. Any user identity that has a valid signature according to
     ///   the supplied CAs will be considered verified, without any manual
     ///   verification taking place. A PEM-formatted string.
+    ///
+    /// * `raw_x509_signer` - Optional async function for signing some data with
+    ///   an X.509 certificate. Used to sign the user's identity so compatible
+    ///   clients will recognise this user as verified without manual
+    ///   verification taking place. If you supply this you must also supply
+    ///   raw_x509_validity.
+    ///
+    /// * `raw_x509_validity` - Optional function returning the validity period
+    ///   of the X.509 certificate used for signing, as the number of
+    ///   milliseconds since the Unix epoch. If you supply this you must also
+    ///   supply raw_x509_signer.
     #[wasm_bindgen(unchecked_return_type = "Promise<OlmMachine>")]
     pub fn initialize(
         user_id: &identifiers::UserId,
@@ -125,6 +138,13 @@ impl OlmMachine {
         #[wasm_bindgen(unchecked_optional_param_type = "string")] store_passphrase: Option<String>,
         #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
         #[wasm_bindgen(unchecked_optional_param_type = "String")] ca_certs_pem: Option<String>,
+        #[wasm_bindgen(
+            unchecked_optional_param_type = "(item: Uint8Array) => Promise<{ signature_bytes: Uint8Array, certificate_chain: string }>"
+        )]
+        raw_x509_signer: Option<X509SignFn>,
+        #[wasm_bindgen(unchecked_optional_param_type = "() => number")] raw_x509_validity: Option<
+            X509ValidityFn,
+        >,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -133,7 +153,16 @@ impl OlmMachine {
         let device_id = device_id.inner.clone();
         future_to_promise(async {
             let store_handle = StoreHandle::open(store_name, store_passphrase).await?;
-            Self::init_helper(user_id, device_id, store_handle, dispatch, ca_certs_pem).await
+            Self::init_helper(
+                user_id,
+                device_id,
+                store_handle,
+                dispatch,
+                ca_certs_pem,
+                raw_x509_signer,
+                raw_x509_validity,
+            )
+            .await
         })
     }
 
@@ -157,7 +186,17 @@ impl OlmMachine {
     ///   certificates. These will be used to check X.509 signatures on user
     ///   identities. Any user identity that has a valid signature according to
     ///   the supplied CAs will be considered verified, without any manual
-    ///   verification taking place. A PEM-formatted string.
+    ///
+    /// * `raw_x509_signer` - Optional async function for signing some data with
+    ///   an X.509 certificate. Used to sign the user's identity so compatible
+    ///   clients will recognise this user as verified without manual
+    ///   verification taking place. If you supply this you must also supply
+    ///   raw_x509_validity.
+    ///
+    /// * `raw_x509_validity` - Optional function returning the validity period
+    ///   of the X.509 certificate used for signing, as the number of
+    ///   milliseconds since the Unix epoch. If you supply this you must also
+    ///   supply raw_x509_signer.
     #[wasm_bindgen(js_name = "initFromStore", unchecked_return_type = "Promise<OlmMachine>")]
     pub fn init_from_store(
         user_id: &identifiers::UserId,
@@ -165,6 +204,13 @@ impl OlmMachine {
         store_handle: &StoreHandle,
         #[wasm_bindgen(unchecked_optional_param_type = "JsLogger")] logger: Option<JsLogger>,
         #[wasm_bindgen(unchecked_optional_param_type = "String")] ca_certs_pem: Option<String>,
+        #[wasm_bindgen(
+            unchecked_optional_param_type = "(item: Uint8Array) => Promise<{ signature_bytes: Uint8Array, certificate_chain: string }>"
+        )]
+        raw_x509_signer: Option<X509SignFn>,
+        #[wasm_bindgen(unchecked_optional_param_type = "() => number")] raw_x509_validity: Option<
+            X509ValidityFn,
+        >,
     ) -> Promise {
         let dispatch = logger_to_dispatcher(logger);
         let _guard = dispatcher::set_default(&dispatch.clone());
@@ -173,7 +219,16 @@ impl OlmMachine {
         let device_id = device_id.inner.clone();
         let store_handle = store_handle.clone();
         future_to_promise(async move {
-            Self::init_helper(user_id, device_id, store_handle, dispatch, ca_certs_pem).await
+            Self::init_helper(
+                user_id,
+                device_id,
+                store_handle,
+                dispatch,
+                ca_certs_pem,
+                raw_x509_signer,
+                raw_x509_validity,
+            )
+            .await
         })
     }
 
@@ -183,16 +238,36 @@ impl OlmMachine {
         store_handle: StoreHandle,
         tracing_subscriber: Dispatch,
         ca_certs_pem: Option<String>,
+        raw_x509_signer: Option<X509SignFn>,
+        raw_x509_validity: Option<X509ValidityFn>,
     ) -> Result<OlmMachine, JsError> {
         let builder = OlmMachineBuilder::new(user_id.as_ref(), device_id.as_ref())
             .with_crypto_store(store_handle);
 
         let builder = if let Some(ca_certs_pem) = ca_certs_pem {
-            builder.with_x509_verifier(Some(std::sync::Arc::new(
-                RustRawX509Verifier::new_from_pem_data(&ca_certs_pem)?,
-            )))
+            builder.with_x509_verifier(Some(Arc::new(RustRawX509Verifier::new_from_pem_data(
+                &ca_certs_pem,
+            )?)))
         } else {
             builder
+        };
+
+        let builder = match (raw_x509_signer, raw_x509_validity) {
+            (Some(raw_x509_signer), Some(raw_x509_validity)) => {
+                // Wrap the provided X.509 signing function as a RawX509Signer to be used by the
+                // client to sign our identity.
+                //
+                // Note: if we are not on a WASM target, this function will panic, since we only
+                // support providing a signing function on WASM.
+                wrap_x509_signer(raw_x509_signer, raw_x509_validity, builder)
+            }
+            (Some(_), None) | (None, Some(_)) => {
+                return Err(JsError::new(
+                    "You must supply both a raw_x509_signer and raw_x509_validity, or neither."
+                        .into(),
+                ))
+            }
+            (None, None) => builder,
         };
 
         let inner = builder.build().await?;
