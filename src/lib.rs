@@ -41,6 +41,7 @@ mod tracing;
 pub mod types;
 pub mod verification;
 pub mod vodozemac;
+mod x509_signer;
 
 use js_sys::JsString;
 use wasm_bindgen::prelude::*;

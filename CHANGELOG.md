@@ -1,11 +1,19 @@
 # UNRELEASED
 
+-   Allow providing `rawX509Signer` and `rawX509Validity` to
+    `OlmMachine::initialize` and `OlmMachine::initFromStore`, allowing the
+    user's identity to be signed using the supplied JavaScript function.
+    Both the signer and validity function must be supplied, or neither.
+    [#341](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/341)
+
 -   Update matrix-rust-sdk to `64b12e0b80`
 
-    -   Change the return type of X509Signer::validity_not_after to Duration to make it easier for downstream crates to implement.
+    -   Change the return type of X509Signer::validity_not_after to Duration to
+        make it easier for downstream crates to implement.
         ([#6904](https://github.com/matrix-org/matrix-rust-sdk/pull/6904))
 
-    -   Make X.509 signing an async operation, meaning that the experimental `RawX509Signer::sign` now returns a Future.
+    -   Make X.509 signing an async operation, meaning that the experimental
+        `RawX509Signer::sign` now returns a Future.
         ([#6867](https://github.com/matrix-org/matrix-rust-sdk/pull/6867))
 
 -   Fix `UserIdentity` methods to correctly set up the logging framework while
