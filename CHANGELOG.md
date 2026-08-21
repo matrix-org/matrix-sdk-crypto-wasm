@@ -1,5 +1,13 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `64b12e0b80`
+
+    -   Change the return type of X509Signer::validity_not_after to Duration to make it easier for downstream crates to implement.
+        ([#6904](https://github.com/matrix-org/matrix-rust-sdk/pull/6904))
+
+    -   Make X.509 signing an async operation, meaning that the experimental `RawX509Signer::sign` now returns a Future.
+        ([#6867](https://github.com/matrix-org/matrix-rust-sdk/pull/6867))
+
 -   Fix `UserIdentity` methods to correctly set up the logging framework while
     they are running.
     ([#340](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/340))
