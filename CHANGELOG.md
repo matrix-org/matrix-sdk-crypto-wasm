@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.6.0
+
 -   Allow providing `rawX509Signer` and `rawX509Validity` to
     `OlmMachine::initialize` and `OlmMachine::initFromStore`, allowing the
     user's identity to be signed using the supplied JavaScript function.
