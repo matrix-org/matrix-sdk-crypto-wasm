@@ -433,7 +433,11 @@ impl OlmMachine {
     ///   `/sync` response
     /// * `one_time_keys_counts`: The number of one-time keys on the server,
     ///   from the `/sync` response. A `Map` from string (encryption algorithm)
-    ///   to number (number of keys).
+    ///   to number (number of keys). Following the sync v2 semantics, a missing
+    ///   entry for an algorithm means that there are *zero* keys of that type
+    ///   on the server. If the caller has no information about the key counts
+    ///   (for example, because it is processing only part of a sync response),
+    ///   it should use {@link receiveSyncChangesMsc4186} instead.
     /// * `unused_fallback_keys`: Optionally, a `Set` of unused fallback keys on
     ///   the server, from the `/sync` response. If this is set, it is used to
     ///   determine if new fallback keys should be uploaded.
@@ -473,6 +477,43 @@ impl OlmMachine {
         )
     }
 
+    /// Handle the changes to the end-to-end encryption state we received from
+    /// a [MSC4186](https://github.com/matrix-org/matrix-spec-proposals/pull/4186)
+    /// (simplified sliding sync) response.
+    ///
+    /// This behaves exactly like {@link receiveSyncChanges}, except for the
+    /// handling of `one_time_keys_counts`: under MSC4186 semantics, a missing
+    /// entry for an algorithm means that the number of keys on the server is
+    /// *unchanged*, rather than zero.
+    ///
+    /// This is therefore also the method to use when the caller has no
+    /// information about the one-time key counts, for example because it is
+    /// processing only the to-device events or the device list changes from a
+    /// sync response.
+    ///
+    /// # Arguments
+    ///
+    /// * `to_device_events`: the JSON-encoded to-device events from the sync
+    ///   response
+    /// * `changed_devices`: the mapping of changed and left devices, from the
+    ///   sync response
+    /// * `one_time_keys_counts`: The number of one-time keys on the server,
+    ///   from the sync response. A `Map` from string (encryption algorithm) to
+    ///   number (number of keys). A missing entry means "unchanged".
+    /// * `unused_fallback_keys`: Optionally, a `Set` of unused fallback keys on
+    ///   the server, from the sync response. If this is set, it is used to
+    ///   determine if new fallback keys should be uploaded.
+    /// * `decryption_settings`: Optionally, the settings to use when decrypting
+    ///   to-device events. If not set, to-device events will be decrypted with
+    ///   a {@link TrustRequirement} of `Untrusted`.
+    ///
+    /// # Returns
+    ///
+    /// A list of values, each of which can be any of:
+    ///   * {@link DecryptedToDeviceEvent}
+    ///   * {@link PlainTextToDeviceEvent}
+    ///   * {@link UTDToDeviceEvent}
+    ///   * {@link InvalidToDeviceEvent}
     #[wasm_bindgen(
         js_name = "receiveSyncChangesMsc4186",
         unchecked_return_type = "Promise<ProcessedToDeviceEvent[]>"
@@ -498,6 +539,12 @@ impl OlmMachine {
         )
     }
 
+    /// Shared implementation of [`Self::receive_sync_changes`] and
+    /// [`Self::receive_sync_changes_msc4186`].
+    ///
+    /// `use_msc4186` selects the semantics of a missing entry in
+    /// `one_time_keys_counts`: `false` for sync v2 (missing means zero keys on
+    /// the server), `true` for MSC4186 (missing means unchanged).
     fn receive_sync_changes_impl(
         &self,
         to_device_events: &str,
