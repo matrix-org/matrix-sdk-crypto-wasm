@@ -463,6 +463,50 @@ impl OlmMachine {
         #[wasm_bindgen(unchecked_optional_param_type = "DecryptionSettings")]
         decryption_settings: Option<encryption::DecryptionSettings>,
     ) -> Result<Promise, JsError> {
+        self.receive_sync_changes_impl(
+            to_device_events,
+            changed_devices,
+            one_time_keys_counts,
+            unused_fallback_keys,
+            decryption_settings,
+            false,
+        )
+    }
+
+    #[wasm_bindgen(
+        js_name = "receiveSyncChangesMsc4186",
+        unchecked_return_type = "Promise<ProcessedToDeviceEvent[]>"
+    )]
+    pub fn receive_sync_changes_msc4186(
+        &self,
+        to_device_events: &str,
+        changed_devices: &sync_events::DeviceLists,
+        #[wasm_bindgen(unchecked_param_type = "Map<string, number>")] one_time_keys_counts: &Map,
+        #[wasm_bindgen(unchecked_optional_param_type = "Set<string>")] unused_fallback_keys: Option<
+            Set,
+        >,
+        #[wasm_bindgen(unchecked_optional_param_type = "DecryptionSettings")]
+        decryption_settings: Option<encryption::DecryptionSettings>,
+    ) -> Result<Promise, JsError> {
+        self.receive_sync_changes_impl(
+            to_device_events,
+            changed_devices,
+            one_time_keys_counts,
+            unused_fallback_keys,
+            decryption_settings,
+            true,
+        )
+    }
+
+    fn receive_sync_changes_impl(
+        &self,
+        to_device_events: &str,
+        changed_devices: &sync_events::DeviceLists,
+        one_time_keys_counts: &Map,
+        unused_fallback_keys: Option<Set>,
+        decryption_settings: Option<encryption::DecryptionSettings>,
+        use_msc4186: bool,
+    ) -> Result<Promise, JsError> {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let to_device_events = serde_json::from_str(to_device_events)?;
         let changed_devices = changed_devices.inner.clone();
@@ -502,20 +546,21 @@ impl OlmMachine {
             // we discard the list of updated room keys in the result; JS applications are
             // expected to use register_room_key_updated_callback to receive updated room
             // keys.
-            let (processed_to_device_events, _) = me
-                .receive_sync_changes(
-                    EncryptionSyncChanges {
-                        to_device_events,
-                        changed_devices: &changed_devices,
-                        one_time_keys_counts: &one_time_keys_counts,
-                        unused_fallback_keys: unused_fallback_keys.as_deref(),
+            let sync_changes = EncryptionSyncChanges {
+                to_device_events,
+                changed_devices: &changed_devices,
+                one_time_keys_counts: &one_time_keys_counts,
+                unused_fallback_keys: unused_fallback_keys.as_deref(),
 
-                        // matrix-sdk-crypto does not (currently) use `next_batch_token`.
-                        next_batch_token: None,
-                    },
-                    &decryption_settings,
-                )
-                .await?;
+                // matrix-sdk-crypto does not (currently) use `next_batch_token`.
+                next_batch_token: None,
+            };
+
+            let (processed_to_device_events, _) = if use_msc4186 {
+                me.receive_sync_changes_msc4186(sync_changes, &decryption_settings).await?
+            } else {
+                me.receive_sync_changes(sync_changes, &decryption_settings).await?
+            };
 
             Ok(processed_to_device_events
                 .into_iter()
