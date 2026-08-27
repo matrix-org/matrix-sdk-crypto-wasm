@@ -440,6 +440,41 @@ eXmIj7ZEOIsufPdiYuKDp/aUdgUHmuCGyegfoCJze36SdFX5q6z8Aq5nKPtz+FM=
         expect(receiveSyncChanges).toEqual([]);
     });
 
+    test("receiveSyncChangesMsc4186 treats a missing one-time key count as unchanged", async () => {
+        const m = await machine();
+        const noToDeviceEvents = JSON.stringify([]);
+        const noChangedDevices = new DeviceLists();
+
+        /** The number of one-time keys in the pending `KeysUploadRequest`, if any. */
+        const pendingOneTimeKeyUploads = async (): Promise<number> => {
+            const requests = await m.outgoingRequests();
+            const upload = requests.find((request) => request instanceof KeysUploadRequest);
+            return upload ? Object.keys(JSON.parse(upload.body).one_time_keys ?? {}).length : 0;
+        };
+
+        // Tell the machine that the server already holds plenty of one-time keys, and flush the initial device
+        // keys upload, so that nothing is pending.
+        await m.receiveSyncChanges(noToDeviceEvents, noChangedDevices, new Map([["signed_curve25519", 100]]));
+        for (const request of await m.outgoingRequests()) {
+            if (request instanceof KeysUploadRequest) {
+                await m.markRequestAsSent(
+                    request.id,
+                    request.type,
+                    JSON.stringify({ one_time_key_counts: { signed_curve25519: 100 } }),
+                );
+            }
+        }
+        expect(await pendingOneTimeKeyUploads()).toBe(0);
+
+        // Under MSC4186 semantics, a missing count means "unchanged": no new keys should be generated.
+        await m.receiveSyncChangesMsc4186(noToDeviceEvents, noChangedDevices, new Map());
+        expect(await pendingOneTimeKeyUploads()).toBe(0);
+
+        // Whereas under sync v2 semantics, a missing count means "zero keys on the server".
+        await m.receiveSyncChanges(noToDeviceEvents, noChangedDevices, new Map());
+        expect(await pendingOneTimeKeyUploads()).toBeGreaterThan(0);
+    });
+
     test("can get the outgoing requests that need to be sent out", async () => {
         const m = await machine();
         const toDeviceEvents = JSON.stringify([]);
