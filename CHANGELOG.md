@@ -1,5 +1,11 @@
 # UNRELEASED
 
+-   Add `OlmMachine.receiveSyncChangesMsc4186`, for processing the encryption
+    state from a simplified sliding sync (MSC4186) response. It behaves like
+    `receiveSyncChanges`, except that a missing one-time key count means
+    "unchanged" rather than "zero keys on the server".
+    [#345](https://github.com/matrix-org/matrix-sdk-crypto-wasm/pull/345)
+
 # matrix-sdk-crypto-wasm v18.6.0
 
 -   Allow providing `rawX509Signer` and `rawX509Validity` to
