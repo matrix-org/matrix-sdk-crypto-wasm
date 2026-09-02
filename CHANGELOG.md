@@ -1,5 +1,39 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.8.0
+
+-   Update matrix-rust-sdk to `6bcb11f`
+
+    -   [**breaking**] `Sas::emoji()` and `Sas::emoji_index()` now return `None` when the emoji method
+        was not part of the negotiated short authentication string methods, instead of
+        returning an emoji representation the remote side never agreed to display.
+        Previously a client that offered only the (mandatory) `decimal` method would
+        negotiate `["decimal"]` in the `m.key.verification.accept` event, yet a peer
+        built on this crate would still be handed emoji and could show them to its
+        user — leaving the two users comparing a decimal string against emoji, two
+        incomparable projections of the same SAS bytes.
+
+    -   A user identity whose master key carries a valid X.509 signature
+        chaining to one of the configured trust anchors now confers trust
+        on that user's devices.
+
+        Previously, such an identity was reported as verified by `UserIdentity::is_verified()`, but its devices would still be
+        reported as unverified by `Device::is_verified()`, and the room key
+        sharing strategies withheld room keys from them.
+
+        Requires the `experimental-x509-identity-verification` feature and a
+        configured X.509 verifier.
+
+    -   [**breaking**] Removed `OwnUserIdentityData::is_identity_verified()`.
+
+        This method asked whether we had verified another user's identity from
+        the perspective of our own identity, and so only ever considered
+        cross-signing.
+
+        Use `UserIdentity::is_verified()` or `OtherUserIdentity::is_verified()`
+        instead, which account for every root of trust we have in that identity,
+        including an X.509 signature on its master key.
+
 # matrix-sdk-crypto-wasm v18.7.0
 
 -   Add `OlmMachine.receiveSyncChangesMsc4186`, for processing the encryption
