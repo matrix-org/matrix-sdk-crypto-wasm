@@ -110,9 +110,11 @@ impl From<MegolmError> for MegolmDecryptionError {
                     decryption_error(DecryptionErrorCode::UnknownSenderDevice, None)
                 }
                 VerificationLevel::UnverifiedIdentity => {
-                    // We do not expect to find this in a MegolmError, since even at the strictest
-                    // `TrustRequirement` level, we are happy to accept events from users whose
-                    // identities we have not verified. We spit out a warning and then treat
+                    // We do not expect to find this in a MegolmError, since
+                    // even at the strictest
+                    // `TrustRequirement` level, we are happy to accept events
+                    // from users whose identities we have
+                    // not verified. We spit out a warning and then treat
                     // it as a generic UTD.
                     warn!("Unexpected verification level in megolm decryption error {}", value);
                     decryption_error(DecryptionErrorCode::UnableToDecrypt, None)

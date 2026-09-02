@@ -254,11 +254,13 @@ impl OlmMachine {
 
         let builder = match (raw_x509_signer, raw_x509_validity) {
             (Some(raw_x509_signer), Some(raw_x509_validity)) => {
-                // Wrap the provided X.509 signing function as a RawX509Signer to be used by the
-                // client to sign our identity.
+                // Wrap the provided X.509 signing function as a RawX509Signer
+                // to be used by the client to sign our
+                // identity.
                 //
-                // Note: if we are not on a WASM target, this function will panic, since we only
-                // support providing a signing function on WASM.
+                // Note: if we are not on a WASM target, this function will
+                // panic, since we only support providing a
+                // signing function on WASM.
                 wrap_x509_signer(raw_x509_signer, raw_x509_validity, builder)
             }
             (Some(_), None) | (None, Some(_)) => {
@@ -571,7 +573,8 @@ impl OlmMachine {
             })
             .collect();
 
-        // Convert the unused_fallback_keys JS Set to a `Vec<OneTimeKeyAlgorithm>`
+        // Convert the unused_fallback_keys JS Set to a
+        // `Vec<OneTimeKeyAlgorithm>`
         let unused_fallback_keys: Option<Vec<OneTimeKeyAlgorithm>> =
             unused_fallback_keys.map(|fallback_keys| {
                 fallback_keys
@@ -590,8 +593,9 @@ impl OlmMachine {
             .into();
 
         Ok(future_to_promise(async move {
-            // we discard the list of updated room keys in the result; JS applications are
-            // expected to use register_room_key_updated_callback to receive updated room
+            // we discard the list of updated room keys in the result; JS
+            // applications are expected to use
+            // register_room_key_updated_callback to receive updated room
             // keys.
             let sync_changes = EncryptionSyncChanges {
                 to_device_events,
@@ -731,14 +735,15 @@ impl OlmMachine {
             let encryption_result =
                 me.encrypt_room_event_raw(&room_id, event_type.as_ref(), &content).await?;
 
-            // Note: encryption_result contains EncryptionInfo that we discard here, but
-            // might conceivably be of interest to our callers in future.
+            // Note: encryption_result contains EncryptionInfo that we discard
+            // here, but might conceivably be of interest to our
+            // callers in future.
             //
             // See https://github.com/matrix-org/matrix-rust-sdk/pull/5936 for the change that
             // added this info.
             //
-            // For now, we just return the event content, which preserves the same interface
-            // we had before.
+            // For now, we just return the event content, which preserves the
+            // same interface we had before.
 
             Ok(serde_json::to_string(&encryption_result.content)?)
         }))
@@ -836,8 +841,9 @@ impl OlmMachine {
 
             responses::DecryptedRoomEvent::try_from(decrypted).map_err(
                 |e: UnsupportedAlgorithmError| {
-                    // This happens if we somehow encounter a room event whose encryption info we
-                    // don't understand (e.g., it is encrypted with Olm rather than
+                    // This happens if we somehow encounter a room event whose
+                    // encryption info we don't understand
+                    // (e.g., it is encrypted with Olm rather than
                     // Megolm). That seems pretty unlikely. If it happens, let's
                     // just treat it as a generic UTD.
                     MegolmDecryptionError::unable_to_decrypt(format!("{e:#}"))
@@ -1045,8 +1051,9 @@ impl OlmMachine {
         let tracing_subscriber = self.tracing_subscriber.clone();
 
         future_to_promise(async move {
-            // wait for up to a second for any in-flight device list requests to complete.
-            // The reason for this isn't so much to avoid races, but to make testing easier.
+            // wait for up to a second for any in-flight device list requests to
+            // complete. The reason for this isn't so much to avoid
+            // races, but to make testing easier.
             Ok(me
                 .get_identity(user_id.as_ref(), Some(Duration::from_secs(1)))
                 .await?
@@ -1113,11 +1120,11 @@ impl OlmMachine {
                 .share_room_key(&room_id, users.iter().map(AsRef::as_ref), encryption_settings)
                 .await?;
 
-            // convert each request to our own ToDeviceRequest struct, and then wrap it in a
-            // JsValue.
+            // convert each request to our own ToDeviceRequest struct, and then
+            // wrap it in a JsValue.
             //
-            // Then collect the results into a javascript Array, throwing any errors into
-            // the promise.
+            // Then collect the results into a javascript Array, throwing any
+            // errors into the promise.
             Ok(to_device_requests
                 .into_iter()
                 .map(|td| ToDeviceRequest::try_from(td.deref()).map(JsValue::from))
@@ -1933,11 +1940,12 @@ impl OlmMachine {
     ) {
         let _guard = dispatcher::set_default(&self.tracing_subscriber);
         let stream = self.inner.store().secrets_stream();
-        // fire up a promise chain which will call `callback` on each result from the
-        // stream
+        // fire up a promise chain which will call `callback` on each result
+        // from the stream
         spawn_local(
             async move {
-                // Pin the stream to ensure it can be safely moved across threads
+                // Pin the stream to ensure it can be safely moved across
+                // threads
                 pin_mut!(stream);
                 while let Some(secret) = stream.next().await {
                     send_secret_gossip_to_callback(&callback, &secret).await;
@@ -2158,9 +2166,10 @@ impl OlmMachine {
         let user_id = user.inner.clone();
 
         let media_encryption_info = media_encryption_info.ok_or_else(|| {
-            // We accept Option<String> to save a typescript assertion on the application
-            // side. In practice `build_room_key_bundle` should never return an
-            // EncryptedAttachment with nullish encryption_info.
+            // We accept Option<String> to save a typescript assertion on the
+            // application side. In practice `build_room_key_bundle`
+            // should never return an EncryptedAttachment with
+            // nullish encryption_info.
             JsError::new("shareRoomKeyBundleData: nullish encryption info")
         })?;
 
@@ -2185,11 +2194,11 @@ impl OlmMachine {
                 .share_room_key_bundle_data(&user_id, &sharing_strategy.into(), bundle_data)
                 .await?;
 
-            // convert each request to our own ToDeviceRequest struct, and then wrap it in a
-            // JsValue.
+            // convert each request to our own ToDeviceRequest struct, and then
+            // wrap it in a JsValue.
             //
-            // Then collect the results into a javascript Array, throwing any errors into
-            // the promise.
+            // Then collect the results into a javascript Array, throwing any
+            // errors into the promise.
             let result = to_device_requests
                 .into_iter()
                 .map(|td| ToDeviceRequest::try_from(&td).map(JsValue::from))
@@ -2484,8 +2493,8 @@ pub(crate) async fn promise_result_to_future(
             JsFuture::from(prom).await
         }
         Err(e) => {
-            // the function threw an exception before it returned the promise. We can just
-            // return the error as an error result.
+            // the function threw an exception before it returned the promise.
+            // We can just return the error as an error result.
             Err(e)
         }
     }
