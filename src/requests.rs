@@ -744,7 +744,8 @@ pub(crate) mod tests {
     use super::{KeysClaimRequest, KeysQueryRequest, KeysUploadRequest};
 
     #[wasm_bindgen_test]
-    // make sure that the timeout in a /keys/claim request is encoded as a number
+    // make sure that the timeout in a /keys/claim request is encoded as a
+    // number
     fn test_keys_claim_request_with_timeout() {
         let rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
             user_id!("@alice:localhost").to_owned(),
@@ -760,7 +761,8 @@ pub(crate) mod tests {
     }
 
     #[wasm_bindgen_test]
-    // if a /keys/claim request has no timeout, make sure it isn't in the request
+    // if a /keys/claim request has no timeout, make sure it isn't in the
+    // request
     fn test_keys_claim_request_without_timeout() {
         let mut rust_request = OriginalKeysClaimRequest::new(BTreeMap::from([(
             user_id!("@alice:localhost").to_owned(),
@@ -789,7 +791,8 @@ pub(crate) mod tests {
     }
 
     #[wasm_bindgen_test]
-    // if a /keys/query request has no timeout, make sure it isn't in the request
+    // if a /keys/query request has no timeout, make sure it isn't in the
+    // request
     fn test_keys_query_request_without_timeout() {
         let rust_request = OriginalKeysQueryRequest { timeout: None, device_keys: BTreeMap::new() };
         let request = KeysQueryRequest::try_from(("ID".to_string(), &rust_request)).unwrap();
@@ -798,7 +801,8 @@ pub(crate) mod tests {
     }
 
     #[wasm_bindgen_test]
-    // if a /keys/upload request no device_keys, make sure it isn't in the request
+    // if a /keys/upload request no device_keys, make sure it isn't in the
+    // request
     fn test_keys_upload_request_without_devices() {
         let request = OriginalKeysUploadRequest::new();
         let request = KeysUploadRequest::try_from(("ID".to_string(), &request)).unwrap();

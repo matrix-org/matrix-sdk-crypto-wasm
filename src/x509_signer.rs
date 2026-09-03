@@ -161,7 +161,8 @@ impl JsRawX509Signer {
         let res = self.validity_fn.call(&JsValue::NULL, ()).map_err(|_| ValidityError)?;
 
         if let Some(millis) = res.as_f64() {
-            // Casting from a float to an integer will round the float towards zero
+            // Casting from a float to an integer will round the float towards
+            // zero
             let millis = millis as u64;
             Ok(Duration::from_millis(millis))
         } else {

@@ -87,8 +87,8 @@ impl Tracing {
     fn install_or_get_inner() -> Arc<Mutex<TracingInner>> {
         static INSTALL: OnceLock<Arc<Mutex<TracingInner>>> = OnceLock::new();
 
-        // if this is the first Tracing to be created, create the TracingInner singleton
-        // and stash it in `INSTALL`
+        // if this is the first Tracing to be created, create the TracingInner
+        // singleton and stash it in `INSTALL`
         INSTALL
             .get_or_init(|| {
                 let subscriber = make_tracing_subscriber(None);
@@ -122,8 +122,8 @@ impl Tracing {
     #[wasm_bindgen(setter, js_name = "minLevel")]
     pub fn min_level(&self, min_level: LoggerLevel) -> Result<(), JsError> {
         let mut inner = self.inner.lock()?;
-        // we store the level in `inner.level`, so that `turn_on` knows what to restore
-        // it to.
+        // we store the level in `inner.level`, so that `turn_on` knows what to
+        // restore it to.
         inner.level = min_level.into();
         inner
             .level_filter_reload_handle
@@ -174,9 +174,10 @@ pub fn logger_to_dispatcher(logger: Option<JsLogger>) -> Dispatch {
     match logger {
         Some(logger) => Dispatch::new(make_tracing_subscriber(Some(logger))),
         None => {
-            // If anyone calls `OlmMachine::init` or similar without initialising `Tracing`,
-            // set it up now, and then use the resulting subscriber for the
-            // lifetime of the OlmMachine, so that a later call to `Tracing::turn_on` will
+            // If anyone calls `OlmMachine::init` or similar without
+            // initialising `Tracing`, set it up now, and then use
+            // the resulting subscriber for the lifetime of the
+            // OlmMachine, so that a later call to `Tracing::turn_on` will
             // have the desired effect.
             Tracing::init();
             dispatcher::get_default(|dispatch| dispatch.clone())

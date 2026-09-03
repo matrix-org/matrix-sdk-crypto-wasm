@@ -249,8 +249,9 @@ impl Sas {
                 .map(JsValue::try_from)
                 .collect::<Result<Array, _>>()?;
 
-            // if a signature upload request was returned, push it onto the end of the array
-            // of OutgoingVerificationRequests we just built.
+            // if a signature upload request was returned, push it onto the end
+            // of the array of OutgoingVerificationRequests we just
+            // built.
             if let Some(sig_rq) = signature_upload_request {
                 outgoing_verification_requests
                     .push(&requests::SignatureUploadRequest::try_from(&sig_rq)?.into());
@@ -361,8 +362,8 @@ impl Sas {
     ) {
         let stream = self.inner.changes();
 
-        // fire up a promise chain which will call `callback` on each result from the
-        // stream
+        // fire up a promise chain which will call `callback` on each result
+        // from the stream
         spawn_local(async move {
             stream.for_each(|_| send_change_info_to_callback(&callback)).await;
         });
@@ -586,8 +587,8 @@ impl Qr {
     ) {
         let stream = self.inner.changes();
 
-        // fire up a promise chain which will call `callback` on each result from the
-        // stream
+        // fire up a promise chain which will call `callback` on each result
+        // from the stream
         spawn_local(async move {
             stream.for_each(|_| send_change_info_to_callback(&callback)).await;
         });
@@ -965,8 +966,8 @@ impl VerificationRequest {
     ) {
         let stream = self.inner.changes();
 
-        // fire up a promise chain which will call `callback` on each result from the
-        // stream
+        // fire up a promise chain which will call `callback` on each result
+        // from the stream
         spawn_local(async move {
             stream.for_each(|_| send_change_info_to_callback(&callback)).await;
         });

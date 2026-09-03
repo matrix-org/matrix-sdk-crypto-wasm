@@ -572,12 +572,14 @@ pub fn processed_to_device_event_to_js_value(
                         .into()
                 }
                 Err(e) => {
-                    // This can only happen if we receive an encrypted to-device event which is
-                    // encrypted with an algorithm we don't recognise. This
+                    // This can only happen if we receive an encrypted to-device
+                    // event which is encrypted with an
+                    // algorithm we don't recognise. This
                     // shouldn't really happen, unless the wasm bindings have
                     // gotten way out of step with the underlying SDK.
                     //
-                    // There's not a lot we can do here: we just throw away the event.
+                    // There's not a lot we can do here: we just throw away the
+                    // event.
                     warn!("Dropping incoming to-device event with invalid encryption_info: {e:?}");
                     return None;
                 }

@@ -29,12 +29,13 @@ fn unstable_rust_sdk() -> Result<()> {
     // Things which DON'T work here include:
     //
     // - A simple `cargo update`. That only works while if `Cargo.toml` is
-    //   configured to use matrix-rust-sdk` from the `main` branch of git. Once we
-    //   switch to a release version, `cargo update` does nothing.
+    //   configured to use matrix-rust-sdk` from the `main` branch of git. Once
+    //   we switch to a release version, `cargo update` does nothing.
     //
     //  - Adding a `[patch]` section to `.cargo/config.toml` (followed by `cargo
-    //    update`). That works ok until the Rust SDK gets a version bump, at which
-    //    point the patch is deemed incompatible with the version in `Cargo.lock`.
+    //    update`). That works ok until the Rust SDK gets a version bump, at
+    //    which point the patch is deemed incompatible with the version in
+    //    `Cargo.lock`.
     //
     // So, let's edit the `Cargo.toml`.
 
