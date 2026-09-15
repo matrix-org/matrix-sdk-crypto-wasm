@@ -37,14 +37,14 @@ dwarf-debug-info = true
 #  * `-Oz`: optimise for size
 #  * `-g`: include the "name" section (which holds the printable names for
 #    symbols) in the output.
-wasm-opt = ['-Oz', '-g']
+wasm-opt = ['-O3', '-g']
 
 ################################################################################
 
 [profile.release]
 # Tell cargo to run `rustc` with `-Oz` - ie, to optimize for size.
 # https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level
-opt-level = 'z'
+opt-level = 3
 # Use a single codegen-unit to enable better optimizations
 codegen-units = 1
 # Enable fat link time optimization
