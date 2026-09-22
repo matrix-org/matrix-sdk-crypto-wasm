@@ -1,5 +1,7 @@
 # UNRELEASED
 
+-   Update dependencies to their latest versions.
+
 # matrix-sdk-crypto-wasm v18.9.0
 
 -   Update matrix-rust-sdk to `0.19.1`
