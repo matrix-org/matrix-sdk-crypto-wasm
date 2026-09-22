@@ -1,7 +1,7 @@
 const { UserId, initAsync } = require("@matrix-org/matrix-sdk-crypto-wasm");
 
 test("can instantiate rust objects with async initialiser", async () => {
-    initUserId = () => new UserId("@foo:bar.org");
+    let initUserId = () => new UserId("@foo:bar.org");
 
     // stub out the synchronous WebAssembly loader with one that raises an error
     jest.spyOn(WebAssembly, "Module").mockImplementation(() => {
