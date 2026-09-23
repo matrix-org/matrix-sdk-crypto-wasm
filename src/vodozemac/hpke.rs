@@ -1,7 +1,11 @@
 //! This module implements [HPKE](https://www.rfc-editor.org/rfc/rfc9180.html).
 //!
+//! The HPKE module can be used to implement [MSC4388].
+//!
 //! Please take a look at the vodozemac documentation of this module for more
 //! info.
+//!
+//! [MSC4388]: https://github.com/matrix-org/matrix-spec-proposals/pull/4388
 
 #![allow(missing_debug_implementations)]
 use std::sync::{Arc, Mutex};
@@ -55,6 +59,9 @@ pub struct BidirectionalCreationResult {
 /// This class is used to start the establishment of a HPKE session. The other
 /// side of the session can be established using the {@link HpkeSenderChannel}.
 ///
+/// The HPKE recipient channel can be used to implement the QR code generating
+/// side of the secure channel from [MSC4388].
+///
 /// @example
 /// ```js
 /// const alice = new HpkeSenderChannel();
@@ -85,6 +92,8 @@ pub struct BidirectionalCreationResult {
 ///
 /// expect(thirdPlaintext).toStrictEqual("Other message");
 /// ```
+///
+/// [MSC4388]: https://github.com/matrix-org/matrix-spec-proposals/pull/4388
 #[wasm_bindgen]
 pub struct HpkeRecipientChannel {
     inner: Option<hpke::HpkeRecipientChannel>,
@@ -184,7 +193,12 @@ impl UnidirectionalRecipientChannel {
 /// first create an {@link HpkeRecipientChannel} and use it to obtain the
 /// recipient's `Curve25519PublicKey`.
 ///
+/// The HPKE sender channel can be used to implement the scanning side of
+/// the secure channel from [MSC4388].
+///
 /// See the {@link HpkeRecipientChannel} documentation for a complete example.
+///
+/// [MSC4388]: https://github.com/matrix-org/matrix-spec-proposals/pull/4388
 #[wasm_bindgen]
 pub struct HpkeSenderChannel {
     inner: Option<hpke::HpkeSenderChannel>,
