@@ -50,7 +50,41 @@ pub struct BidirectionalCreationResult {
     pub initial_response: String,
 }
 
-/// An unestablished HPKE session.
+/// An unestablished HPKE recipient session.
+///
+/// This class is used to start the establishment of a HPKE session. The other
+/// side of the session can be established using the {@link HpkeSenderChannel}.
+///
+/// @example
+/// ```js
+/// const alice = new HpkeSenderChannel();
+/// const bob = new HpkeRecipientChannel();
+///
+/// const { message, channel: aliceUnidirectional } = alice.establishChannel(
+///     bob.publicKey,
+///     "It's a secret to everybody",
+///     "AAD",
+/// );
+///
+/// const { message: initialMessage, channel: bobUnidirectional } = bob.establishChannel(message, "AAD");
+///
+/// const { initialResponse, channel: bobEstablished } = bobUnidirectional.establishBidirectionalChannel(
+///     "Initial response",
+///     "AAD2",
+/// );
+/// const { initialResponse: secondPlaintext, channel: aliceEstablished } =
+///     aliceUnidirectional.establishBidirectionalChannel(initialResponse, "AAD2");
+///
+/// const aliceCheck = aliceEstablished.checkCode;
+/// const bobCheck = bobEstablished.checkCode;
+///
+/// // Compare the check codes here and only proceed if they match.
+///
+/// const ciphertext = bobEstablished.seal("Other message", "");
+/// const thirdPlaintext = aliceEstablished.open(ciphertext, "");
+///
+/// expect(thirdPlaintext).toStrictEqual("Other message");
+/// ```
 #[wasm_bindgen]
 pub struct HpkeRecipientChannel {
     inner: Option<hpke::HpkeRecipientChannel>,
@@ -144,7 +178,13 @@ impl UnidirectionalRecipientChannel {
     }
 }
 
-/// An unestablished HPKE channel.
+/// An unestablished HPKE sender channel.
+///
+/// This class is used to initiate an HPKE session. To establish the session,
+/// first create an {@link HpkeRecipientChannel} and use it to obtain the
+/// recipient's `Curve25519PublicKey`.
+///
+/// See the {@link HpkeRecipientChannel} documentation for a complete example.
 #[wasm_bindgen]
 pub struct HpkeSenderChannel {
     inner: Option<hpke::HpkeSenderChannel>,
@@ -242,7 +282,7 @@ pub struct EstablishedHpkeChannel {
 
 #[wasm_bindgen]
 impl EstablishedHpkeChannel {
-    /// Get our [`Curve25519PublicKey`].
+    /// Get our `Curve25519PublicKey`.
     ///
     /// This public key needs to be sent to the other side so that it can
     /// complete the HPKE channel establishment.
@@ -264,7 +304,7 @@ impl EstablishedHpkeChannel {
         Ok(String::from_utf8_lossy(&result).to_string())
     }
 
-    /// Get the [`CheckCode`] which uniquely identifies this { @link
+    /// Get the `CheckCode` which uniquely identifies this { @link
     /// EstablishedHpkeChannel }.
     ///
     /// This check code can be used to verify and confirm that both sides of the
