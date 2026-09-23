@@ -16,6 +16,8 @@ fn used_up_error() -> JsError {
 }
 
 /// The result of an recipient HPKE channel establishment.
+///
+/// @see {@link HpkeRecipientChannel#establishChannel}
 #[wasm_bindgen(getter_with_clone)]
 pub struct HpkeRecipientCreationResult {
     /// The established HPKE channel.
@@ -25,6 +27,8 @@ pub struct HpkeRecipientCreationResult {
 }
 
 /// The result of an inbound HPKE channel establishment.
+///
+/// @see {@link HpkeSenderChannel#establishChannel}
 #[wasm_bindgen(getter_with_clone)]
 pub struct HpkeSenderCreationResult {
     /// The established HPKE channel.
@@ -34,6 +38,9 @@ pub struct HpkeSenderCreationResult {
 }
 
 /// The result of an outbound HPKE channel establishment.
+///
+/// @see {@link UnidirectionalSenderChannel#establishBidirectionalChannel}
+/// @see {@link UnidirectionalRecipientChannel#establishBidirectionalChannel}
 #[wasm_bindgen(getter_with_clone)]
 pub struct BidirectionalCreationResult {
     /// The fully established HPKE channel.
@@ -100,6 +107,8 @@ impl HpkeRecipientChannel {
 /// This channel is created when we open the initial message. It allows us to
 /// seal the initial response at which point the channel gets transformed into a
 /// fully established and bidirectional HPKE channel.
+///
+/// @see {@link HpkeRecipientChannel#establishChannel}
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct UnidirectionalRecipientChannel {
@@ -179,6 +188,8 @@ impl HpkeSenderChannel {
 ///
 /// This channel is created when we seal the initial plaintext and we wait for
 /// the initial response. from the other side.
+///
+/// @see {@link HpkeSenderChannel#establishChannel}
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct UnidirectionalSenderChannel {
@@ -219,6 +230,10 @@ impl UnidirectionalSenderChannel {
 ///
 /// This channel can be used to seal and open messages between the two
 /// sides of the channel.
+///
+/// @see {@link UnidirectionalSenderChannel#establishBidirectionalChannel}
+/// @see {@link UnidirectionalRecipientChannel#establishBidirectionalChannel}
+#[wasm_bindgen(getter_with_clone)]
 #[derive(Clone)]
 #[wasm_bindgen]
 pub struct EstablishedHpkeChannel {
@@ -275,6 +290,8 @@ impl EstablishedHpkeChannel {
 /// attention to its content. By expanding this single bit into a deterministic
 /// two-digit check code, the user is forced to pay more attention by having to
 /// enter it instead of just clicking through a dialogue.
+///
+/// @see {@link EstablishedHpkeChannel#checkCode}
 #[derive(Clone)]
 #[wasm_bindgen]
 pub struct HpkeCheckCode {
@@ -286,7 +303,7 @@ impl HpkeCheckCode {
     /// Convert the check code to an array of two bytes.
     ///
     /// The bytes can be converted to a more user-friendly representation. The
-    /// [`CheckCode::to_digit`] converts the bytes to a two-digit number.
+    /// {@ link CheckCode#to_digit} converts the bytes to a two-digit number.
     pub fn as_bytes(&self) -> Vec<u8> {
         self.inner.as_bytes().to_vec()
     }
