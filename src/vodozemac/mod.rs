@@ -7,6 +7,7 @@ use zeroize::{Zeroize, Zeroizing};
 use crate::impl_from_to_inner;
 
 pub mod ecies;
+pub mod hpke;
 pub mod pk_encryption;
 
 /// An Ed25519 public key, used to verify digital signatures.

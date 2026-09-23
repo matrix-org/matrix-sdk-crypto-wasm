@@ -74,6 +74,22 @@ Encryption](https://en.wikipedia.org/wiki/End-to-end_encryption)) for
     - In Node.js, invoke with commandline arguments [`--experimental-wasm-modules`](https://nodejs.org/api/esm.html#wasm-modules)
       [`--conditions=wasm-esm`](https://nodejs.org/api/cli.html#-c-condition---conditionscondition).
 
+### HPKE support
+
+The library exposes bindings for [HPKE (Hybrid Public Key Encryption)], which
+can be used to implement [MSC4388].
+
+The following HPKE related classes are available:
+
+-   [`HpkeSenderChannel`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/HpkeSenderChannel.html)
+-   [`HpkeRecipientChannel`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/HpkeRecipientChannel.html)
+-   [`UnidirectionalSenderChannel`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/UnidirectionalSenderChannel.html)
+-   [`UnidirectionalRecipientChannel`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/UnidirectionalRecipientChannel.html)
+-   [`EstablishedHpkeChannel`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/EstablishedHpkeChannel.html)
+-   [`HpkeCheckCode`](https://matrix-org.github.io/matrix-sdk-crypto-wasm/classes/HpkeCheckCode.html)
+
+See the [API documentation](https://matrix-org.github.io/matrix-sdk-crypto-wasm/) for details and examples.
+
 ## Building matrix-sdk-crypto-wasm
 
 These WebAssembly bindings are written in [Rust]. To build them, you
@@ -127,7 +143,8 @@ The documentation is generated in the `./docs` directory.
 [`matrix-rust-sdk`]: https://github.com/matrix-org/matrix-rust-sdk
 [Matrix]: https://matrix.org/
 [Rust]: https://www.rust-lang.org/
-[npm]: https://www.npmjs.com/
+[HPKE (Hybrid Public Key Encryption)]: https://www.rfc-editor.org/rfc/rfc9180.html
+[MSC4388]: https://github.com/matrix-org/matrix-spec-proposals/pull/4388
 
 ## Contributing
 
