@@ -67,28 +67,34 @@ pub struct BidirectionalCreationResult {
 /// const alice = new HpkeSenderChannel();
 /// const bob = new HpkeRecipientChannel();
 ///
+/// let aad = "AAD";
+/// let aadBytes = new TextEncoder().encode(aad);
+///
 /// const { message, channel: aliceUnidirectional } = alice.establishChannel(
 ///     bob.publicKey,
 ///     "It's a secret to everybody",
-///     "AAD",
+///     aadBytes,
 /// );
 ///
-/// const { message: initialMessage, channel: bobUnidirectional } = bob.establishChannel(message, "AAD");
+/// const { message: initialMessage, channel: bobUnidirectional } = bob.establishChannel(message, aadBytes);
+///
+/// let aadTwo = "AADTWO";
+/// let aadTwoBytes = new TextEncoder().encode(aad);
 ///
 /// const { initialResponse, channel: bobEstablished } = bobUnidirectional.establishBidirectionalChannel(
 ///     "Initial response",
-///     "AAD2",
+///     aadTwoBytes,
 /// );
 /// const { initialResponse: secondPlaintext, channel: aliceEstablished } =
-///     aliceUnidirectional.establishBidirectionalChannel(initialResponse, "AAD2");
+///     aliceUnidirectional.establishBidirectionalChannel(initialResponse, aadTwoBytes);
 ///
 /// const aliceCheck = aliceEstablished.checkCode;
 /// const bobCheck = bobEstablished.checkCode;
 ///
 /// // Compare the check codes here and only proceed if they match.
 ///
-/// const ciphertext = bobEstablished.seal("Other message", "");
-/// const thirdPlaintext = aliceEstablished.open(ciphertext, "");
+/// const ciphertext = bobEstablished.seal("Other message", []);
+/// const thirdPlaintext = aliceEstablished.open(ciphertext, []);
 ///
 /// expect(thirdPlaintext).toStrictEqual("Other message");
 /// ```
@@ -130,14 +136,11 @@ impl HpkeRecipientChannel {
     pub fn establish_channel(
         &mut self,
         initial_message: &str,
-        aad: &str,
+        aad: &[u8],
     ) -> Result<HpkeRecipientCreationResult, JsError> {
         let message = hpke::InitialMessage::decode(&initial_message)?;
-        let result = self
-            .inner
-            .take()
-            .ok_or_else(used_up_error)?
-            .establish_channel(&message, aad.as_bytes())?;
+        let result =
+            self.inner.take().ok_or_else(used_up_error)?.establish_channel(&message, aad)?;
 
         let message = String::from_utf8_lossy(&result.message).to_string();
 
@@ -170,7 +173,7 @@ impl UnidirectionalRecipientChannel {
     pub fn establish_bidirectional_channel(
         &mut self,
         initial_response: &str,
-        aad: &str,
+        aad: &[u8],
     ) -> Result<BidirectionalCreationResult, JsError> {
         let hpke::BidirectionalCreationResult { channel, message } = self
             .inner
@@ -178,7 +181,7 @@ impl UnidirectionalRecipientChannel {
             .unwrap()
             .take()
             .ok_or_else(used_up_error)?
-            .establish_bidirectional_channel(&initial_response.as_bytes(), aad.as_bytes());
+            .establish_bidirectional_channel(&initial_response.as_bytes(), aad);
 
         Ok(BidirectionalCreationResult {
             channel: channel.into(),
@@ -225,14 +228,13 @@ impl HpkeSenderChannel {
         &mut self,
         their_public_key: Curve25519PublicKey,
         initial_message: &str,
-        aad: &str,
+        aad: &[u8],
     ) -> Result<HpkeSenderCreationResult, JsError> {
-        let hpke::SenderCreationResult { channel, message } =
-            self.inner.take().ok_or_else(used_up_error)?.establish_channel(
-                their_public_key.inner,
-                &initial_message.as_bytes(),
-                aad.as_bytes(),
-            )?;
+        let hpke::SenderCreationResult { channel, message } = self
+            .inner
+            .take()
+            .ok_or_else(used_up_error)?
+            .establish_channel(their_public_key.inner, &initial_message.as_bytes(), aad)?;
 
         Ok(HpkeSenderCreationResult { message: message.encode(), channel: channel.into() })
     }
@@ -262,7 +264,7 @@ impl UnidirectionalSenderChannel {
     pub fn establish_bidirectional_channel(
         &mut self,
         initial_response: &str,
-        aad: &str,
+        aad: &[u8],
     ) -> Result<BidirectionalCreationResult, JsError> {
         let initial_response = hpke::InitialResponse::decode(initial_response)?;
 
@@ -272,7 +274,7 @@ impl UnidirectionalSenderChannel {
             .unwrap()
             .take()
             .ok_or_else(used_up_error)?
-            .establish_bidirectional_channel(&initial_response, aad.as_bytes())?;
+            .establish_bidirectional_channel(&initial_response, aad)?;
 
         let message = String::from_utf8(message)?;
 
@@ -306,14 +308,14 @@ impl EstablishedHpkeChannel {
     }
 
     /// Encrypt the given plaintext using this HPKE channel.
-    pub fn seal(&mut self, message: &str, aad: &str) -> String {
-        self.inner.lock().unwrap().seal(message.as_bytes(), aad.as_bytes()).encode()
+    pub fn seal(&mut self, message: &str, aad: &[u8]) -> String {
+        self.inner.lock().unwrap().seal(message.as_bytes(), aad).encode()
     }
 
     /// Decrypt the given message using this HPKE channel.
-    pub fn open(&mut self, message: &str, aad: &str) -> Result<String, JsError> {
+    pub fn open(&mut self, message: &str, aad: &[u8]) -> Result<String, JsError> {
         let message = hpke::Message::decode(message)?;
-        let result = self.inner.lock().unwrap().open(&message, aad.as_bytes())?;
+        let result = self.inner.lock().unwrap().open(&message, aad)?;
 
         Ok(String::from_utf8_lossy(&result).to_string())
     }
