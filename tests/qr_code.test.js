@@ -36,7 +36,7 @@ describe(QrCodeData.name, () => {
 
     test("can construct a new MSC4388 QrCodeData class", () => {
         const base64Data =
-            "SU9fRUxFTUVOVF9NU0M0Mzg4AwG0yzZ1QVpQ1jlnoxWX3d5jrWRFfELxjS2gN7pz9y+3PAAaMDFIWDlLMDBRMUg2S1BENDdFRzRHMVQzWEcAJGh0dHBzOi8vc3luYXBzZS1vaWRjLmxhYi5lbGVtZW50LmRldg";
+            "SU9fRUxFTUVOVF9NU0M0Mzg4AwG0yzZ1QVpQ1jlnoxWX3d5jrWRFfELxjS2gN7pz9y+3PBowMUhYOUswMFExSDZLUEQ0N0VHNEcxVDNYRyRodHRwczovL3N5bmFwc2Utb2lkYy5sYWIuZWxlbWVudC5kZXY";
 
         const publicKey = new Curve25519PublicKey("tMs2dUFaUNY5Z6MVl93eY61kRXxC8Y0toDe6c/cvtzw");
         const rendezvousId = "01HX9K00Q1H6KPD47EG4G1T3XG";
