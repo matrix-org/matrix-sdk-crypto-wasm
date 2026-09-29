@@ -1,5 +1,13 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `8a6fb702c2`
+
+    -   [**breaking**] Attempting to create a `QrCodeData` with `new_msc4388`
+        now returns an error if the rendezvous ID or base URL are longer than
+        255 bytes of UTF-8. This complies with
+        [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388).
+        ([#7130](https://github.com/matrix-org/matrix-rust-sdk/pull/7130))
+
 -   Expose the vodozemac HPKE support, which replaces the ECIES module. It
     can be used to establish the secure channel required for QR code login
     described in [MSC4388](https://github.com/matrix-org/matrix-spec-proposals/pull/4388).

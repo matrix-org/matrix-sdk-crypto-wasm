@@ -83,7 +83,7 @@ impl From<qr_login::QrCodeIntentData<'_>> for QrCodeIntentData {
             qr_login::QrCodeIntentData::Msc4388 { rendezvous_id, base_url } => Self {
                 msc_4108: None,
                 msc_4388: Some(Msc4388IntentData {
-                    rendezvous_id: rendezvous_id.to_owned(),
+                    rendezvous_id: rendezvous_id.to_string(),
                     base_url: base_url.to_string(),
                 }),
             },
@@ -192,7 +192,7 @@ impl QrCodeData {
         let intent = intent.into();
         let base_url = Url::parse(base_url)?;
 
-        let inner = qr_login::QrCodeData::new_msc4388(public_key, rendezvous_id, base_url, intent);
+        let inner = qr_login::QrCodeData::new_msc4388(public_key, rendezvous_id, base_url, intent)?;
 
         Ok(QrCodeData { inner })
     }
