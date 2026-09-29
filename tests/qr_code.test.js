@@ -3,6 +3,7 @@ const { QrCodeData, QrCodeIntent, Curve25519PublicKey } = require("@matrix-org/m
 describe(QrCodeData.name, () => {
     test("can parse the QR code bytes from the MSC", () => {
         // Parse a QrCodeData from its serialised form
+        // Should match https://github.com/matrix-org/matrix-rust-sdk/blob/main/crates/matrix-sdk-crypto/src/types/qr_login/msc_4108.rs#L251
         const base64Input =
             "TUFUUklYAgPYhmhqshl7eA4wCp1KIUdIBwDXkp85qzG55RQ3AkjtawBHaHR0cHM6Ly9yZW5kZXp2b3VzLmxhYi5lbGVtZW50LmRldi9lOGRhNjM1NS01NTBiLTRhMzItYTE5My0xNjE5ZDk4MzA2Njg";
 
