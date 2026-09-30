@@ -1,6 +1,6 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `8a6fb702c2`
+-   Update matrix-rust-sdk to `12f7c8353`
 
     -   [**breaking**] Attempting to create a `QrCodeData` with `new_msc4388`
         now returns an error if the rendezvous ID or base URL are longer than
