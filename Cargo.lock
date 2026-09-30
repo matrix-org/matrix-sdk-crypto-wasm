@@ -1328,7 +1328,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "as_variant",
  "async-trait",
@@ -1355,7 +1355,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "eyeball-im",
  "futures-core",
@@ -1378,7 +1378,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "aes",
  "as_variant",
@@ -1452,7 +1452,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "async-trait",
  "base64",
@@ -1484,7 +1484,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1496,7 +1496,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#8a6fb702c23a7b2d5cf8776440bba779a48e8637"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
 dependencies = [
  "base64",
  "blake3",

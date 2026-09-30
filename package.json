@@ -82,6 +82,7 @@
         "build": "WASM_PACK_ARGS=--release ./scripts/build.sh",
         "build:dev": "WASM_PACK_ARGS=--dev ./scripts/build.sh",
         "test": "jest --verbose && pnpm wasm-pack test --node",
+        "test:unit": "jest --verbose",
         "doc": "typedoc --treatWarningsAsErrors --tsconfig .",
         "prepack": "pnpm build && pnpm run test"
     }
