@@ -296,8 +296,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b77c319abfd5219629c45c34c89ba945ed3c5e49fcde9d16b6c3885f118a730"
 dependencies = [
  "const-oid 0.9.6",
- "der",
- "spki",
+ "der 0.7.10",
+ "spki 0.7.3",
  "x509-cert",
 ]
 
@@ -504,6 +504,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "der"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a996a108feb8b427a6e12fcf6af4aa83409b79d72c15337d7741368131ee004"
+dependencies = [
+ "const-oid 0.10.2",
+ "zeroize",
+]
+
+[[package]]
 name = "der_derive"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -613,6 +623,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a"
 dependencies = [
+ "pkcs8",
  "serdect",
  "signature",
 ]
@@ -913,6 +924,15 @@ checksum = "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
 dependencies = [
  "bytes",
  "itoa",
+]
+
+[[package]]
+name = "http-auth"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "150fa4a9462ef926824cf4519c84ed652ca8f4fbae34cb8af045b5cbcaf98822"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]
@@ -1328,7 +1348,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-base"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "as_variant",
  "async-trait",
@@ -1348,6 +1368,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "tokio-util",
  "tracing",
  "unicode-normalization",
 ]
@@ -1355,7 +1376,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-common"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "eyeball-im",
  "futures-core",
@@ -1378,14 +1399,13 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-crypto"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "aes",
  "as_variant",
  "async-trait",
  "bs58",
  "byteorder",
- "cfg-if",
  "cms",
  "ctr",
  "eyeball",
@@ -1452,7 +1472,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-indexeddb"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "async-trait",
  "base64",
@@ -1484,7 +1504,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-qrcode"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "byteorder",
  "qrcode",
@@ -1496,7 +1516,7 @@ dependencies = [
 [[package]]
 name = "matrix-sdk-store-encryption"
 version = "0.19.1"
-source = "git+https://github.com/matrix-org/matrix-rust-sdk#12f7c8353f08b59caf297d9f7ea95f582715c85f"
+source = "git+https://github.com/matrix-org/matrix-rust-sdk#1e54358136beb13999f09b31cbc9734b654f50e0"
 dependencies = [
  "base64",
  "blake3",
@@ -1559,6 +1579,12 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "mime"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
 
 [[package]]
 name = "minicov"
@@ -1720,8 +1746,18 @@ version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8ffb9f10fa047879315e6625af03c164b16962a5368d724ed16323b68ace47f"
 dependencies = [
- "der",
- "spki",
+ "der 0.7.10",
+ "spki 0.7.3",
+]
+
+[[package]]
+name = "pkcs8"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "451913da69c775a56034ea8d9003d27ee8948e12443eae7c038ba100a4f21cb7"
+dependencies = [
+ "der 0.8.3",
+ "spki 0.8.1",
 ]
 
 [[package]]
@@ -1947,9 +1983,8 @@ dependencies = [
 
 [[package]]
 name = "ruma"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc484e2676b31e677a3e3646078c01d41529eed3360226804a857db8428cc978"
+version = "0.17.2"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "assign",
  "js_int",
@@ -1957,15 +1992,15 @@ dependencies = [
  "ruma-client-api",
  "ruma-common",
  "ruma-events",
+ "ruma-federation-api",
  "ruma-html",
  "web-time",
 ]
 
 [[package]]
 name = "ruma-client-api"
-version = "0.25.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a6187ddda33fefafe3a738f40075ce2e8a7ecd3606998d2a885cf6dac73629d"
+version = "0.25.2"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "as_variant",
  "assign",
@@ -1986,9 +2021,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-common"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfbfb1235d65ebd89e169c67cc120a6608530b3445babb8689baba7ef2e72a12"
+version = "0.20.2"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "as_variant",
  "base64",
@@ -2020,9 +2054,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-events"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "140e7848282c33721f4bc4f1e5922fa5eb92d3a7b497ec4b71086b047ee7cd0d"
+version = "0.35.2"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "as_variant",
  "indexmap",
@@ -2040,10 +2073,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruma-federation-api"
+version = "0.16.1"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
+dependencies = [
+ "http",
+ "http-auth",
+ "js_int",
+ "mime",
+ "ruma-common",
+ "ruma-events",
+ "ruma-signatures",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "ruma-html"
 version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e27e35e6c36fa1abc4def766e474a0f2f709e87f1602d57ec34d41b09253da4"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "as_variant",
  "html5ever",
@@ -2053,9 +2103,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-identifiers-validation"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d6cff00317675f487c4e7ccfb18875a14c5a14867b51d13f2a826053f03c432"
+version = "0.14.0"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "js_int",
  "thiserror",
@@ -2063,9 +2112,8 @@ dependencies = [
 
 [[package]]
 name = "ruma-macros"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4b8571408bf1aefd0f06ea49e9d19551bcf4ba7388e19848adcd9291547c6cb"
+version = "0.20.2"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
 dependencies = [
  "as_variant",
  "cfg-if",
@@ -2079,6 +2127,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ruma-signatures"
+version = "0.22.1"
+source = "git+https://github.com/ruma/ruma?rev=0ed7fba34213f18a628a56f527c6cc795cd7eef5#0ed7fba34213f18a628a56f527c6cc795cd7eef5"
+dependencies = [
+ "base64",
+ "ed25519-dalek",
+ "pkcs8",
+ "rand",
+ "ruma-common",
+ "ruma-events",
+ "serde_json",
+ "sha2 0.11.0",
+ "thiserror",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2089,9 +2153,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.45"
+version = "0.23.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d41d731c7d2f962d1ccc364cec258de3c0e93b38c2fb3ba97ac74513048d634"
+checksum = "48e13bd8c0e9365c43cfa5c9e8f9ad49d3c8444926c9aac819e0e4dc503c8fdf"
 dependencies = [
  "once_cell",
  "ring",
@@ -2113,9 +2177,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.15"
+version = "0.103.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2"
+checksum = "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281"
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -2350,7 +2414,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
- "der",
+ "der 0.7.10",
+]
+
+[[package]]
+name = "spki"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ef958a98b9d5da290cfc78946e9f3e61e1e62a18db0d92cac0b83cc161491a9"
+dependencies = [
+ "base64ct",
+ "der 0.8.3",
 ]
 
 [[package]]
@@ -2527,9 +2601,9 @@ checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
 name = "tokio"
-version = "1.53.1"
+version = "1.54.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+checksum = "b52fd3255258d26fac7264ab5a76b53c13367136dc011d3d6ad4f8ed070396a3"
 dependencies = [
  "pin-project-lite",
  "tokio-macros",
@@ -3133,8 +3207,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1301e935010a701ae5f8655edc0ad17c44bad3ac5ce8c39185f75453b720ae94"
 dependencies = [
  "const-oid 0.9.6",
- "der",
- "spki",
+ "der 0.7.10",
+ "spki 0.7.3",
 ]
 
 [[package]]
