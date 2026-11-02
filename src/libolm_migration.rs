@@ -151,21 +151,24 @@ async fn migrate_base_data_to_store(
             user_id: user_id.clone(),
             device_id: data.device_id.clone().ok_or(JsError::new("Device ID not specified"))?.inner,
             pickle: account.pickle(),
-            // Legacy crypto in the js-sdk does not keep a record of whether it has published the
-            // device keys to the server (it does it every time the stack is started). For safety,
-            // let's assume it hasn't happened yet.
+            // Legacy crypto in the js-sdk does not keep a record of whether it
+            // has published the device keys to the server (it does it every
+            // time the stack is started). For safety, let's assume it hasn't
+            // happened yet.
             shared: false,
             dehydrated: false,
-            // Assume we have 50 keys on the server, until we get a sync that says fewer.
+            // Assume we have 50 keys on the server, until we get a sync that
+            // says fewer.
             uploaded_signed_key_count: 50,
 
-            // The legacy crypto stack didn't keep a record of when the device was created, so we
-            // have to make something up.
+            // The legacy crypto stack didn't keep a record of when the device
+            // was created, so we have to make something up.
             //
-            // The main thing the creation time is used for is determining whether an event was sent
-            // before the device was created (and hence should not expect to receive the keys).
-            // To avoid incorrectly marking UTD events sent before migration as "expected UTDs", we
-            // set the "creation time" to zero.
+            // The main thing the creation time is used for is determining
+            // whether an event was sent before the device was created (and
+            // hence should not expect to receive the keys).
+            // To avoid incorrectly marking UTD events sent before migration as
+            // "expected UTDs", we set the "creation time" to zero.
             creation_local_time: MilliSecondsSinceUnixEpoch(UInt::MIN),
 
             fallback_key_creation_timestamp: None,

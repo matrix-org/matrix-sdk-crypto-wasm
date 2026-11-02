@@ -603,7 +603,8 @@ impl OlmMachine {
                 one_time_keys_counts: &one_time_keys_counts,
                 unused_fallback_keys: unused_fallback_keys.as_deref(),
 
-                // matrix-sdk-crypto does not (currently) use `next_batch_token`.
+                // matrix-sdk-crypto does not (currently) use
+                // `next_batch_token`.
                 next_batch_token: None,
             };
 
@@ -1526,8 +1527,9 @@ impl OlmMachine {
                             .call3(
                                 &JsValue::NULL,
                                 &JsValue::from(progress),
-                                // "total_valid" counts the total number of keys that
-                                // we passed to `import_backed_up_room_keys` so we
+                                // "total_valid" counts the total number of keys
+                                // that we passed to
+                                // `import_backed_up_room_keys` so we
                                 // need to add `failures` to get the full total
                                 &JsValue::from(total_valid + failures),
                                 &JsValue::from(failures),
@@ -2282,7 +2284,8 @@ impl OlmMachine {
                 .receive_room_key_bundle(
                     &bundle_data.inner,
                     deserialized_bundle,
-                    /* TODO: Use the progress listener and expose an argument for it. */
+                    /* TODO: Use the progress listener and expose an argument
+                     * for it. */
                     |_, _| {},
                 )
                 .await?;
