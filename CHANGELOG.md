@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v19.0.0
+
 -   Update matrix-rust-sdk to `1e54358136b`
 
     -   SAS verification now cancels with `m.mismatched_commitment` instead of
