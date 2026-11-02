@@ -481,10 +481,10 @@ impl TryFrom<&OriginalToDeviceRequest> for ToDeviceRequest {
     fn try_from(request: &OriginalToDeviceRequest) -> Result<Self, Self::Error> {
         {
             Ok(ToDeviceRequest {
-                // When matrix_sdk_crypto returns requests via `share_room_key`, they must be sent
-                // out to the server and the responses need to be passed back to the
-                // olmMachine using [`mark_request_as_sent`], using the `txn_id` as
-                // `request_id`
+                // When matrix_sdk_crypto returns requests via `share_room_key`,
+                // they must be sent out to the server and the responses need to
+                // be passed back to the olmMachine using
+                // [`mark_request_as_sent`], using the `txn_id` as `request_id`
                 id: request.txn_id.to_string().into(),
                 event_type: request.event_type.to_string().into(),
                 txn_id: request.txn_id.to_string().into(),

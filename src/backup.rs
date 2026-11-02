@@ -92,8 +92,8 @@ pub struct RoomKeyCounts {
 impl From<store::types::RoomKeyCounts> for RoomKeyCounts {
     fn from(inner: store::types::RoomKeyCounts) -> Self {
         RoomKeyCounts {
-            // There is no `TryFrom<usize> for f64`, so first downcast the usizes to u32, then back
-            // up to f64
+            // There is no `TryFrom<usize> for f64`, so first downcast the
+            // usizes to u32, then back up to f64
             total: inner.total.try_into().unwrap_or(u32::MAX).into(),
             backed_up: inner.backed_up.try_into().unwrap_or(u32::MAX).into(),
         }

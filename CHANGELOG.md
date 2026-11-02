@@ -1,7 +1,34 @@
 # UNRELEASED
 
--   Update matrix-rust-sdk to `12f7c8353`
+# matrix-sdk-crypto-wasm v19.0.0
 
+-   Update matrix-rust-sdk to `1e54358136b`
+
+    -   SAS verification now cancels with `m.mismatched_commitment` instead of
+        `m.key_mismatch` when the public key in the other side's
+        `m.key.verification.key` event doesn't match the commitment from its
+        `m.key.verification.accept` event, as the spec requires.
+        ([#7270](https://github.com/matrix-org/matrix-rust-sdk/pull/7270))
+    -   Decrypted `m.room_key` to-device events passed to the application now keep
+        their `shared_history` flag. Previously, the flag was dropped when the session
+        key was zeroized, so applications always saw it as `false`.
+        ([#7256](https://github.com/matrix-org/matrix-rust-sdk/pull/7256))
+    -   [**breaking**] The `shared_history` flag of `m.room_key` contents, exported
+        room keys and backed-up room keys is now (de)serialized as `shared_history`,
+        as defined in the Matrix specification, instead of `m.shared_history`. The
+        previous `m.shared_history` name and the unstable
+        `org.matrix.msc3061.shared_history` name are still accepted when
+        deserializing. Previously, keys from spec-compliant senders were treated as
+        not shareable with newly invited users. Versions of the SDK before this
+        change do not recognise the `shared_history` name, so they read keys, exports
+        and backups written by this version as not shareable.
+        ([#7190](https://github.com/matrix-org/matrix-rust-sdk/pull/7190))
+    -   Room keys imported from a backup or file export are no longer made undecryptable
+        under the `CrossSignedOrLegacy` trust requirement once the sender's device is
+        fetched via `/keys/query`. Previously, the device lookup replaced the session's
+        sender data with less useful data, dropping its legacy flag, and its events
+        failed with "The sending device is not known".
+        ([#7172](https://github.com/matrix-org/matrix-rust-sdk/pull/7172))
     -   [**breaking**] Attempting to create a `QrCodeData` with `new_msc4388`
         now returns an error if the rendezvous ID or base URL are longer than
         255 bytes of UTF-8. This complies with
