@@ -84,7 +84,9 @@ impl From<qr_login::QrCodeIntentData<'_>> for QrCodeIntentData {
                 msc_4108: None,
                 msc_4388: Some(Msc4388IntentData {
                     rendezvous_id: rendezvous_id.to_string(),
-                    base_url: base_url.to_string(),
+                    // `as_str()` is the normalised URL, but we want the exact
+                    // bytes from the QR code, which are always valid UTF-8
+                    base_url: String::from_utf8_lossy(base_url.as_bytes()).into_owned(),
                 }),
             },
         }
@@ -123,7 +125,10 @@ pub struct Msc4388IntentData {
     pub rendezvous_id: String,
 
     /// The base URL of the homeserver that the device generating the QR is
-    /// using.
+    /// using, exactly as it is encoded in the QR code.
+    ///
+    /// MSC4388 binds the secure channel to this exact string, so it must not
+    /// be normalised before use in the additional authenticated data.
     #[wasm_bindgen(getter_with_clone, js_name = "baseUrl")]
     pub base_url: String,
 }
@@ -176,11 +181,14 @@ impl QrCodeData {
     }
 
     /// Create new {@link QrCodeData} from a given public key, a rendezvous ID
-    /// and, a base homeserver URL.
+    /// and a base homeserver URL.
     ///
     /// This creates a QR code which conforms to
     /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the data
     /// format for QR login.
+    ///
+    /// The base URL is encoded in the QR code exactly as given, without being
+    /// normalised (e.g. no trailing `/` is added).
     #[wasm_bindgen(js_name = "newMsc4388")]
     pub fn new_msc4388(
         public_key: Curve25519PublicKey,
@@ -190,7 +198,7 @@ impl QrCodeData {
     ) -> Result<QrCodeData, JsError> {
         let public_key = public_key.inner;
         let intent = intent.into();
-        let base_url = Url::parse(base_url)?;
+        let base_url = qr_login::LimitedUrl::parse(base_url)?;
 
         let inner = qr_login::QrCodeData::new_msc4388(public_key, rendezvous_id, base_url, intent)?;
 

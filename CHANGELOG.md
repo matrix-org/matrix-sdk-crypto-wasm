@@ -1,5 +1,12 @@
 # UNRELEASED
 
+-   `QrCodeData.newMsc4388()` now encodes the base URL in the QR code exactly as
+    given. Previously it was normalised (e.g. a trailing `/` was added), so a
+    caller using the URL it passed in as MSC4388 additional authenticated data
+    could not establish a secure channel with the scanning device.
+-   `Msc4388IntentData.baseUrl` now returns the base URL exactly as encoded in
+    the QR code, rather than a normalised form.
+
 # matrix-sdk-crypto-wasm v19.0.0
 
 -   Update matrix-rust-sdk to `1e54358136b`
