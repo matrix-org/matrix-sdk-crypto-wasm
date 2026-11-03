@@ -44,7 +44,7 @@ describe(QrCodeData.name, () => {
 
     test("can round-trip an MSC4388 QrCodeData class", () => {
         // Deserialise from a known base 64 representation
-        // Should match https://github.com/matrix-org/matrix-rust-sdk/blob/main/crates/matrix-sdk-crypto/src/types/qr_login/msc_4388.rs#L339
+        // Should match `QR_CODE_DATA_BASE64` in https://github.com/matrix-org/matrix-rust-sdk/blob/main/crates/matrix-sdk-crypto/src/types/qr_login/msc_4388.rs
         const serialisedInput =
             "SU9fRUxFTUVOVF9NU0M0Mzg4AwG0yzZ1QVpQ1jlnoxWX3d5jrWRFfELxjS2gN7pz9y+3PBowMUhYOUswMFExSDZLUEQ0N0VHNEcxVDNYRyRodHRwczovL3N5bmFwc2Utb2lkYy5sYWIuZWxlbWVudC5kZXY";
 

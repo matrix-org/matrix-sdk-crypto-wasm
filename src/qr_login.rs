@@ -181,7 +181,7 @@ impl QrCodeData {
     }
 
     /// Create new {@link QrCodeData} from a given public key, a rendezvous ID
-    /// and, a base homeserver URL.
+    /// and a base homeserver URL.
     ///
     /// This creates a QR code which conforms to
     /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the data
