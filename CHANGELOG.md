@@ -1,5 +1,7 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v19.0.1
+
 -   Update vodozemac to 0.11.2, which fixes a panic when decoding Ed25519 keys
     from Base64, along with several zeroization issues.
     ([0.11.2](https://github.com/matrix-org/vodozemac/releases/tag/0.11.2))
