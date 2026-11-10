@@ -64,8 +64,29 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      - name: Determine dist-tag
+        id: dist-tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          LATEST=$(npm view . dist-tags.latest 2>/dev/null || echo "0.0.0")
+
+          # Compare the new version with the current `latest`. If the new version is
+          # more recent, we can tag it as `latest`.
+          if [ "$(printf '%s\n%s\n' "$LATEST" "$VERSION" | sort -V | tail -n1)" = "$VERSION" ]; then
+            # Latest release branch
+            TAG=latest
+          else
+            # Older release branch: 18.9.1 -> v18-latest
+            TAG="v${VERSION%%.*}-latest"
+          fi
+
+          echo "Publishing with tag $TAG (current latest: $LATEST)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
       - name: Publish to npmjs
-        run: npm publish --provenance --ignore-scripts
+        run: npm publish --provenance --ignore-scripts --tag "$DIST_TAG"
+        env:
+          DIST_TAG: ${{ steps.dist-tag.outputs.tag }}
 
   github-release:
     name: Create the Github release
