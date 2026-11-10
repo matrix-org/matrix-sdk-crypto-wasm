@@ -1,5 +1,9 @@
 # UNRELEASED
 
+# matrix-sdk-crypto-wasm v18.9.2
+
+No functional changes.
+
 # matrix-sdk-crypto-wasm v18.9.1
 
 -   Update vodozemac to 0.11.2, which fixes a panic when decoding Ed25519 keys
