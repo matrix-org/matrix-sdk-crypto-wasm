@@ -67,10 +67,11 @@ jobs:
       - name: Determine dist-tag
         id: dist-tag
         run: |
-          NAME=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          LATEST=$(npm view "$NAME" dist-tags.latest 2>/dev/null || echo "0.0.0")
+          VERSION="${GITHUB_REF_NAME#v}"
+          LATEST=$(npm view . dist-tags.latest 2>/dev/null || echo "0.0.0")
 
+          # Compare the new version with the current `latest`. If the new version is
+          # more recent, we can tag it as `latest`.
           if [ "$(printf '%s\n%s\n' "$LATEST" "$VERSION" | sort -V | tail -n1)" = "$VERSION" ]; then
             # Latest release branch
             TAG=latest
@@ -79,7 +80,7 @@ jobs:
             TAG="v${VERSION%%.*}-latest"
           fi
 
-          echo "Publishing $NAME@$VERSION with tag $TAG (current latest: $LATEST)"
+          echo "Publishing with tag $TAG (current latest: $LATEST)"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npmjs
