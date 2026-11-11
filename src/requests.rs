@@ -5,7 +5,7 @@ use std::time::Duration;
 use js_sys::JsString;
 use matrix_sdk_common::ruma::{
     api::client::{
-        dehydrated_device::put_dehydrated_device::unstable::Request as OriginalPutDehydratedDeviceRequest,
+        dehydrated_device::put_dehydrated_device::msc3814::Request as OriginalPutDehydratedDeviceRequest,
         keys::{
             claim_keys::v3::Request as OriginalKeysClaimRequest,
             upload_keys::v3::Request as OriginalKeysUploadRequest,
