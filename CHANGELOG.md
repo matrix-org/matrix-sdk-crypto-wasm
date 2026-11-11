@@ -2,6 +2,11 @@
 
 # matrix-sdk-crypto-wasm v19.0.1
 
+-   Update matrix-rust-sdk to `0c23570`
+
+    -   Automatically close indexeddb connections when the DB is dropped.
+        ([#7469](https://github.com/matrix-org/matrix-rust-sdk/pull/7469))
+
 -   Update vodozemac to 0.11.2, which fixes a panic when decoding Ed25519 keys
     from Base64, along with several zeroization issues.
     ([0.11.2](https://github.com/matrix-org/vodozemac/releases/tag/0.11.2))
