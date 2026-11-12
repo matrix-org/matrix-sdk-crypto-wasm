@@ -84,7 +84,9 @@ impl From<qr_login::QrCodeIntentData<'_>> for QrCodeIntentData {
                 msc_4108: None,
                 msc_4388: Some(Msc4388IntentData {
                     rendezvous_id: rendezvous_id.to_string(),
-                    base_url: base_url.to_string(),
+                    // `as_str()` is the normalised URL, but we want the exact
+                    // bytes from the QR code, which are always valid UTF-8
+                    base_url: String::from_utf8_lossy(base_url.as_bytes()).into_owned(),
                 }),
             },
         }
@@ -123,7 +125,11 @@ pub struct Msc4388IntentData {
     pub rendezvous_id: String,
 
     /// The base URL of the homeserver that the device generating the QR is
-    /// using.
+    /// using, exactly as it is encoded in the QR code.
+    ///
+    /// MSC4388 binds the secure channel to this exact string, so it must be
+    /// used as is (not normalised) in the additional authenticated data. A
+    /// separately normalised copy may be used to construct request URLs.
     #[wasm_bindgen(getter_with_clone, js_name = "baseUrl")]
     pub base_url: String,
 }
@@ -176,11 +182,19 @@ impl QrCodeData {
     }
 
     /// Create new {@link QrCodeData} from a given public key, a rendezvous ID
-    /// and, a base homeserver URL.
+    /// and a base homeserver URL.
     ///
     /// This creates a QR code which conforms to
     /// {@link https://github.com/matrix-org/matrix-spec-proposals/pull/4388 MSC4388} of the data
     /// format for QR login.
+    ///
+    /// The base URL is normalised before being encoded in the QR code (e.g. a
+    /// trailing `/` is added to `https://example.org`), so the encoded value
+    /// may differ from the string that was passed in. MSC4388 binds the
+    /// secure channel to the exact base URL in the QR code, so use
+    /// `intentData.msc4388.baseUrl` on the returned {@link QrCodeData} as
+    /// the base URL in the additional authenticated data, rather than the
+    /// string passed in here.
     #[wasm_bindgen(js_name = "newMsc4388")]
     pub fn new_msc4388(
         public_key: Curve25519PublicKey,
