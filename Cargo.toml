@@ -35,9 +35,7 @@ dwarf-debug-info = true
 [package.metadata.wasm-pack.profile.release]
 # Tell wasm-opt to:
 #  * `-Oz`: optimise for size
-#  * `-g`: include the "name" section (which holds the printable names for
-#    symbols) in the output.
-wasm-opt = ['-Oz', '-g']
+wasm-opt = ['-Oz']
 
 ################################################################################
 
