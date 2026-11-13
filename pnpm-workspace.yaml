@@ -1,6 +1,5 @@
-onlyBuiltDependencies:
-  - wasm-pack
-
+allowBuilds:
+  wasm-pack: true
 overrides:
   axios@<0.30.0: '>=0.30.0'
   axios@<=0.30.2: '>=0.30.3'
