@@ -2,4 +2,4 @@
 xtask = "run --manifest-path xtask/Cargo.toml --"
 
 [target.wasm32-unknown-unknown]
-rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"', "-C", "target-feature=+simd128,+tail-call,+extended-const"]
