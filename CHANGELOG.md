@@ -11,6 +11,10 @@
     from Base64, along with several zeroization issues.
     ([0.11.2](https://github.com/matrix-org/vodozemac/releases/tag/0.11.2))
 
+-   The released binary is now stripped of debug symbols using `wasm-opt`.
+    Developers can refer to GitHub releases going forward for the matching
+    unstripped binary and symbol table mapping between them.
+
 # matrix-sdk-crypto-wasm v19.0.0
 
 -   Update matrix-rust-sdk to `1e54358136b`
