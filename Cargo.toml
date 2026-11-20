@@ -36,7 +36,8 @@ dwarf-debug-info = true
 # Tell wasm-opt to:
 #  * `-Oz`: optimise for size
 #  * `-g`: include the "name" section (which holds the printable names for
-#    symbols) in the output.
+#    symbols) in the output. A release binary with stripped debug symbols
+#    is prepared by `scripts/build.sh`.
 wasm-opt = ['-Oz', '-g']
 
 ################################################################################
