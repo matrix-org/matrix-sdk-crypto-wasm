@@ -44,7 +44,7 @@ describe(QrCodeData.name, () => {
 
     test("can round-trip an MSC4388 QrCodeData class", () => {
         // Deserialise from a known base 64 representation
-        // Should match https://github.com/matrix-org/matrix-rust-sdk/blob/main/crates/matrix-sdk-crypto/src/types/qr_login/msc_4388.rs#L339
+        // Should match `QR_CODE_DATA_BASE64` in https://github.com/matrix-org/matrix-rust-sdk/blob/main/crates/matrix-sdk-crypto/src/types/qr_login/msc_4388.rs
         const serialisedInput =
             "SU9fRUxFTUVOVF9NU0M0Mzg4AwG0yzZ1QVpQ1jlnoxWX3d5jrWRFfELxjS2gN7pz9y+3PBowMUhYOUswMFExSDZLUEQ0N0VHNEcxVDNYRyRodHRwczovL3N5bmFwc2Utb2lkYy5sYWIuZWxlbWVudC5kZXY";
 
@@ -53,7 +53,7 @@ describe(QrCodeData.name, () => {
         // Check the fields deserialised as expected
         const publicKeyBase64 = "tMs2dUFaUNY5Z6MVl93eY61kRXxC8Y0toDe6c/cvtzw";
         const rendezvousId = "01HX9K00Q1H6KPD47EG4G1T3XG";
-        const baseUrl = "https://synapse-oidc.lab.element.dev/";
+        const baseUrl = "https://synapse-oidc.lab.element.dev";
 
         expect(qrCodeData.publicKey.toBase64()).toStrictEqual(publicKeyBase64);
         expect(qrCodeData.mode).toStrictEqual(QrCodeIntent.Reciprocate);
@@ -91,5 +91,17 @@ describe(QrCodeData.name, () => {
         // QrCodeData.newMsc4388.
         //
         // So we don't check the serialisation here - the previous test should be adequate.
+    });
+
+    test("normalises the base URL of a new MSC4388 QrCodeData class", () => {
+        for (const [input, encoded] of [
+            ["https://example.org", "https://example.org/"],
+            ["https://example.org/", "https://example.org/"],
+            ["https://EXAMPLE.org:443", "https://example.org/"],
+        ]) {
+            const publicKey = new Curve25519PublicKey("tMs2dUFaUNY5Z6MVl93eY61kRXxC8Y0toDe6c/cvtzw");
+            const qrCodeData = QrCodeData.newMsc4388(publicKey, "rendezvous", input, QrCodeIntent.Login);
+            expect(qrCodeData.intentData.msc4388.baseUrl).toStrictEqual(encoded);
+        }
     });
 });
