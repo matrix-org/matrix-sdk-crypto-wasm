@@ -1,5 +1,24 @@
 # UNRELEASED
 
+-   Update matrix-rust-sdk to `d7ce2a0`
+
+    -   Add `OlmMachine::reset_cross_signing()`, which generates a new
+        cross-signing identity without persisting it until the returned
+        handle is committed.
+        ([#7341](https://github.com/matrix-org/matrix-rust-sdk/pull/7341))
+    -   In-room verification requests addressed to another user are now
+        ignored, instead of being surfaced to every non-sender member of a
+        room with more than two members.
+        ([#7269](https://github.com/matrix-org/matrix-rust-sdk/pull/7269))
+
+-   Expose the new API as `OlmMachine.resetCrossSigning()` and
+    `UncommittedCrossSigningReset`. Unlike `OlmMachine.bootstrapCrossSigning(true)`,
+    the new cross-signing identity only replaces the old one in the store once
+    `UncommittedCrossSigningReset.commit()` is called, which should happen
+    after the server has accepted the signing-keys upload. Abandoning the
+    reset, for example at the user-interactive authentication step, leaves
+    the old identity in place.
+
 # matrix-sdk-crypto-wasm v19.0.1
 
 -   Update matrix-rust-sdk to `0c23570`
