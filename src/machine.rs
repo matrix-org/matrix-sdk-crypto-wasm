@@ -1037,6 +1037,38 @@ impl OlmMachine {
         })
     }
 
+    /// Generate a new cross-signing identity without persisting it.
+    ///
+    /// Unlike {@link OlmMachine.bootstrapCrossSigning}, this does not touch
+    /// the identity in the store. The new identity is only stored, replacing
+    /// the old one, when {@link UncommittedCrossSigningReset.commit} is
+    /// called, which should happen once the server has accepted the keys
+    /// uploaded with
+    /// {@link UncommittedCrossSigningReset.uploadSigningKeysRequest}.
+    /// Abandoning the reset before committing leaves the old identity in
+    /// effect.
+    ///
+    /// Returns a {@link UncommittedCrossSigningReset}.
+    #[wasm_bindgen(
+        js_name = "resetCrossSigning",
+        unchecked_return_type = "Promise<UncommittedCrossSigningReset>"
+    )]
+    pub fn reset_cross_signing(&self) -> Promise {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let me = self.inner.clone();
+        let tracing_subscriber = self.tracing_subscriber.clone();
+
+        future_to_promise(async move {
+            let inner = me.reset_cross_signing().await?;
+            let upload_signing_keys_request = inner.upload_signing_keys_req().try_into()?;
+            Ok(UncommittedCrossSigningReset {
+                inner: Some(inner),
+                upload_signing_keys_request,
+                tracing_subscriber,
+            })
+        })
+    }
+
     /// Get the cross signing user identity of a user.
     ///
     /// Returns a promise for an {@link OwnUserIdentity}, a
@@ -2401,6 +2433,52 @@ impl OlmMachine {
     /// All associated resources will be closed too, like IndexedDB
     /// connections.
     pub fn close(self) {}
+}
+
+/// A handle to a cross-signing reset that has not yet been committed,
+/// returned by {@link OlmMachine.resetCrossSigning}.
+///
+/// The new identity only replaces the old one in the store when
+/// {@link UncommittedCrossSigningReset.commit} is called.
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Debug)]
+pub struct UncommittedCrossSigningReset {
+    inner: Option<matrix_sdk_crypto::UncommittedCrossSigningReset>,
+
+    /// Request to upload the new cross-signing keys.
+    ///
+    /// May require user interactive auth.
+    #[wasm_bindgen(readonly, js_name = "uploadSigningKeysRequest")]
+    pub upload_signing_keys_request: requests::UploadSigningKeysRequest,
+
+    /// The tracing subscriber of the machine which created this handle.
+    tracing_subscriber: Dispatch,
+}
+
+#[wasm_bindgen]
+impl UncommittedCrossSigningReset {
+    /// Store the new cross-signing identity, replacing the old one.
+    ///
+    /// Must only be called once the server has accepted the keys uploaded
+    /// with {@link UncommittedCrossSigningReset.uploadSigningKeysRequest}.
+    ///
+    /// Returns a {@link SignatureUploadRequest} to upload the signatures
+    /// made with the new keys, which should be sent out next.
+    ///
+    /// Throws if the reset has already been committed.
+    #[wasm_bindgen(unchecked_return_type = "Promise<SignatureUploadRequest>")]
+    pub fn commit(&mut self) -> Result<Promise, JsError> {
+        let _guard = dispatcher::set_default(&self.tracing_subscriber);
+        let inner = self
+            .inner
+            .take()
+            .ok_or_else(|| JsError::new("The cross-signing reset has already been committed"))?;
+
+        Ok(future_to_promise(async move {
+            let request = inner.commit().await?;
+            Ok(requests::SignatureUploadRequest::try_from(&request)?)
+        }))
+    }
 }
 
 impl OlmMachine {
