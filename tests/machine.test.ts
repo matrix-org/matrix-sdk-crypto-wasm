@@ -37,6 +37,7 @@ import {
     StoreHandle,
     ToDeviceRequest,
     TrustRequirement,
+    UncommittedCrossSigningReset,
     UserId,
     UTDToDeviceEvent,
     VerificationRequest,
@@ -892,6 +893,51 @@ eXmIj7ZEOIsufPdiYuKDp/aUdgUHmuCGyegfoCJze36SdFX5q6z8Aq5nKPtz+FM=
         expect(crossSigningStatus.hasMaster).toStrictEqual(false);
         expect(crossSigningStatus.hasSelfSigning).toStrictEqual(false);
         expect(crossSigningStatus.hasUserSigning).toStrictEqual(false);
+    });
+
+    test("can reset cross-signing without committing it", async () => {
+        const m = await machine();
+
+        const reset = await m.resetCrossSigning();
+        expect(reset).toBeInstanceOf(UncommittedCrossSigningReset);
+
+        // The upload request contains the new public keys.
+        const body = JSON.parse(reset.uploadSigningKeysRequest.body);
+        expect(body.master_key).toBeDefined();
+        expect(body.self_signing_key).toBeDefined();
+        expect(body.user_signing_key).toBeDefined();
+
+        // The new identity is not stored until the reset is committed.
+        let status = await m.crossSigningStatus();
+        expect(status.hasMaster).toStrictEqual(false);
+        expect(status.hasSelfSigning).toStrictEqual(false);
+        expect(status.hasUserSigning).toStrictEqual(false);
+
+        const signatureUpload = await reset.commit();
+        expect(signatureUpload).toBeInstanceOf(SignatureUploadRequest);
+
+        status = await m.crossSigningStatus();
+        expect(status.hasMaster).toStrictEqual(true);
+        expect(status.hasSelfSigning).toStrictEqual(true);
+        expect(status.hasUserSigning).toStrictEqual(true);
+
+        // Committing a second time throws.
+        expect(() => reset.commit()).toThrow();
+    });
+
+    test("abandoning a cross-signing reset leaves the old identity in place", async () => {
+        const m = await machine();
+        await m.bootstrapCrossSigning(true);
+        const oldKeys = await m.exportCrossSigningKeys();
+        expect(oldKeys?.masterKey).toBeDefined();
+
+        const reset = await m.resetCrossSigning();
+        reset.free();
+
+        const keys = await m.exportCrossSigningKeys();
+        expect(keys?.masterKey).toStrictEqual(oldKeys?.masterKey);
+        expect(keys?.self_signing_key).toStrictEqual(oldKeys?.self_signing_key);
+        expect(keys?.userSigningKey).toStrictEqual(oldKeys?.userSigningKey);
     });
 
     test("can sign a message", async () => {

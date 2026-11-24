@@ -6,7 +6,8 @@
         // Allow .ts file extensions in `import`, otherwise Jest can't find `helper.ts`.
         "allowImportingTsExtensions": true,
         // Required by `allowImportingTsExtensions`.
-        "noEmit": true
+        "noEmit": true,
+        "types": ["node", "jest"]
     },
     "typedocOptions": {
         "entryPoints": ["index.d.ts"],
